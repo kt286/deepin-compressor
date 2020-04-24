@@ -159,8 +159,9 @@ bool LibzipPlugin::list(bool /*isbatch*/)
 
     // Get number of archive entries.
     const auto nofEntries = zip_get_num_entries(archive, 0);
-
+    qDebug() << "Get number of archive entries";
     detectAllfile(archive, nofEntries);
+    qDebug() << "nofEntries：" << nofEntries;
     // Loop through all archive entries.
     for (int i = 0; i < nofEntries; i++) {
 
@@ -171,7 +172,7 @@ bool LibzipPlugin::list(bool /*isbatch*/)
         emitEntryForIndex(archive, i);
         emit progress(float(i + 1) / nofEntries);
     }
-
+    qDebug() << "Loop over";
     zip_close(archive);
     m_listAfterAdd = false;
     return true;
@@ -179,6 +180,7 @@ bool LibzipPlugin::list(bool /*isbatch*/)
 
 void LibzipPlugin::detectAllfile(zip_t *archive, int num)
 {
+    qDebug() << "detectAllfile:" << num;
     m_codecname.clear();
     QByteArrayList codeclist;
 
@@ -188,12 +190,15 @@ void LibzipPlugin::detectAllfile(zip_t *archive, int num)
         if (zip_stat_index(archive, i, ZIP_FL_ENC_RAW, &statBuffer)) {
             return;
         }
+        qDebug() << "detectAllfilea:";
+        qDebug() << "i:" << i;
 
         if (statBuffer.valid & ZIP_STAT_NAME) {
             QByteArray codec = detectEncode(statBuffer.name);
             codeclist.append(codec);
         }
     }
+    qDebug() << "detectAllfileacccc:";
     if (codeclist.count() > 1) {
         QMap<QByteArray, int> codec_map;
         QByteArray max_codec;
@@ -422,18 +427,18 @@ bool LibzipPlugin::writeEntry(zip_t *archive, const QString &file, const Archive
 bool LibzipPlugin::emitEntryForIndex(zip_t *archive, qlonglong index)
 {
     Q_ASSERT(archive);
-
+    qDebug() << "archive 有效";
     zip_stat_t statBuffer;
     if (zip_stat_index(archive, index, ZIP_FL_ENC_RAW, &statBuffer)) {
         return false;
     }
-
+    qDebug() << "archive 有效1";
     auto e = new Archive::Entry();
 
     if (statBuffer.valid & ZIP_STAT_NAME) {
         e->setFullPath(trans2uft8(statBuffer.name));
     }
-
+    qDebug() << "archive 有效2";
     if (e->fullPath(PathFormat::WithTrailingSlash).endsWith(QDir::separator())) {
         e->setProperty("isDirectory", true);
     }

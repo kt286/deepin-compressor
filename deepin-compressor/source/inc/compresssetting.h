@@ -76,6 +76,7 @@ private:
 
 signals:
     void sigCompressPressed(QMap<QString, QString> &Args);
+    void sigUncompressStateAutoCompress(QMap<QString, QString> &Args);
     void sigFileUnreadable(QStringList &pathList, int fileIndex);//compress file is unreadable or file is a link
 
 public slots:
@@ -86,6 +87,8 @@ public slots:
     void showRightMenu(QMouseEvent *e);
 
     void onThemeChanged();
+
+    void autoCompress(const QString &compresspath, const QStringList &path);
 
 private:
     int showWarningDialog(const QString &msg, int index = 0);

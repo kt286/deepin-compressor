@@ -40,7 +40,7 @@
 #include <DApplicationHelper>
 #include <DFontSizeManager>
 #include <QUrl>
-
+#include <QReadWriteLock>
 #include "openwithdialog/openwithdialog.h"
 
 DWIDGET_USE_NAMESPACE
@@ -57,7 +57,27 @@ enum EXTRACT_TYPE {
     EXTRACT_DRAG,
     EXTRACT_TEMP,
     EXTRACT_TEMP_OPEN,
-    EXTRACT_TEMP_CHOOSE_OPEN
+    EXTRACT_TEMP_CHOOSE_OPEN,
+    EXTRACT_DELETE
+};
+
+enum SUBACTION_MODE {
+    ACTION_INVALID,
+    ACTION_DRAG,
+    ACTION_DELETE,
+    ACTION_OPEN
+};
+
+struct SubActionInfo {
+    SubActionInfo()
+        : mode(ACTION_INVALID)
+    {
+
+    }
+    SUBACTION_MODE mode;
+    QString archive;
+    QString packageFile;
+    QStringList ActionFiles;
 };
 
 class LogViewHeaderView;
@@ -96,8 +116,14 @@ protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
 
+    void dragEnterEvent(QDragEnterEvent *event) Q_DECL_OVERRIDE;
+    void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
+    void dropEvent(QDropEvent *event) Q_DECL_OVERRIDE;
+    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+
 signals:
     void sigdragLeave(QString path);
+    void signalDrop(QStringList file);
 
 public slots:
     void slotDragpath(QUrl url);
@@ -121,6 +147,7 @@ class MimesAppsManager;
 class fileViewer : public DWidget
 {
     Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "com.archive.fileViewer.registry")
 public:
     fileViewer(QWidget *parent = nullptr, PAGE_TYPE type = PAGE_COMPRESS);
 
@@ -141,12 +168,16 @@ public:
 
     void deleteCompressFile();
 
+    void subWindowChangedMsg(const SUBACTION_MODE &mode, const QStringList &msg);
 
-
+    void upDateArchive(const SubActionInfo &dragInfo);
 
 public slots:
     void showPlable();
     void onSortIndicatorChanged(int logicalIndex, Qt::SortOrder order);
+
+    void clickedSlot(int index, const QString &text);
+    void SubWindowDragMsgReceive(int mode, const QStringList &urls);
 
 protected:
     void resizecolumn();
@@ -156,32 +187,36 @@ protected slots:
     void slotCompressRowDoubleClicked(const QModelIndex index);
     void slotDecompressRowDoubleClicked(const QModelIndex index);
     void slotCompressRePreviousDoubleClicked();
-
+    void slotDecompressRowDelete();
 
     void showRightMenu(const QPoint &pos);
     void onRightMenuClicked(QAction *action);
     void onRightMenuOpenWithClicked(QAction *action);
     void slotDragLeave(QString path);
+    void onDropSlot(QStringList files);
 
 
 
 signals:
-    void sigFileRemoved(const QStringList &filelist);
+    void sigFileRemoved(const QStringList &);
+    void sigFileRemovedFromArchive(const QStringList &, const QString &);
     void sigextractfiles(QVector<Archive::Entry *> fileList, EXTRACT_TYPE type, QString path = "");
     void sigpathindexChanged();
-    void sigOpenWith(QVector<Archive::Entry *> fileList,const QString& programma);
-
+    void sigOpenWith(QVector<Archive::Entry *> fileList, const QString &programma);
+    void sigFileAutoCompress(const QStringList &);
+    void sigFileAutoCompressToArchive(const QStringList &, const QString &);
 private:
     void refreshTableview();
 
-    void restoreHeaderSort(const QString& currentPath);
+    void restoreHeaderSort(const QString &currentPath);
 
-    void updateAction(const QString& fileType);
+    void updateAction(const QString &fileType);
 
-    void openWithDialog(const QModelIndex& index);
-    void openWithDialog(const QModelIndex& index,const QString& programma);
+    void openWithDialog(const QModelIndex &index);
+    void openWithDialog(const QModelIndex &index, const QString &programma);
 
     void keyPressEvent(QKeyEvent *event) override;
+    int popUpDialog(const QString &desc);
 
 private:
     QLineEdit *pLineEditDir;
@@ -213,6 +248,9 @@ private:
 
     QMap<QString, SortInfo> sortCache_;
     QAction *deleteAction;
+
+    bool isPromptDelete = false;
+    SubActionInfo m_ActionInfo;
 };
 
 #endif // FILEVIWER_H

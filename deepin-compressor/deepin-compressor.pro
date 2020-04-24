@@ -18,7 +18,11 @@ DEFINES += QT_MESSAGELOGCONTEXT
 #DEFINES += __aarch64__
 
 INCLUDEPATH +=  $$PWD/source/inc/ \
-                $$PWD/interface/
+                $$PWD/interface/ \
+                $$PWD/../plugin/libLogPlugin
+
+LIBS += -L/data/home/lx777/jared/Project/new_Comprocess/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
+
 
 # Input
 HEADERS +=  \
@@ -80,8 +84,11 @@ HEADERS +=  \
     source/inc/openwithdialog/openwithdialog.h \
     source/inc/openwithdialog/properties.h \
     source/inc/openwithdialog/singleton.h \
-    interface/analysepsdtool.h
-
+    interface/analysepsdtool.h \
+    source/inc/monitorAdaptor.h \
+    source/inc/monitorInterface.h \
+    source/inc/logwidget.h \
+    source/inc/logwidgetappender.h
 
 
 SOURCES +=  \
@@ -138,7 +145,12 @@ SOURCES +=  \
     source/src/openwithdialog/mimesappsmanager.cpp \
     source/src/openwithdialog/openwithdialog.cpp \
     source/src/openwithdialog/properties.cpp \
-    interface/analysepsdtool.cpp
+    interface/analysepsdtool.cpp \
+    source/src/monitorAdaptor.cpp \
+    source/src/monitorInterface.cpp \
+    source/src/logwidget.cpp \
+    source/src/logwidgetappender.cpp
+
 
 
 RESOURCES += deepin-compressor.qrc

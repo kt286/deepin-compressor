@@ -149,7 +149,7 @@ void Job::connectToArchiveInterfaceSignals()
     connect(archiveInterface(), &ReadOnlyArchiveInterface::progress_filename, this, &Job::onProgressFilename, Qt::ConnectionType::UniqueConnection);
     connect(archiveInterface(), &ReadOnlyArchiveInterface::updateDestFileSignal, this, &Job::onUpdateDestFile, Qt::ConnectionType::UniqueConnection);
 
-    auto readWriteInterface = qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+    ReadWriteArchiveInterface *readWriteInterface = dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
     if (readWriteInterface) {
         connect(readWriteInterface, &ReadWriteArchiveInterface::entryRemoved, this, &Job::onEntryRemoved, Qt::ConnectionType::UniqueConnection);
     }
@@ -217,6 +217,7 @@ void Job::onFinished(bool result)
         setError(KJob::NoError);
     }
 
+    qDebug() << "加载文件结束：";
     if (!d->isInterruptionRequested()) {
         emitResult();
     }
@@ -286,7 +287,7 @@ void LoadJob::doWork()
 
     if (archiveInterface()) {
         connect(archiveInterface(), &ReadOnlyArchiveInterface::sigExtractNeedPassword, this, &LoadJob::sigLodJobPassword);
-
+        qDebug() << "开始加载文件：" << archiveInterface()->filename();
         ret = archiveInterface()->list(m_isbatch);
     }
 
@@ -716,8 +717,12 @@ void AddJob::doWork()
 
 
     // The file paths must be relative to GlobalWorkDir.
-    for (Archive::Entry *entry : qAsConst(m_entries)) {
+    for (Archive::Entry *entry : /*qAsConst*/(m_entries)) {
         qDebug() << entry->fullPath();
+
+        QFileInfo file(entry->fullPath());
+        qulonglong  m_archiveSizeOnDisk = static_cast< qulonglong >(file.size());
+        entry->setProperty("size", m_archiveSizeOnDisk);
 
         const QString &fullPath = entry->fullPath();
         QString relativePath = workDir.relativeFilePath(fullPath);
@@ -741,6 +746,17 @@ void AddJob::onFinished(bool result)
 {
     if (!m_oldWorkingDir.isEmpty()) {
         QDir::setCurrent(m_oldWorkingDir);
+    }
+
+    if (result) {
+        foreach (Archive::Entry *pEntry, m_entries) {
+            if (!pEntry) {
+                continue;
+            }
+            pEntry->setProperty("timestamp", QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss")));
+
+            onEntry(pEntry);
+        }
     }
 
     Job::onFinished(result);
@@ -839,8 +855,10 @@ void DeleteJob::doWork()
     //emit description(this, desc, qMakePair(tr("Archive"), archiveInterface()->filename()));
     emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
 
-    ReadWriteArchiveInterface *m_writeInterface =
-        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+//    ReadWriteArchiveInterface *m_writeInterface =
+//        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+
+    ReadWriteArchiveInterface *m_writeInterface = dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
 
     Q_ASSERT(m_writeInterface);
 

@@ -162,6 +162,15 @@ CreateJob *Archive::create(const QString &fileName, const QString &mimeType, con
     return createJob;
 }
 
+AddJob *Archive::add(Archive * pArchive , const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
+{
+    if(!pArchive){
+       return nullptr;
+    }
+   auto newarchive =  pArchive->addFiles(files,destination,options);
+   return newarchive;
+}
+
 Archive *Archive::createEmpty(const QString &fileName, const QString &mimeType, QObject *parent)
 {
     auto archive = create(fileName, mimeType, parent);
@@ -197,6 +206,11 @@ LoadJob *Archive::load(const QString &fileName, bool isbatch, QObject *parent)
     auto loadJob = new LoadJob(archive, isbatch);
 
     return loadJob;
+}
+
+Archive::Archive()
+{
+
 }
 
 Archive::Archive(ArchiveError errorCode, QObject *parent)

@@ -115,12 +115,14 @@ public:
     bool hasMultipleTopLevelEntries() const;
     static BatchExtractJob *batchExtract(const QString &fileName, const QString &destination, bool autoSubfolder, bool preservePaths, QObject *parent = nullptr);
     static CreateJob *create(const QString &fileName, const QString &mimeType, const QVector<Archive::Entry *> &entries, const CompressionOptions &options, QObject *parent = nullptr, bool useLibArchive = false);
+    static AddJob *add(Archive * pArchive , const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     static Archive *createEmpty(const QString &fileName, const QString &mimeType, QObject *parent = nullptr);
     static LoadJob *load(const QString &fileName, QObject *parent = nullptr);
     static LoadJob *load(const QString &fileName, const QString &mimeType, QObject *parent = nullptr);
     static LoadJob *load(const QString &fileName, Plugin *plugin, QObject *parent = nullptr);
     static LoadJob *load(const QString &fileName, bool isbatch = false, QObject *parent = nullptr);
 
+    Archive();
     ~Archive() override;
 
     ArchiveError error() const;
@@ -153,7 +155,7 @@ private:
     static Archive *create(const QString &fileName, const QString &fixedMimeType, QObject *parent = nullptr);
     static Archive *create(const QString &fileName, Plugin *plugin, QObject *parent = nullptr);
     static Archive *create(const QString &fileName, const QString &fixedMimeType, bool write, QObject *parent= nullptr , bool useLibArchive = false);
-    ReadOnlyArchiveInterface *m_iface;
+    ReadOnlyArchiveInterface *m_iface = nullptr;
     bool m_isReadOnly;
     bool m_isSingleFolder;
     bool m_isMultiVolume;
