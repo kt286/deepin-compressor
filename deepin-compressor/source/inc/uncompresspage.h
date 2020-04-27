@@ -51,6 +51,7 @@ public:
     int getFileCount();
     int showWarningDialog(const QString &msg);
     void slotCompressedAddFile();
+    fileViewer *getFileViewer();
 
 signals:
     void sigDecompressPress(const QString &localPath);
@@ -66,6 +67,8 @@ signals:
 
     void sigDeleteArchiveFiles(const QStringList &files, const QString &);
     void sigAddArchiveFiles(const QStringList &files, const QString &);
+
+    void sigDeleteJobFinished();
 
 public slots:
     void oneCompressPress();

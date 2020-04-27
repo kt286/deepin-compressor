@@ -29,6 +29,7 @@
 #include <DApplicationSettings>
 #include "monitorAdaptor.h"
 #include "logwidget.h"
+#include "openwithdialog/openwithdialog.h"
 
 int main(int argc, char *argv[])
 {

@@ -37,6 +37,7 @@
 
 #include <unistd.h>
 
+#include "uncompresspage.h"
 #include "fileViewer.h"
 #include "utils.h"
 #include "myfileitem.h"
@@ -309,6 +310,14 @@ void fileViewer::onDropSlot(QStringList files)
     emit sigFileAutoCompress(files);
 
     subWindowChangedMsg(ACTION_DRAG, files);
+}
+
+void fileViewer::deleteJobFinishedSlot()
+{
+    QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
+                       + QDir::separator() + "tempfiles" + QDir::separator() + m_ActionInfo.packageFile;
+    qDebug() << "添加文件：" << tempPath;
+    emit sigFileAutoCompress(QStringList() << tempPath);
 }
 
 fileViewer::fileViewer(QWidget *parent, PAGE_TYPE type)
@@ -677,6 +686,47 @@ void fileViewer::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void fileViewer::openTempFile(QString path)
+{
+    QFileInfo file(path);
+    KProcess *cmdprocess = new KProcess;
+    QStringList arguments;
+    QString programPath = QStandardPaths::findExecutable("xdg-open"); //查询本地位置
+    if (file.fileName().contains("%")) {
+        QString tmppath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles";
+        QDir dir(tmppath);
+        if (!dir.exists()) {
+            dir.mkdir(tmppath);
+        }
+
+        QProcess p;
+        QFileInfo tempFile(path);
+        QString openTempFile = QString("%1").arg(openFileTempLink) + "." + file.suffix();
+        openFileTempLink++;
+        QString commandCreate = "ln";
+        QStringList args;
+        args.append(path);
+        args.append(DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
+                    + QDir::separator() + openTempFile);
+        arguments << DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
+                  + QDir::separator() + openTempFile;
+        p.execute(commandCreate, args);
+    } else {
+        arguments << path;
+    }
+
+//                arguments << m_curfilelist.at(row).filePath();
+    cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
+    cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
+    cmdprocess->setProgram(programPath, arguments);
+    cmdprocess->start();
+}
+
+void fileViewer::resetTempFile()
+{
+    openFileTempLink = 0;
+}
+
 int fileViewer::popUpDialog(const QString &desc)
 {
     DDialog *dialog = new DDialog(this);
@@ -760,32 +810,40 @@ void fileViewer::subWindowChangedMsg(const SUBACTION_MODE &mode, const QStringLi
 
 void fileViewer::upDateArchive(const SubActionInfo &dragInfo)
 {
-    switch (dragInfo.mode) {
-    case ACTION_DELETE: {
-        qDebug() << "删除文件：" << dragInfo.ActionFiles[0];
-        emit sigFileRemovedFromArchive(dragInfo.ActionFiles, dragInfo.packageFile);
-    }
-    break;
-    case ACTION_DRAG:
-    case ACTION_OPEN: {
-        QString addInfo = QString("给压缩包：%1中的压缩文件：%2添加拖拽文件：%3")
-                          .arg(dragInfo.archive).arg(dragInfo.packageFile).arg(dragInfo.ActionFiles[0]);
-        qDebug() << addInfo;
-        emit sigFileAutoCompressToArchive(dragInfo.ActionFiles, dragInfo.packageFile);
-    }
-    break;
-    case ACTION_INVALID:
-        break;
-    }
+//    switch (dragInfo.mode) {
+//    case ACTION_DELETE: {
+//        qDebug() << "删除文件：" << dragInfo.ActionFiles[0];
+//        emit sigFileRemovedFromArchive(dragInfo.ActionFiles, dragInfo.packageFile);
+//    }
+//    break;
+//    case ACTION_DRAG:
+//    case ACTION_OPEN: {
+//        QString addInfo = QString("给压缩包：%1中的压缩文件：%2添加拖拽文件：%3")
+//                          .arg(dragInfo.archive).arg(dragInfo.packageFile).arg(dragInfo.ActionFiles[0]);
+//        qDebug() << addInfo;
+//        emit sigFileAutoCompressToArchive(dragInfo.ActionFiles, dragInfo.packageFile);
+//    }
+//    break;
+//    case ACTION_INVALID:
+//        break;
+//    }
 
-//    //delete file from dest
-//    qDebug() << "删除文件：" << file;
-//    emit sigFileRemoved(QStringList() << file);
-//    //add file from temp path
+    //delete file from dest
+    qDebug() << "删除文件：" << dragInfo.packageFile;
+    emit sigFileRemoved(QStringList() <<  dragInfo.packageFile);
+    //add file from temp path
 //    QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
-//                       + QDir::separator() + "tempfiles" + QDir::separator() + file;
+//                       + QDir::separator() + "tempfiles" + QDir::separator() + dragInfo.packageFile;
 //    qDebug() << "添加文件：" << tempPath;
-//    emit sigFileAutoCompress(QStringList() << tempPath);
+    //emit sigFileAutoCompress(QStringList() << tempPath);
+    if (UnCompressPage *pPage = qobject_cast<UnCompressPage *>(parentWidget())) {
+        connect(pPage, &UnCompressPage::sigDeleteJobFinished, this, &fileViewer::deleteJobFinishedSlot);
+    }
+}
+
+MyTableView *fileViewer::getTableView()
+{
+    return pTableViewFile;
 }
 
 int fileViewer::getPathIndex()
@@ -1058,14 +1116,7 @@ void fileViewer::slotCompressRowDoubleClicked(const QModelIndex index)
 
                 resizecolumn();
             } else {
-                KProcess *cmdprocess = new KProcess;
-                QStringList arguments;
-                QString programPath = QStandardPaths::findExecutable("xdg-open"); //查询本地位置
-                arguments << m_curfilelist.at(row).filePath();
-                cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
-                cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
-                cmdprocess->setProgram(programPath, arguments);
-                cmdprocess->start();
+                openTempFile(m_curfilelist.at(row).filePath());
             }
         } else if (pModel && pModel->fileInfo(curindex).isDir()) {
             m_indexmode = pModel->setRootPath(pModel->fileInfo(curindex).filePath());
@@ -1084,7 +1135,6 @@ void fileViewer::slotCompressRowDoubleClicked(const QModelIndex index)
             cmdprocess->start();
 
         }
-
 
         emit sigpathindexChanged();
     }

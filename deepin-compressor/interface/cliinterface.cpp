@@ -51,9 +51,14 @@ CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWrit
 CliInterface::~CliInterface()
 {
 //    Q_ASSERT(!m_process);
-    if(m_process != nullptr){
+    if (m_process != nullptr) {
         m_process->kill();
         m_process->waitForFinished(1);
+    }
+
+    if (pAnalyseHelp != nullptr) {
+        delete pAnalyseHelp;
+        pAnalyseHelp = nullptr;
     }
 }
 
@@ -91,31 +96,45 @@ bool CliInterface::extractFiles(const QVector< Archive::Entry * > &files, const 
     this->extractPsdStatus = NotChecked;
 
 
-    this->extractFF(files,destinationDirectory,options);
+    return this->extractFF(files,destinationDirectory,options);
 }
 
 bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QString &destinationDirectory, const ExtractionOptions &options)
 {
-    m_operationMode = Extract;
-    m_extractionOptions = options;
-    m_extractedFiles = files;
-    QString destPath = "";
+    if(this->extractPsdStatus == ReadOnlyArchiveInterface::WrongPsd){
+        return false;
+    }
+
     if (pAnalyseHelp != nullptr) {
         delete pAnalyseHelp;
         pAnalyseHelp = nullptr;
     }
+
+    m_operationMode = Extract;
+    m_extractionOptions = options;
+    m_extractedFiles = files;
+    QString destPath = "";
+
+    ifReplaceTip = false;
     if(this->extractPsdStatus == NotChecked){
         pAnalyseHelp = new AnalyseHelp(destinationDirectory,this->extractTopFolderName);
         destPath = pAnalyseHelp->getTempPath();
-    }else{
+    } else {
         destPath = destinationDirectory;
         this->extractPsdStatus = Checked;
+        emit sigExtractPwdCheckDown();
     }
+    m_extractDestDir = destinationDirectory;
     m_extractDestDir = destPath;
     qDebug()<<m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
+        destDirName = extractDst7z_;
         updateDestFileSignal(m_extractDestDir + "/" + extractDst7z_);
-        extractDst7z_.clear();
+//        extractDst7z_.clear();
+    }else{
+        if(destDirName == ""){
+            destDirName = extractTopFolderName;
+        }
     }
 
 
@@ -234,6 +253,7 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
 bool CliInterface::moveFiles(const QVector< Archive::Entry * > &files, Archive::Entry *destination,
                              const CompressionOptions &options)
 {
+
     Q_UNUSED(options);
 
     m_operationMode = Move;
@@ -289,7 +309,7 @@ bool CliInterface::runProcess(const QString &programName, const QStringList &arg
     QString programPath = QStandardPaths::findExecutable(programName);
     if (programPath.isEmpty()) {
         //emit error(tr("@info", "Failed to locate program <filename>%1</filename> on disk."));
-        emit error( "@info Failed to locate program <filename>%1</filename> on disk." );
+        emit error("@info Failed to locate program <filename>%1</filename> on disk.");
         emit finished(false);
         return false;
     }
@@ -371,13 +391,18 @@ void CliInterface::processFinished(int exitCode, QProcess::ExitStatus exitStatus
     } else if (m_operationMode == List && (isWrongPassword() || 9 == exitCode || 2 == exitCode)) {
         qDebug() << "wrong password";
         //emit error(tr("wrong password"));
-        emit error( "wrong password" );
+        emit error("wrong password");
         setPassword(QString());
         return;
     } else {
         emit progress(1.0);
         emit finished(true);
     }
+}
+
+void CliInterface::cleanIfCanceled()
+{
+
 }
 
 void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
@@ -425,7 +450,7 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
         if (!m_extractionOptions.isDragAndDropEnabled()) {
             if (!moveToDestination(QDir::current(), QDir(m_extractDestDir), m_extractionOptions.preservePaths())) {
                 //emit error(tr("Could not move the extracted file to the destination directory."));
-                emit error( "Could not move the extracted file to the destination directory." );
+                emit error("Could not move the extracted file to the destination directory.");
                 cleanUpExtracting();
                 emit finished(false);
                 return;
@@ -436,8 +461,28 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
     }
 
     if(this->extractPsdStatus == Reextract){
-        this->extractFF(m_extractedFiles,this->pAnalyseHelp->getDestDir(),m_extractionOptions);
-        qDebug()<<"重新解压";
+        qDebug()<<this->destDirName;
+        if(this->pAnalyseHelp!= nullptr){
+            this->extractFF(m_extractedFiles,this->pAnalyseHelp->getDestDir(),m_extractionOptions);
+//            qDebug()<<"==========直接解压文件";
+            return;
+        }
+    }else if(this->extractPsdStatus == Checked){
+
+    }else if(this->extractPsdStatus == Canceled){
+        if(ifReplaceTip == false){
+//            qDebug()<<"==========删除临时文件";
+            if(this->m_extractDestDir == "" || this->destDirName == ""){
+
+            }else{
+                QString fullPath = m_extractDestDir+QDir::separator()+this->destDirName;
+                QFileInfo fileInfo(fullPath);
+                if(fileInfo.exists())
+                {
+                     ReadWriteArchiveInterface::clearPath(fullPath);
+                }
+            }
+        }
     }
 
     if (m_exitCode == 2 || m_exitCode == 3 || m_exitCode == 255) {
@@ -447,7 +492,7 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
         } else {
             qDebug() << "Extraction failed, the file is broken";
             //emit error(tr("Extraction failed. the file is broken"));
-            emit error( "Extraction failed. the file is broken" );
+            emit error("Extraction failed. the file is broken");
             setPassword(QString());
         }
         cleanUpExtracting();
@@ -456,7 +501,7 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
     } else if (m_exitCode == 9) {
         qDebug() << "wrong password";
         //emit error(tr("wrong password"));
-        emit error( "wrong password" );
+        emit error("wrong password");
         setPassword(QString());
         return;
     }
@@ -570,7 +615,7 @@ bool CliInterface::moveDroppedFilesToDest(const QVector< Archive::Entry * > &fil
             if (!QFile(absSourceEntry.absoluteFilePath()).rename(absDestEntry.absoluteFilePath())) {
                 qDebug() << "Failed to move file" << absSourceEntry.filePath() << "to final destination.";
                 //emit error(tr("Could not move the extracted file to the destination directory."));
-                emit error( "Could not move the extracted file to the destination directory." );
+                emit error("Could not move the extracted file to the destination directory.");
                 emit finished(false);
                 return false;
             }
@@ -914,9 +959,17 @@ bool CliInterface::handleLine(const QString &line)
     //       shown by each CLI application is subject to a lot of variation.
 
     qDebug() << "#####" << line;
-    if(pAnalyseHelp != nullptr){
+    if (pAnalyseHelp != nullptr) {
         pAnalyseHelp->analyseLine(line);
-        if(pAnalyseHelp->isNotKnown() == true){
+        if (pAnalyseHelp->isNotKnown() == true) {
+            this->extractPsdStatus = Reextract;
+            return false;
+        }
+    }
+
+    if(pAnalyseHelp != nullptr){
+        if(pAnalyseHelp->isRightPsd() == 1){
+//            qDebug() << "%%%%%%RightPassword";
             this->extractPsdStatus = Reextract;
             return false;
         }
@@ -925,7 +978,7 @@ bool CliInterface::handleLine(const QString &line)
     if ((m_operationMode == Extract || m_operationMode == Add) && m_cliProps->property("captureProgress").toBool()) {
         // read the percentage
         int pos = line.indexOf(QLatin1Char('%'));
-        qDebug()<<"####"<<line;
+//        qDebug()<<"####"<<line;
         if (pos > 1) {
             int percentage = line.midRef(pos - 3, 3).toInt();
 //            emit progress(float(percentage) / 100);
@@ -1008,9 +1061,7 @@ bool CliInterface::handleLine(const QString &line)
         }
 
         if (handleFileExistsMessage(line)) {
-            if(pAnalyseHelp != nullptr){
-                pAnalyseHelp->mark(ENUMLINEINFO::REPLACE, line, true);
-            }
+            ifReplaceTip = true;
             return true;
         }
 
@@ -1018,20 +1069,15 @@ bool CliInterface::handleLine(const QString &line)
             setPassword(QString());
             if (m_extractionOptions.isBatchExtract()) {
             } else {
-                qDebug() << "$$$$$WrongPassword";
-                if(pAnalyseHelp != nullptr){
-                    pAnalyseHelp->mark(ENUMLINEINFO::WRONGPSD, line, true);
+                if(this->extractPsdStatus != ReadOnlyArchiveInterface::WrongPsd){
+                    if(pAnalyseHelp != nullptr){
+                        pAnalyseHelp->mark(ENUMLINEINFO::WRONGPSD, line, true);
+                    }
+                    this->extractPsdStatus = ReadOnlyArchiveInterface::WrongPsd;
+//                    qDebug() << "$$$$$WrongPassword";
+                    emit sigExtractNeedPassword();
                 }
 
-                emit sigExtractNeedPassword();
-                return false;
-            }
-        }
-
-        if(pAnalyseHelp != nullptr){
-            if(pAnalyseHelp->isRightPsd() == 1){
-                qDebug() << "%%%%%%RightPassword";
-                this->extractPsdStatus = Reextract;
                 return false;
             }
         }
@@ -1145,6 +1191,7 @@ bool CliInterface::handleFileExistsMessage(const QString &line)
 
             if (rxMatch.hasMatch()) {
                 m_storedFileName = rxMatch.captured(1);
+                this->extractTopFolderName = m_storedFileName;
                 qDebug() << "Detected existing file:" << m_storedFileName;
             }
         }

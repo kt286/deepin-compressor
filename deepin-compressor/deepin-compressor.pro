@@ -41,6 +41,7 @@ HEADERS +=  \
     source/inc/compressor_fail.h \
     source/inc/myfilesystemmodel.h \
     source/inc/archivemodel.h \
+    interface/analysepsdtool.h \
     interface/archiveinterface.h \
     interface/cliinterface.h \
     interface/archiveentry.h \
@@ -84,7 +85,6 @@ HEADERS +=  \
     source/inc/openwithdialog/openwithdialog.h \
     source/inc/openwithdialog/properties.h \
     source/inc/openwithdialog/singleton.h \
-    interface/analysepsdtool.h \
     source/inc/monitorAdaptor.h \
     source/inc/monitorInterface.h \
     source/inc/logwidget.h \
@@ -107,6 +107,7 @@ SOURCES +=  \
     source/src/myfilesystemmodel.cpp \
     source/src/archivemodel.cpp \
     source/src/encryptionpage.cpp \
+    interface/analysepsdtool.cpp \
     interface/archiveinterface.cpp \
     interface/cliinterface.cpp \
     interface/archiveentry.cpp \
@@ -145,7 +146,6 @@ SOURCES +=  \
     source/src/openwithdialog/mimesappsmanager.cpp \
     source/src/openwithdialog/openwithdialog.cpp \
     source/src/openwithdialog/properties.cpp \
-    interface/analysepsdtool.cpp \
     source/src/monitorAdaptor.cpp \
     source/src/monitorInterface.cpp \
     source/src/logwidget.cpp \

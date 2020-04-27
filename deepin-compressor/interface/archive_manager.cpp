@@ -41,8 +41,7 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
 {
     PluginManager pluginManager;
     QFileInfo fileinfo(fileName);
-    if(fileinfo.suffix() == QString("iso"))
-    {
+    if (fileinfo.suffix() == QString("iso")) {
         pluginManager.setFileSize(fileinfo.size());
     }
 
@@ -71,35 +70,29 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
 {
     PluginManager pluginManager;
     QFileInfo fileinfo(fileName);
-    if(fileinfo.suffix() == QString("iso"))
-    {
+    if (fileinfo.suffix() == QString("iso")) {
         pluginManager.setFileSize(fileinfo.size());
     }
 
     const QMimeType mimeType = fixedMimeType.isEmpty() ? determineMimeType(fileName) : QMimeDatabase().mimeTypeForName(fixedMimeType);
 
     QVector<Plugin *> offers;
-    if(write)
-    {
+    if (write) {
         offers = pluginManager.preferredWritePluginsFor(mimeType);
 
-        if( useLibArchive == true && mimeType.name() == "application/zip")
-        {
+        if (useLibArchive == true && mimeType.name() == "application/zip") {
             std::sort(offers.begin(), offers.end(), [](Plugin * p1, Plugin * p2) {
-                if( p1->metaData().name().contains("Libarchive") )
-                {
+                if (p1->metaData().name().contains("Libarchive")) {
                     return true;
                 }
-                if( p2->metaData().name().contains("Libarchive") )
-                {
+                if (p2->metaData().name().contains("Libarchive")) {
                     return false;
                 }
 
                 return p1->priority() > p2->priority();
             });
         }
-    }
-    else {
+    } else {
         offers = pluginManager.preferredPluginsFor(mimeType);
     }
 
@@ -162,13 +155,13 @@ CreateJob *Archive::create(const QString &fileName, const QString &mimeType, con
     return createJob;
 }
 
-AddJob *Archive::add(Archive * pArchive , const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
+AddJob *Archive::add(Archive *pArchive, const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
 {
-    if(!pArchive){
-       return nullptr;
+    if (!pArchive) {
+        return nullptr;
     }
-   auto newarchive =  pArchive->addFiles(files,destination,options);
-   return newarchive;
+    auto newarchive =  pArchive->addFiles(files, destination, options);
+    return newarchive;
 }
 
 Archive *Archive::createEmpty(const QString &fileName, const QString &mimeType, QObject *parent)
@@ -405,6 +398,10 @@ QString Archive::password() const
     return m_iface->password();
 }
 
+void Archive::resetPsd(){
+    m_iface->setPassword("");
+}
+
 uint Archive::numberOfEntries() const
 {
     if (!isValid()) {
@@ -493,7 +490,7 @@ MoveJob *Archive::moveFiles(const QVector<Archive::Entry *> &files, Archive::Ent
 
     Q_ASSERT(!m_iface->isReadOnly());
 
-    MoveJob *newJob = new MoveJob(files, destination, newOptions, static_cast<ReadWriteArchiveInterface *>(m_iface));
+    MoveJob *newJob = new MoveJob(files, destination, newOptions, dynamic_cast<ReadWriteArchiveInterface *>(m_iface));
     return newJob;
 }
 

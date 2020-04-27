@@ -183,6 +183,11 @@ void UnCompressPage::slotCompressedAddFile()
     emit sigAutoCompress(m_info.filePath(), dialog.selectedFiles());
 }
 
+fileViewer *UnCompressPage::getFileViewer()
+{
+    return m_fileviewer;
+}
+
 QString UnCompressPage::getDecompressPath()
 {
     return m_pathstr;
@@ -226,6 +231,8 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
             dir.mkdir(tmppath);
         }
         emit sigextractfiles(fileList, tmppath, type);
+    }else {
+        emit sigextractfiles(fileList, m_pathstr, type);
     }
 }
 

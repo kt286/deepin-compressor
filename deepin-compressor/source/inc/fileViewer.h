@@ -167,10 +167,13 @@ public:
     void startDrag(Qt::DropActions supportedActions);
 
     void deleteCompressFile();
-
+    void resetTempFile();
     void subWindowChangedMsg(const SUBACTION_MODE &mode, const QStringList &msg);
 
     void upDateArchive(const SubActionInfo &dragInfo);
+
+    MyTableView *getTableView();
+
 
 public slots:
     void showPlable();
@@ -194,7 +197,7 @@ protected slots:
     void onRightMenuOpenWithClicked(QAction *action);
     void slotDragLeave(QString path);
     void onDropSlot(QStringList files);
-
+    void deleteJobFinishedSlot();
 
 
 signals:
@@ -217,6 +220,7 @@ private:
 
     void keyPressEvent(QKeyEvent *event) override;
     int popUpDialog(const QString &desc);
+	void openTempFile(QString path);
 
 private:
     QLineEdit *pLineEditDir;
@@ -251,6 +255,7 @@ private:
 
     bool isPromptDelete = false;
     SubActionInfo m_ActionInfo;
+	int openFileTempLink = 0;
 };
 
 #endif // FILEVIWER_H

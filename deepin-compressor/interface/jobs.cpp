@@ -177,6 +177,7 @@ void Job::onError(const QString &message, const QString &details)
     }
     setError(KJob::UserDefinedError);
     setErrorText(message);
+    emit sigExtractSpinnerFinished();
 }
 
 void Job::onEntry(Archive::Entry *entry)
@@ -216,8 +217,6 @@ void Job::onFinished(bool result)
     } else {
         setError(KJob::NoError);
     }
-
-    qDebug() << "加载文件结束：";
     if (!d->isInterruptionRequested()) {
         emitResult();
     }
@@ -287,7 +286,7 @@ void LoadJob::doWork()
 
     if (archiveInterface()) {
         connect(archiveInterface(), &ReadOnlyArchiveInterface::sigExtractNeedPassword, this, &LoadJob::sigLodJobPassword);
-        qDebug() << "开始加载文件：" << archiveInterface()->filename();
+
         ret = archiveInterface()->list(m_isbatch);
     }
 
@@ -308,7 +307,9 @@ void LoadJob::onFinished(bool result)
         const auto name = subfolderName().isEmpty() ? archive()->completeBaseName() : subfolderName();
         archive()->setProperty("subfolderName", name);
         if (isPasswordProtected()) {
-            archive()->setProperty("encryptionType",  archive()->password().isEmpty() ? Archive::Encrypted : Archive::HeaderEncrypted);
+            QString psd = archive()->password();
+            QVariant et = archive()->password().isEmpty() ? Archive::Encrypted : Archive::HeaderEncrypted;
+            archive()->setProperty("encryptionType",  et);
         }
     }
 
@@ -538,6 +539,7 @@ ExtractJob::ExtractJob(const QVector<Archive::Entry *> &entries, const QString &
 {
     qDebug() << "ExtractJob job instance";
     connect(interface, &ReadOnlyArchiveInterface::sigExtractNeedPassword, this, &ExtractJob::sigExtractJobPassword, Qt::QueuedConnection);
+    connect(interface, &ReadOnlyArchiveInterface::sigExtractPwdCheckDown, this, &ExtractJob::sigExtractJobPwdCheckDown, Qt::QueuedConnection);
 }
 
 void ExtractJob::doWork()
@@ -569,13 +571,25 @@ void ExtractJob::doWork()
 //             << m_entries
 //             << "Destination dir:" << m_destinationDir
 //             << "Options:" << m_options;
-
+    ReadOnlyArchiveInterface* pTool = archiveInterface();
     bool ret = archiveInterface()->extractFiles(m_entries, m_destinationDir, m_options);
 
     if (!archiveInterface()->waitForFinishedSignal() /*&& archiveInterface()->isUserCancel() == false*/) {
         onFinished(ret);
-        emit sigExtractJobFinished();
+//        emit sigExtractJobFinished();
     }
+}
+
+void ExtractJob::cleanIfCanceled()
+{
+    this->archiveInterface()->waitForFinishedSignal();
+}
+
+void ExtractJob::onFinished(bool result)
+{
+    this->archiveInterface()->cleanIfCanceled();
+    emit sigExtractSpinnerFinished();
+    Job::onFinished(result);
 }
 
 bool ExtractJob::Killjob()
@@ -781,12 +795,15 @@ void MoveJob::doWork()
     //emit description(this, desc, qMakePair(tr("Archive"), archiveInterface()->filename()));
     emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
 
+//    ReadWriteArchiveInterface *m_writeInterface =
+//        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
     ReadWriteArchiveInterface *m_writeInterface =
-        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+        dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
 
     Q_ASSERT(m_writeInterface);
 
     connectToArchiveInterfaceSignals();
+
     bool ret = m_writeInterface->moveFiles(m_entries, m_destination, m_options);
 
     if (!archiveInterface()->waitForFinishedSignal()) {

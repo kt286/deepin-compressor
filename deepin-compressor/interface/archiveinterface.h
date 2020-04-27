@@ -44,6 +44,18 @@ class  ReadOnlyArchiveInterface: public QObject
 {
     Q_OBJECT
 public:
+    enum ExtractPsdStatus{
+        Default,
+        NotChecked,
+        Reextract,
+        Checked,
+        WrongPsd,
+        RightPsd,
+        NoPsd,
+        Completed,
+        Canceled
+    };
+
     explicit ReadOnlyArchiveInterface(QObject *parent, const QVariantList &args);
     ~ReadOnlyArchiveInterface() override;
 
@@ -169,9 +181,18 @@ public:
     virtual bool isUserCancel() const;
     bool isAnyFileExtracted() const;
 
+    /**
+     * @brief cleanIfCanceled
+     *
+     * Derived classes can overwrite this method for clean tempfiles if user canceled extract job and there is no overwrite query.
+     */
+    virtual void cleanIfCanceled() = 0;
+
 public:
     QString extractTopFolderName;
-
+    QString destDirName;        //取消解压，需要该变量
+    bool ifReplaceTip = false;  //是否有替换提示
+    ExtractPsdStatus extractPsdStatus = ReadOnlyArchiveInterface::Default;
 Q_SIGNALS:
 
     /**
@@ -190,6 +211,7 @@ Q_SIGNALS:
     void compressionMethodFound(const QString &method);
     void encryptionMethodFound(const QString &method);
     void sigExtractNeedPassword();
+    void sigExtractPwdCheckDown();
     /**
      * Emitted when @p query needs to be executed on the GUI thread.
      */
@@ -248,13 +270,6 @@ public:
         Test
     };
 
-    enum ExtractPsdStatus{
-        NotChecked,
-        Reextract,
-        Checked,
-        Completed
-    };
-
     explicit ReadWriteArchiveInterface(QObject *parent, const QVariantList &args);
     ~ReadWriteArchiveInterface() override;
 
@@ -275,8 +290,7 @@ public:
     virtual bool deleteFiles(const QVector<Archive::Entry *> &files) = 0;
     virtual bool addComment(const QString &comment) = 0;
 
-public:
-    ExtractPsdStatus extractPsdStatus;
+    static void clearPath(QString path);
 
 Q_SIGNALS:
     void entryRemoved(const QString &path);

@@ -129,6 +129,7 @@ public:
     void creatBatchArchive(QMap<QString, QString> &Args, QMap<QString, QStringList> &filetoadd);
     void addArchive(QMap<QString, QString> &Args);
     void removeFromArchive(const QStringList &removeFilePaths);
+    void moveToArchive(QMap<QString, QString> &Args);
 
     void transSplitFileName(QString &fileName); // *.7z.003 -> *.7z.001
 
@@ -161,8 +162,6 @@ protected:
     void dropEvent(QDropEvent *) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
 
-    void mousePressEvent(QMouseEvent *event) override;
-
 public slots:
     //accept subwindows drag files and return tips string
     bool onSubWindowActionFinished(int mode, const qint64 &pid, const QStringList &urls);
@@ -184,6 +183,7 @@ private slots:
 
     void slotLoadingFinished(KJob *job);
     void slotExtractionDone(KJob *job);
+    void slotShowPageUnzipProgress();
     void slotextractSelectedFilesTo(const QString &localPath);
     void SlotProgress(KJob *job, unsigned long percent);
     void SlotProgressFile(KJob *job, const QString &filename);
@@ -222,6 +222,7 @@ signals:
     void loadingStarted();
     void sigUpdateTableView(const QFileInfo &);
     void sigTipsWindowPopUp(int, const QStringList &);
+    void deleteJobComplete();
 
 private:
     Archive *m_archive_manager = nullptr;
@@ -269,6 +270,7 @@ private:
     LoadJob *m_loadjob = nullptr;
     CreateJob *m_createJob = nullptr;
     AddJob *m_addJob = nullptr;
+    MoveJob *m_moveJob = nullptr;
     DeleteJob *m_DeleteJob = nullptr;
     EncryptionType m_encryptiontype = Encryption_NULL;
     bool m_isrightmenu = false;
@@ -306,6 +308,7 @@ private:
     QString program;
     QMap<qint64, QStringList> m_subWinDragFiles;
     int m_mode = 0;
+    qint64 m_curOperChildPid = 0;
 
 #ifdef __aarch64__
     qint64 maxFileSize_ = 0;

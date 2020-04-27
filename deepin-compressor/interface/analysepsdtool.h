@@ -6,12 +6,14 @@
 enum ENUMLINEINFO{
     RIGHTPSD,
     WRONGPSD,
-    REPLACE
 };
 
 #define VALIDLINE 0
 #define EXTRACT_REPLACE_TIP "Would you like to replace the existing file"
 #define ALLOK "All OK"
+#define DoubleBBBB "\b\b\b\b    \b\b\b\b"
+#define EVERYOK "Everything is Ok"
+#define WRONGPSD7Z ". Wrong password? "
 
 typedef struct lineInfo{
     lineInfo(QString l,bool b);
@@ -54,16 +56,35 @@ public:
      * @return 1:psd right;  2:psd wrong;  0:psd not checked;
      */
     int isRightPsd();
-private:
-    void clean(){
-
-    }
 
 private:
     QMap<ENUMLINEINFO,LineInfo*>* pMapInfo;
     int lineCount = 0;
 };
 
+
+class AnalyseTool7Z:public AnalyseTool{
+public:
+    explicit AnalyseTool7Z();
+
+    ~AnalyseTool7Z()override;
+
+    void mark(ENUMLINEINFO id,QString line,bool read)override;
+
+    void analyseLine(const QString &line)override;
+
+    LineInfo* getLineInfo(ENUMLINEINFO id)override;
+
+    /**
+     * @brief isRightPsd
+     * @return 1:psd right;  2:psd wrong;  0:psd not checked;
+     */
+    int isRightPsd();
+
+private:
+    QMap<ENUMLINEINFO,LineInfo*>* pMapInfo;
+    int lineCount = 0;
+};
 
 class AnalyseHelp{
 public:
@@ -82,8 +103,6 @@ public:
 
     QString getDestDir();
 
-    bool hasReplace();
-
     bool isNotKnown();
     /**
      * @brief isRightPsd
@@ -97,13 +116,16 @@ public:
 
     QString getTempPath();
 
-    bool isNeedRemoveTemp();
+    void checkReplaceTip(const QString &line);
+private:
+    void resetTempDir();
 private:
     AnalyseTool* pTool = nullptr;
     QString destPath = "";
     QString destSubFolderName = "";
     QString tempPath = "";
     int lineCount = 0;
+    bool replaceTip = false;
 };
 
 

@@ -33,7 +33,7 @@ public:
     bool addComment(const QString &comment) override;
     bool testArchive() override;
     bool hasBatchExtractionProgress() const override;
-
+    virtual void cleanIfCanceled()override;
 protected:
     struct ArchiveReadCustomDeleter {
         static inline void cleanup(struct archive *a)
@@ -77,6 +77,7 @@ private:
     qlonglong m_extractedFilesSize;
     QVector<Archive::Entry *> m_emittedEntries;
     QString m_oldWorkingDir;
+    QString m_extractDestDir;
 };
 
 #endif // LIBARCHIVEPLUGIN_H

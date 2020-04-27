@@ -77,7 +77,7 @@ Q_SIGNALS:
     void sigWrongPassword();
     void sigCancelled();
     void updateDestFile(QString dstFile);
-
+    void sigExtractSpinnerFinished();
 private:
     Archive *m_archive;
     ReadOnlyArchiveInterface *m_archiveInterface;
@@ -200,13 +200,17 @@ public:
 
 public Q_SLOTS:
     void doWork() override;
-
+    void onFinished(bool result)override;
 public:
     bool Killjob();
 
 signals:
     void sigExtractJobPassword();
     void sigExtractJobFinished();
+    void sigExtractJobPwdCheckDown();
+
+private:
+    void cleanIfCanceled();
 private:
 
     QVector<Archive::Entry *> m_entries;
