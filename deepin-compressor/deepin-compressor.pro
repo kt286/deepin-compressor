@@ -152,7 +152,6 @@ SOURCES +=  \
     source/src/logwidgetappender.cpp
 
 
-
 RESOURCES += deepin-compressor.qrc
 RESOURCES += config.qrc
 TRANSLATIONS += translations/*.ts
