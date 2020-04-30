@@ -220,7 +220,7 @@ private:
 
     void keyPressEvent(QKeyEvent *event) override;
     int popUpDialog(const QString &desc);
-	void openTempFile(QString path);
+    void openTempFile(QString path);
 
 private:
     QLineEdit *pLineEditDir;
@@ -255,7 +255,7 @@ private:
 
     bool isPromptDelete = false;
     SubActionInfo m_ActionInfo;
-	int openFileTempLink = 0;
+    int openFileTempLink = 0;
 };
 
 #endif // FILEVIWER_H

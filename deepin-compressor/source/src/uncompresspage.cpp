@@ -231,7 +231,7 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
             dir.mkdir(tmppath);
         }
         emit sigextractfiles(fileList, tmppath, type);
-    }else {
+    } else {
         emit sigextractfiles(fileList, m_pathstr, type);
     }
 }
@@ -239,7 +239,7 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
 void UnCompressPage::onRefreshFilelist(const QStringList &filelist)
 {
     m_filelist = filelist;
-    m_fileviewer->setFileList(m_filelist);
+//    m_fileviewer->setFileList(m_filelist);
 
     emit sigRefreshFileList(m_filelist);
 

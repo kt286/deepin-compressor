@@ -970,6 +970,7 @@ void fileViewer::slotDecompressRowDelete()
             filelist.push_back(fullPath);
         }
     }
+
     emit sigFileRemoved(filelist);
 
     subWindowChangedMsg(ACTION_DELETE, filelist);
@@ -1143,15 +1144,17 @@ void fileViewer::slotCompressRowDoubleClicked(const QModelIndex index)
 void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
 {
     if (index.isValid()) {
-        qDebug() << m_decompressmodel->isentryDir(m_sortmodel->mapToSource(index));
+        QModelIndex sourceIndex = m_sortmodel->mapToSource(index);
+        qDebug() << m_decompressmodel->isentryDir(sourceIndex);
         if (0 == m_pathindex) {
-            if (m_decompressmodel->isentryDir(m_sortmodel->mapToSource(index))) {
+            if (m_decompressmodel->isentryDir(sourceIndex)) {
                 m_decompressmodel->setPathIndex(&m_pathindex);
-                QModelIndex sourceindex = m_decompressmodel->createNoncolumnIndex(m_sortmodel->mapToSource(index));
-                pTableViewFile->setRootIndex(m_sortmodel->mapFromSource(sourceindex));
+                QModelIndex curIndex = m_decompressmodel->createNoncolumnIndex(sourceIndex);
+                QModelIndex delegateIndex = m_sortmodel->mapFromSource(curIndex);
+                pTableViewFile->setRootIndex(delegateIndex);
                 m_pathindex++;
-                m_indexmode = sourceindex;
-                Archive::Entry *entry = m_decompressmodel->entryForIndex(m_sortmodel->mapToSource(index));
+                m_indexmode = curIndex;
+                Archive::Entry *entry = m_decompressmodel->entryForIndex(sourceIndex);
                 restoreHeaderSort(zipPathUnique + MainWindow::getLoadFile() + "/" + entry->fullPath());
                 if (0 == entry->entries().count()) {
                     showPlable();

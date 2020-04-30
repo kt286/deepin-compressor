@@ -43,7 +43,7 @@
 #include <DStandardPaths>
 #include <QStackedLayout>
 #include "monitorInterface.h"
-#include <boost/foreach.hpp>
+//#include <boost/foreach.hpp>
 
 #include <log4qt/basicconfigurator.h>
 #include "logwidgetappender.h"
@@ -1721,6 +1721,8 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     m_decompressfilename = Args[QStringLiteral("filename")];
     m_CompressSuccess->setCompressPath(Args[QStringLiteral("localFilePath")]);
 
+    ReadOnlyArchiveInterface *pIface = Archive::createInterface(createCompressFile_, fixedMimeType);
+
     if (createCompressFile_.isEmpty()) {
         qDebug() << "filename.isEmpty()";
         return;
@@ -1745,6 +1747,11 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         QFileInfo fi(file);
         if (fi.isDir()) {
             entry->setIsDirectory(true);
+            QHash<QString, QIcon> *map = new QHash<QString, QIcon>();
+            Archive::CreateEntry(file, entry, map);
+            m_model->appendEntryIcons(*map);
+            delete map;
+            map = nullptr;
         }
 
         all_entries.append(entry);
@@ -1799,7 +1806,8 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
 
     qDebug() << "开始执行添加任务12";
     //m_addJob = Archive::add(m_model->archive() , all_entries, sourceEntry, options );
-    m_addJob =  m_model->addFiles(all_entries, sourceEntry, options);
+//    m_addJob =  m_model->addFiles(all_entries, sourceEntry, options);//this write by hanshuai
+    m_addJob = m_model->addFiles(all_entries, sourceEntry, pIface, options);//this added by hsw
     if (!m_addJob) {
         return;
     }
@@ -2258,7 +2266,12 @@ void MainWindow::slotJobFinished(KJob *job)
             m_DeleteJob = nullptr;
         }
         refreshPage();
-        qDebug() << "删除完成消息!\n";
+        //refresh valid begin
+        m_filterModel->clear();
+        m_filterModel->setSourceModel(m_model);
+        //refresh valid begin
+
+        qDebug() << "删除完成信号";
         emit deleteJobComplete();
     }
     break;
