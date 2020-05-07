@@ -493,6 +493,11 @@ void ArchiveModel::slotNewEntry(Archive::Entry *entry)
     newEntry(entry, NotifyViews);
 }
 
+//QList<Archive::Entry *> *ArchiveModel::getLeavesList()
+//{
+//    return this->pListLeaves;
+//}
+
 void ArchiveModel::slotListEntry(Archive::Entry *entry)
 {
     newEntry(entry, DoNotNotifyViews);
@@ -718,9 +723,9 @@ ExtractJob *ArchiveModel::extractFiles(const QVector<Archive::Entry *> &files, c
 {
     Q_ASSERT(m_archive);
     QString psd = m_archive->password();
-    if (m_archive->encryptionType() == Archive::Unencrypted) { //没有加密的
+    if(m_archive->encryptionType() == Archive::Unencrypted){//没有加密的
 
-    } else {
+    }else{
         //是否启用头部加密,如果启用头部加密，当前用户肯定已经输入正确密码；所以要记录密码，并且将加密状态设置为Archive::Encrypted
         //如果不是头部加密，那就是文件加密了，所以需要将密码设置空字符串，同样加密状态设置为Archive::Encrypted.
         bool headerEncrypted = m_archive->encryptionType() == Archive::HeaderEncrypted;
@@ -772,6 +777,7 @@ AddJob *ArchiveModel::addFiles(QVector<Archive::Entry *> &entries, const Archive
     }
     return nullptr;
 }
+
 AddJob *ArchiveModel::addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options)
 {
     if (!m_archive) {

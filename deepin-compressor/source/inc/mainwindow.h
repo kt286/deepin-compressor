@@ -129,6 +129,7 @@ public:
     void creatBatchArchive(QMap<QString, QString> &Args, QMap<QString, QStringList> &filetoadd);
     void addArchive(QMap<QString, QString> &Args);
     void removeFromArchive(const QStringList &removeFilePaths);
+    void removeEntryVector(QVector<Archive::Entry *> &vectorDel);
     void moveToArchive(QMap<QString, QString> &Args);
 
     void transSplitFileName(QString &fileName); // *.7z.003 -> *.7z.001
@@ -203,6 +204,7 @@ private slots:
 
     void slotCalDeleteRefreshTotalFileSize(const QStringList &files);
     void slotUncompressCalDeleteRefreshTotalFileSize(const QStringList &files);
+    void slotUncompressCalDeleteRefreshTotoalSize(QVector<Archive::Entry *> &vectorDel);
 
     void resetMainwindow();
     void slotBackButtonClicked();
@@ -297,6 +299,7 @@ private:
 
 private:
     void calSelectedTotalFileSize(const QStringList &files);
+    void calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel);
     qint64 calFileSize(const QString &path);
     void calSpeedAndTime(unsigned long compressPercent);
 

@@ -311,6 +311,7 @@ void LoadJob::onFinished(bool result)
             QVariant et = archive()->password().isEmpty() ? Archive::Encrypted : Archive::HeaderEncrypted;
             archive()->setProperty("encryptionType",  et);
         }
+//        archive()->resetPsd();
     }
 
     Job::onFinished(result);

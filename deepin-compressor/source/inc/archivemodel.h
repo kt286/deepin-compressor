@@ -125,7 +125,7 @@ public:
 
     QMap<QString, Archive::Entry *> filesToMove;
     QMap<QString, Archive::Entry *> filesToCopy;
-
+//    QList<Archive::Entry *> *getLeavesList();
 Q_SIGNALS:
     void loadingStarted();
     void loadingFinished(KJob *);
@@ -177,7 +177,6 @@ private:
     QScopedPointer<Archive::Entry> m_rootEntry;
     QHash<QString, QIcon> m_entryIcons;
     QMap<int, QByteArray> m_propertiesMap;
-
     QString m_dbusPathName;
 
     qulonglong m_numberOfFiles;

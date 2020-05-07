@@ -126,7 +126,7 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
     }
     m_extractDestDir = destinationDirectory;
     m_extractDestDir = destPath;
-    qDebug()<<m_extractDestDir;
+//    qDebug() << m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
         destDirName = extractDst7z_;
         updateDestFileSignal(m_extractDestDir + "/" + extractDst7z_);
@@ -139,6 +139,7 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
 
 
     bool b2 = options.encryptedArchiveHint();
+    //get user input password
     QString psdd = password();
     if (!m_cliProps->property("passwordSwitch").toStringList().isEmpty() && b2
             && psdd.isEmpty()) {
@@ -941,14 +942,16 @@ bool CliInterface::setAddedFiles()
     return true;
 }
 
-void CliInterface::emitProgress(float value){
-    if(this->pAnalyseHelp == nullptr){
+void CliInterface::emitProgress(float value)
+{
+    if (this->pAnalyseHelp == nullptr) {
         emit progress(value);
     }
 }
 
-void CliInterface::emitFileName(QString name){
-    if(this->pAnalyseHelp == nullptr){
+void CliInterface::emitFileName(QString name)
+{
+    if (this->pAnalyseHelp == nullptr) {
         emit progress_filename(name);
     }
 }
@@ -958,7 +961,7 @@ bool CliInterface::handleLine(const QString &line)
     // TODO: This should be implemented by each plugin; the way progress is
     //       shown by each CLI application is subject to a lot of variation.
 
-    qDebug() << "#####" << line;
+
     if (pAnalyseHelp != nullptr) {
         pAnalyseHelp->analyseLine(line);
         if (pAnalyseHelp->isNotKnown() == true) {
@@ -966,6 +969,7 @@ bool CliInterface::handleLine(const QString &line)
             return false;
         }
     }
+
 
     if(pAnalyseHelp != nullptr){
         if(pAnalyseHelp->isRightPsd() == 1){
@@ -1150,8 +1154,16 @@ bool CliInterface::handleLine(const QString &line)
             }
         }
 
+        if (line.startsWith("        Name: ")) {
+            QString folder = line;
+            extractDst7z_ = folder.remove("        Name: ");
+        }
+
+
         return readListLine(line);
+
     }
+
 
     if (m_operationMode == Delete) {
         return readDeleteLine(line);

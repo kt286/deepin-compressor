@@ -202,6 +202,7 @@ protected slots:
 
 signals:
     void sigFileRemoved(const QStringList &);
+    void sigEntryRemoved(QVector<Archive::Entry *> &vectorDel);
     void sigFileRemovedFromArchive(const QStringList &, const QString &);
     void sigextractfiles(QVector<Archive::Entry *> fileList, EXTRACT_TYPE type, QString path = "");
     void sigpathindexChanged();

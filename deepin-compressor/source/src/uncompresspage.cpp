@@ -79,7 +79,7 @@ UnCompressPage::UnCompressPage(QWidget *parent)
     connect(m_fileviewer, &fileViewer::sigextractfiles, this, &UnCompressPage::onextractfilesSlot);
     connect(m_fileviewer, &fileViewer::sigOpenWith,     this, &UnCompressPage::onextractfilesOpenSlot);
     connect(m_fileviewer, &fileViewer::sigFileRemoved, this, &UnCompressPage::onRefreshFilelist);
-
+    connect(m_fileviewer, &fileViewer::sigEntryRemoved, this, &UnCompressPage::onRefreshEntryList);
     connect(m_fileviewer, &fileViewer::sigFileAutoCompress, this, &UnCompressPage::onAutoCompress);
     connect(this, &UnCompressPage::subWindowTipsPopSig, m_fileviewer, &fileViewer::SubWindowDragMsgReceive);
 
@@ -166,6 +166,11 @@ int UnCompressPage::showWarningDialog(const QString &msg)
     return res;
 }
 
+EXTRACT_TYPE UnCompressPage::getExtractType()
+{
+    return extractType;
+}
+
 void UnCompressPage::slotCompressedAddFile()
 {
     DFileDialog dialog(this);
@@ -198,6 +203,8 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
     if (fileList.count() == 0) {
         return;
     }
+    // get extract type
+    extractType = type;
 
     if (EXTRACT_TO == type) {
         DFileDialog dialog(this);
@@ -244,6 +251,16 @@ void UnCompressPage::onRefreshFilelist(const QStringList &filelist)
     emit sigRefreshFileList(m_filelist);
 
     if (m_filelist.size() == 0) {
+        emit sigFilelistIsEmpty();
+    }
+}
+
+void UnCompressPage::onRefreshEntryList(QVector<Archive::Entry *> &vectorDel)
+{
+    m_vectorDel = vectorDel;
+//    emit sigRefreshFileList(m_filelist);
+    emit sigRefreshEntryVector(m_vectorDel);
+    if (m_vectorDel.size() == 0) {
         emit sigFilelistIsEmpty();
     }
 }

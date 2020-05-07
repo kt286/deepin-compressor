@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
 
     const QStringList fileList = parser.positionalArguments();
 
-
     QStringList newfilelist;
     foreach (QString file, fileList) {
         if (file.contains("file://")) {

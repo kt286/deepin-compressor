@@ -318,6 +318,11 @@ void CompressSetting::onNextButoonClicked()
         return;
     }
 
+    if ((((m_getFileSize / 1024 / 1024) / (m_splitnumedit->value())) > 10) && m_compresstype->text().contains("7z") && m_splitcompress->isChecked()) {
+        showWarningDialog(tr("Too many volumes, please change and retry"));
+        return;
+    }
+
     QMap< QString, QString > m_openArgs;
     const QString password = m_password->text();
     QString fixedMimeType;
@@ -359,7 +364,7 @@ void CompressSetting::onNextButoonClicked()
 
     m_openArgs[QStringLiteral("localFilePath")] = m_savepath->text();
     m_openArgs[QStringLiteral("filename")] =
-        m_filename->text() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+        m_filename->text()/* + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix()*/;
 
     //check if folderName valid
     QString unvalidStr = "";
@@ -452,6 +457,7 @@ void CompressSetting::setDefaultName(QString name)
     initWidget();
 
     onAdvanceButtonClicked(m_moresetbutton->isChecked());
+    name = name + "." + m_compresstype->text();
     m_filename->setText(name);
     QLineEdit *qfilename = m_filename->lineEdit();
     qfilename->selectAll();
@@ -525,6 +531,16 @@ bool CompressSetting::checkFilePermission(const QString &path)
     return filePermissionFlag;
 }
 
+void CompressSetting::getSelectedFileSize(qint64 size)
+{
+    m_getFileSize = size;
+}
+
+void CompressSetting::clickTitleBtnResetAdvancedOptions()
+{
+    m_moresetbutton->setChecked(false);
+}
+
 void CompressSetting::showEvent(QShowEvent *event)
 {
     initWidget();
@@ -563,6 +579,9 @@ void CompressSetting::onSplitChanged(int /*status*/)
 {
     if (m_splitcompress->isChecked() && "7z" == m_compresstype->text()) {
         m_splitnumedit->setEnabled(true);
+        if ((m_getFileSize / 1024 / 1024) > 1) {
+            m_splitnumedit->setValue(m_getFileSize / 1024 / 1024 / 2 + 1);
+        }
     } else {
         m_splitnumedit->setEnabled(false);
     }
@@ -571,9 +590,13 @@ void CompressSetting::onSplitChanged(int /*status*/)
 void CompressSetting::ontypeChanged(QAction *action)
 {
     qDebug() << action->text();
-
+    int substrindex = m_filename->text().lastIndexOf('.' + m_compresstype->text());
     setTypeImage(action->text());
     m_compresstype->setText(action->text());
+
+    //update m_filename
+    QString nanme = m_filename->text().left(substrindex);
+    setDefaultName(m_filename->text().left(substrindex));
 
     if (action->text().contains("7z")) {
         if (m_splitcompress->isChecked()) {

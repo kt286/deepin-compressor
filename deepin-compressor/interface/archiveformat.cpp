@@ -28,6 +28,7 @@
 
 ArchiveFormat::ArchiveFormat()
 {
+
 }
 
 ArchiveFormat::ArchiveFormat(const QMimeType &mimeType,

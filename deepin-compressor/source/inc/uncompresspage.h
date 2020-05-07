@@ -50,16 +50,18 @@ public:
     void SetDefaultFile(QFileInfo info);
     int getFileCount();
     int showWarningDialog(const QString &msg);
+    EXTRACT_TYPE getExtractType();
     void slotCompressedAddFile();
     fileViewer *getFileViewer();
 
 signals:
     void sigDecompressPress(const QString &localPath);
     void sigextractfiles(QVector<Archive::Entry *>, QString path, EXTRACT_TYPE type);
+    void sigOpenExtractFile(const QVector<Archive::Entry *> &fileList, const QString &programma);
     void sigFilelistIsEmpty();
     void sigRefreshFileList(const QStringList &files);
+    void sigRefreshEntryVector(QVector<Archive::Entry *> &vectorDel);
     void sigAutoCompress(const QString &, const QStringList &);
-    void sigOpenExtractFile(const QVector<Archive::Entry *> &fileList, const QString &programma);
 
     void sigUpdateUnCompreeTableView(const QFileInfo &);
     void sigSelectedFiles(QStringList &files);
@@ -74,8 +76,9 @@ public slots:
     void oneCompressPress();
     void onPathButoonClicked();
     void onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTRACT_TYPE type, QString path);
-    void onRefreshFilelist(const QStringList &filelist);
     void onextractfilesOpenSlot(const QVector<Archive::Entry *> &fileList, const QString &programma);
+    void onRefreshFilelist(const QStringList &filelist);
+    void onRefreshEntryList(QVector<Archive::Entry *> &vectorDel);
     void onAutoCompress(const QStringList &path);
 
 private:
@@ -83,6 +86,7 @@ private:
     fileViewer *m_fileviewer;
     DPushButton *m_nextbutton;
     QStringList m_filelist;
+    QVector<Archive::Entry *> m_vectorDel;
     DCommandLinkButton *m_extractpath;
     DLabel *m_pixmaplabel;
     Lib_Edit_Button *m_pathbutton;
@@ -90,6 +94,7 @@ private:
     QFileInfo m_info;
 
     ArchiveSortFilterModel *m_model;
+    EXTRACT_TYPE extractType;
 
 };
 #endif

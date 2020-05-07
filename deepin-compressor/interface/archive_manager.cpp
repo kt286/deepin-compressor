@@ -218,7 +218,7 @@ CreateJob *Archive::create(const QString &fileName, const QString &mimeType, con
     return createJob;
 }
 
-Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QHash<QString, QIcon> *&map)
+Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map)
 {
     QDir dir(path);
     if (!dir.exists()) {
@@ -246,21 +246,15 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QHash<QString
         parent->appendEntry(entry);
         if (is_dir) {
             entry->setIsDirectory(true);
-            entry->setFullPath(file_info.absoluteFilePath());
+            entry->setFullPath(file_info.absoluteFilePath().remove(externalPath) + QDir::separator());  //remove external path
             entry->setParent(parent);
-            //进行递归
-            CreateEntry(file_info.filePath(), entry, map);
+
+            CreateEntry(file_info.filePath(), entry, externalPath, map);    //recursive function
         } else {
             qint64 size = file_info.size();
             entry->setProperty("size", size);
-            entry->setFullPath(file_info.absoluteFilePath());
+            entry->setFullPath(file_info.absoluteFilePath().remove(externalPath));
             entry->setParent(parent);
-            //获取文件后缀并获取所选包含类型，若存在包含类型且后缀相同，则添加
-//            QString suffix =  file_info.suffix();
-//            if (QString::compare(suffix, QString("png"), Qt::CaseInsensitive) == 0) {
-//                QString absolute_file_path = file_info.absoluteFilePath();
-//                string_list.append(absolute_file_path);
-//            }
         }
 
         // set Icon begin

@@ -530,7 +530,13 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
     zip_error_t err;
 
     // Open archive.
-    zip_t *archive = zip_open(QFile::encodeName(filename()).constData(), 0, &errcode);
+    char *fileName = QFile::encodeName(filename()).data();
+    zip_t *archive = zip_open(fileName, 0, &errcode);
+    if (errcode != ZIP_ER_OK) {
+        emit error(tr("Failed to open archive: %1"));
+        return false;
+    }
+
     zip_error_init_with_code(&err, errcode);
     if (archive == nullptr) {
         emit error(tr("Failed to open archive: %1"));
@@ -538,39 +544,63 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
     }
 
     qulonglong i = 0;
-    for (const Archive::Entry *e : files) {
-
-        if (QThread::currentThread()->isInterruptionRequested()) {
-            if (zip_close(archive)) {
-                emit error(tr("Failed to write archive."));
-                return false;
-            }
-            break;
+    for (Archive::Entry *pCurEntry : files) {
+        bool status = this->deleteEntry(pCurEntry, archive);
+        if (status == true) {
+            emit entryRemoved(pCurEntry->fullPath());
+            emit progress(float(++i) / files.size());
         }
-
-        const qlonglong index = zip_name_locate(archive, e->fullPath().toUtf8().constData(), ZIP_FL_ENC_GUESS);
-        if (index == -1) {
-            emit error(tr("Failed to delete entry: %1"));
-            if (zip_close(archive)) {
-                emit error(tr("Failed to write archive."));
-                return false;
-            }
-            return false;
-        }
-        if (zip_delete(archive, index) == -1) {
-            emit error(tr("Failed to delete entry: %1"));
-            if (zip_close(archive)) {
-                emit error(tr("Failed to write archive."));
-                return false;
-            }
-            return false;
-        }
-        emit entryRemoved(e->fullPath());
-        emit progress(float(++i) / files.size());
     }
 
     if (zip_close(archive)) {
         emit error(tr("Failed to write archive."));
+        return false;
+    }
+    return true;
+}
+
+bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive)
+{
+    if (pCurEntry->isDir() == true) {
+        for (int i = 0; i < pCurEntry->entries().length(); i++) {
+            this->deleteEntry(pCurEntry->entries().at(i), archive);
+        }
+    }
+    if (QThread::currentThread()->isInterruptionRequested()) {
+        if (zip_close(archive)) {
+            emit error(tr("Failed to write archive."));
+            return false;
+        }
+        return false;
+    }
+    QString fullpath = pCurEntry->fullPath();
+    char *path = fullpath.toUtf8().data();
+    char *filenameDel = (char *)malloc((strlen(path) + 1) * sizeof(char));
+    strcpy(filenameDel, path);
+//    const char *nn1 = zip_get_name(archive, 1, ZIP_FL_ENC_GUESS);
+//    const char *nn2 = zip_get_name(archive, 2, ZIP_FL_ENC_GUESS);
+//    const char *nn3 = zip_get_name(archive, 3, ZIP_FL_ENC_GUESS);
+//    const char *nn4 = zip_get_name(archive, 4, ZIP_FL_ENC_GUESS);
+//    const char *nn5 = zip_get_name(archive, 5, ZIP_FL_ENC_GUESS);
+//    const char *nn6 = zip_get_name(archive, 6, ZIP_FL_ENC_GUESS);
+    zip_int64_t index = zip_name_locate(archive, filenameDel, ZIP_FL_ENC_GUESS);
+    free(filenameDel);
+    if (index == -1) {
+        emit error(tr("Failed to delete entry: %1"));
+        if (zip_close(archive)) {
+            emit error(tr("Failed to write archive."));
+            return false;
+        }
+        return false;
+    }
+    zip_uint64_t indexDel = index;
+    int statusDel = zip_delete(archive, indexDel);
+    if (statusDel == -1) {
+        emit error(tr("Failed to delete entry: %1"));
+        if (zip_close(archive)) {
+            emit error(tr("Failed to write archive."));
+            return false;
+        }
         return false;
     }
     return true;
@@ -791,7 +821,7 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
                 pi.fileProgressStart = pi.fileProgressProportion * float(i);
             }
             QString entryName = QDir::fromNativeSeparators(trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW)));
-            if(i == 0){
+            if (i == 0) {
                 destDirName = entryName;
             }
             if (!extractEntry(archive,
@@ -1478,19 +1508,18 @@ QByteArray LibzipPlugin::detectEncode(const QByteArray &data, const QString &fil
 
 void LibzipPlugin::cleanIfCanceled()
 {
-    if(this->ifReplaceTip == false){
-        if(this->extractPsdStatus == ReadOnlyArchiveInterface::Canceled){
+    if (this->ifReplaceTip == false) {
+        if (this->extractPsdStatus == ReadOnlyArchiveInterface::Canceled) {
 //            qDebug()<<"可以删除解压文件夹";
 //            qDebug()<<"$$$"<<this->destDirName;
 //            qDebug()<<"$$$"<<this->m_extractDestDir;
-            if(this->destDirName == "" || this->m_extractDestDir == ""){
+            if (this->destDirName == "" || this->m_extractDestDir == "") {
                 return;
             }
-            QString fullPath = m_extractDestDir+QDir::separator()+this->destDirName;
+            QString fullPath = m_extractDestDir + QDir::separator() + this->destDirName;
             QFileInfo fileInfo(fullPath);
-            if(fileInfo.exists())
-            {
-                 ReadWriteArchiveInterface::clearPath(fullPath);
+            if (fileInfo.exists()) {
+                ReadWriteArchiveInterface::clearPath(fullPath);
             }
         }
     }
