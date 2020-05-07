@@ -475,8 +475,8 @@ void ArchiveModel::slotEntryRemoved(const QString &path)
         Archive::Entry *parent = entry->getParent();
         QModelIndex index = indexForEntry(entry);
         Q_UNUSED(index)
-
-        beginRemoveRows(indexForEntry(parent), entry->row(), entry->row());
+        int row = entry->row();
+        beginRemoveRows(index, row, row);
         m_entryIcons.remove(parent->entries().at(entry->row())->fullPath(NoTrailingSlash));
         parent->removeEntryAt(entry->row());
         endRemoveRows();
@@ -492,6 +492,11 @@ void ArchiveModel::slotNewEntry(Archive::Entry *entry)
 {
     newEntry(entry, NotifyViews);
 }
+
+//QList<Archive::Entry *> *ArchiveModel::getLeavesList()
+//{
+//    return this->pListLeaves;
+//}
 
 void ArchiveModel::slotListEntry(Archive::Entry *entry)
 {
@@ -661,6 +666,15 @@ void ArchiveModel::insertEntry(Archive::Entry *entry, InsertBehaviour behaviour)
     m_entryIcons.insert(entry->fullPath(NoTrailingSlash), icon);
 }
 
+void ArchiveModel::appendEntryIcons(const QHash<QString, QIcon> &map)
+{
+    QHash<QString, QIcon>::const_iterator iter1 = map.constBegin();
+    while (iter1 != map.constEnd()) {
+        m_entryIcons.insert(iter1.key(), iter1.value());
+        ++iter1;
+    }
+}
+
 Archive *ArchiveModel::archive() const
 {
     return m_archive.data();
@@ -709,9 +723,9 @@ ExtractJob *ArchiveModel::extractFiles(const QVector<Archive::Entry *> &files, c
 {
     Q_ASSERT(m_archive);
     QString psd = m_archive->password();
-    if (m_archive->encryptionType() == Archive::Unencrypted) { //没有加密的
+    if(m_archive->encryptionType() == Archive::Unencrypted){//没有加密的
 
-    } else {
+    }else{
         //是否启用头部加密,如果启用头部加密，当前用户肯定已经输入正确密码；所以要记录密码，并且将加密状态设置为Archive::Encrypted
         //如果不是头部加密，那就是文件加密了，所以需要将密码设置空字符串，同样加密状态设置为Archive::Encrypted.
         bool headerEncrypted = m_archive->encryptionType() == Archive::HeaderEncrypted;
@@ -746,6 +760,22 @@ OpenWithJob *ArchiveModel::openWith(Archive::Entry *file) const
     OpenWithJob *job = m_archive->openWith(file);
     connect(job, &Job::userQuery, this, &ArchiveModel::slotUserQuery);
     return job;
+}
+AddJob *ArchiveModel::addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, ReadOnlyArchiveInterface *pIface, const CompressionOptions &options)
+{
+    if (!m_archive) {
+        return nullptr;
+    }
+
+    if (!m_archive->isReadOnly()) {
+        AddJob *job = m_archive->addFiles(entries, destination, pIface, options);
+        connect(job, &AddJob::newEntry, this, &ArchiveModel::slotNewEntry);
+        connect(job, &AddJob::userQuery, this, &ArchiveModel::slotUserQuery);
+
+
+        return job;
+    }
+    return nullptr;
 }
 
 AddJob *ArchiveModel::addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options)

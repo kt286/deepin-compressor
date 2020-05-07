@@ -114,6 +114,69 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
     return archive;
 }
 
+ReadOnlyArchiveInterface *Archive::createInterface(const QString &fileName, const QString &fixedMimeType)
+{
+    bool write = true;
+    bool useLibArchive = false;
+
+    PluginManager pluginManager;
+    QFileInfo fileinfo(fileName);
+    if (fileinfo.suffix() == QString("iso")) {
+        pluginManager.setFileSize(fileinfo.size());
+    }
+
+    const QMimeType mimeType = fixedMimeType.isEmpty() ? determineMimeType(fileName) : QMimeDatabase().mimeTypeForName(fixedMimeType);
+
+    QVector<Plugin *> offers;
+    if (write) {
+        offers = pluginManager.preferredWritePluginsFor(mimeType);
+
+        if (useLibArchive == true && mimeType.name() == "application/zip") {
+            std::sort(offers.begin(), offers.end(), [](Plugin * p1, Plugin * p2) {
+                if (p1->metaData().name().contains("Libarchive")) {
+                    return true;
+                }
+                if (p2->metaData().name().contains("Libarchive")) {
+                    return false;
+                }
+
+                return p1->priority() > p2->priority();
+            });
+        }
+    } else {
+        offers = pluginManager.preferredPluginsFor(mimeType);
+    }
+
+    if (offers.isEmpty()) {
+        qDebug() << "Could not find a plugin to handle" << fileName;
+        return nullptr;
+    }
+
+    ReadOnlyArchiveInterface *pIface = nullptr;
+    for (Plugin *plugin : offers) {
+        pIface = createInterface(fileName, plugin);
+        // Use the first valid plugin, according to the priority sorting.
+        return pIface;
+    }
+
+}
+
+ReadOnlyArchiveInterface *Archive::createInterface(const QString &fileName, Plugin *plugin)
+{
+    Q_ASSERT(plugin);
+
+    KPluginFactory *factory = KPluginLoader(plugin->metaData().fileName()).factory();
+    if (!factory) {
+        return nullptr;
+    }
+
+    const QVariantList args = {QVariant(QFileInfo(fileName).absoluteFilePath()),
+                               QVariant().fromValue(plugin->metaData())
+                              };
+    ReadOnlyArchiveInterface *iface = factory->create<ReadOnlyArchiveInterface>(nullptr, args);
+    return iface;
+}
+
 Archive *Archive::create(const QString &fileName, Plugin *plugin, QObject *parent)
 {
     Q_ASSERT(plugin);
@@ -155,6 +218,67 @@ CreateJob *Archive::create(const QString &fileName, const QString &mimeType, con
     return createJob;
 }
 
+Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map)
+{
+    QDir dir(path);
+    if (!dir.exists()) {
+        return nullptr;
+    }
+    if (map == nullptr) {
+        map = new QHash<QString, QIcon>();
+    }
+    dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks);
+    dir.setSorting(QDir::DirsFirst);
+    QFileInfoList list = dir.entryInfoList();
+    int i = 0;
+    bool is_dir;
+    do {
+        QFileInfo file_info = list.at(i);
+        if (file_info.fileName() == "." | file_info.fileName() == "..") {
+            i++;
+            continue;
+        }
+
+        is_dir = file_info.isDir();
+        Archive::Entry *entry = new Archive::Entry();
+
+        entry->setProperty("timestamp", QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss")));
+        parent->appendEntry(entry);
+        if (is_dir) {
+            entry->setIsDirectory(true);
+            entry->setFullPath(file_info.absoluteFilePath().remove(externalPath) + QDir::separator());  //remove external path
+            entry->setParent(parent);
+
+            CreateEntry(file_info.filePath(), entry, externalPath, map);    //recursive function
+        } else {
+            qint64 size = file_info.size();
+            entry->setProperty("size", size);
+            entry->setFullPath(file_info.absoluteFilePath().remove(externalPath));
+            entry->setParent(parent);
+        }
+
+        // set Icon begin
+        QMimeDatabase db;
+        QIcon icon;
+        entry->isDir()
+        ? icon = QIcon::fromTheme(db.mimeTypeForName(QStringLiteral("inode/directory")).iconName()).pixmap(24, 24)
+                 : icon = QIcon::fromTheme(db.mimeTypeForFile(entry->fullPath()).iconName()).pixmap(24, 24);
+        // set Icon end
+        map->insert(entry->fullPath(NoTrailingSlash), icon);
+        i++;
+    } while (i < list.size());
+
+}
+
+AddJob *Archive::add(Archive *pArchive, const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
+{
+    if (!pArchive) {
+        return nullptr;
+    }
+    auto newarchive =  pArchive->addFiles(files, destination, options);
+    return newarchive;
+}
+
 Archive *Archive::createEmpty(const QString &fileName, const QString &mimeType, QObject *parent)
 {
     auto archive = create(fileName, mimeType, parent);
@@ -190,6 +314,11 @@ LoadJob *Archive::load(const QString &fileName, bool isbatch, QObject *parent)
     auto loadJob = new LoadJob(archive, isbatch);
 
     return loadJob;
+}
+
+Archive::Archive()
+{
+
 }
 
 Archive::Archive(ArchiveError errorCode, QObject *parent)
@@ -446,6 +575,24 @@ DeleteJob *Archive::deleteFiles(QVector<Archive::Entry *> &entries)
     return newJob;
 }
 
+AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, ReadOnlyArchiveInterface *pIface, const CompressionOptions &options)
+{
+    if (!isValid()) {
+        return nullptr;
+    }
+
+    CompressionOptions newOptions = options;
+    if (encryptionType() != Unencrypted) {
+        newOptions.setEncryptedArchiveHint(true);
+    }
+
+    Q_ASSERT(!pIface->isReadOnly());
+
+    AddJob *newJob = new AddJob(files, destination, newOptions, static_cast<ReadWriteArchiveInterface *>(pIface));
+    connect(newJob, &AddJob::result, this, &Archive::onAddFinished);
+    return newJob;
+}
+
 AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
 {
     if (!isValid()) {
@@ -477,7 +624,7 @@ MoveJob *Archive::moveFiles(const QVector<Archive::Entry *> &files, Archive::Ent
 
     Q_ASSERT(!m_iface->isReadOnly());
 
-    MoveJob *newJob = new MoveJob(files, destination, newOptions, static_cast<ReadWriteArchiveInterface *>(m_iface));
+    MoveJob *newJob = new MoveJob(files, destination, newOptions, dynamic_cast<ReadWriteArchiveInterface *>(m_iface));
     return newJob;
 }
 

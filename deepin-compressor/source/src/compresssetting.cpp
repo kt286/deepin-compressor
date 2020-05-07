@@ -646,6 +646,254 @@ void CompressSetting::onThemeChanged()
     m_filename->setPalette(plt);
 }
 
+void CompressSetting::autoCompress(const QString &compresspath, const QStringList &path)
+{
+    qDebug() << "开始执行添加操作！" << ";compresspath:" << compresspath << ";path:" << path;
+    for (int i = 0; i < path.count(); i++) {
+        if (compresspath == path.at(i)) {
+            showWarningDialog(tr("You cannot add the archive to yourself"));
+            return;
+        }
+    }
+
+    QStringList cFileInfoList = path ;
+    QFileInfo cFileInfo(compresspath);
+    QDir dir(cFileInfo.path());//compress path
+
+    QString name = cFileInfo.fileName();
+    if (!checkfilename(name)) {
+        showWarningDialog(tr("Invalid file name"));
+        return;
+    }
+
+    if (name.isEmpty()) {
+        showWarningDialog(tr("Please enter the path"));
+        return;
+    }
+
+    if (false == dir.exists()) {
+        showWarningDialog(tr("The path does not exist, please retry"));
+        return;
+    }
+
+    for (int i = 0; i < cFileInfoList.count(); i++) {
+        QFileInfo m_fileName(cFileInfoList.at(i));
+        if (!m_fileName.exists()) {
+            filePermission = false;
+            showWarningDialog(tr("%1 was changed on the disk, please import it again.").arg(m_fileName.fileName()));
+            return;
+        }
+
+        if (m_fileName.isFile()) {
+            if (!m_fileName.isReadable()) {
+                filePermission = false;
+                showWarningDialog(tr("You do not have permission to compress %1").arg(m_fileName.fileName()), i);
+                return;
+            }
+        } else if (m_fileName.isDir()) {
+            if (!m_fileName.isReadable()) {
+                filePermission = false;
+                showWarningDialog(tr("You do not have permission to compress %1").arg(m_fileName.fileName()), i);
+                return;
+            } else {
+                filePermission = checkFilePermission(m_fileName.absoluteFilePath());
+                if (!filePermission) {
+                    showWarningDialog(tr("You do not have permission to compress %1").arg(m_fileName.fileName()), i);
+                    return;
+                }
+            }
+        }
+    }
+
+    QFileInfo m_fileDestinationPath(cFileInfo.path());
+    if (!(m_fileDestinationPath.isWritable() && m_fileDestinationPath.isExecutable())) {
+        showWarningDialog(tr("You do not have permission to save files here, please change and retry"));
+        return;
+    }
+
+    qDebug() << "开始设置参数！";
+    QMap< QString, QString > m_openArgs;
+    const QString password = "";
+    QString fixedMimeType;
+    if (!m_supportedMimeTypes.size()) {
+        m_supportedMimeTypes = m_pluginManger.supportedWriteMimeTypes(PluginManager::SortByComment);
+    }
+    for (const QString &type : qAsConst(m_supportedMimeTypes)) {
+        if (0 == QMimeDatabase().mimeTypeForName(type).preferredSuffix().compare(cFileInfo.completeSuffix(), Qt::CaseInsensitive)) {
+            fixedMimeType = type;
+            break;
+        }
+    }
+
+    m_openArgs[QStringLiteral("createNewArchive")] = QStringLiteral("false");
+    m_openArgs[QStringLiteral("fixedMimeType")] = fixedMimeType;
+    if ("application/x-tar" == fixedMimeType || "application/x-tarz" == fixedMimeType) {
+        m_openArgs[QStringLiteral("compressionLevel")] = "-1";  //-1 is unuseful
+    } else {
+        m_openArgs[QStringLiteral("compressionLevel")] = "6";  // 6 is default
+    }
+
+    if (m_splitnumedit && m_splitnumedit->value() > 0) {
+        m_openArgs[QStringLiteral("volumeSize")] = QString::number(static_cast< int >(m_splitnumedit->value() * 1024));
+    }
+    //    if (!dialog.data()->compressionMethod().isEmpty()) {
+    //        m_openArgs.metaData()[QStringLiteral("compressionMethod")] = dialog.data()->compressionMethod();
+    //    }
+    if (m_password && !m_password->text().isEmpty()) {
+        m_openArgs[QStringLiteral("encryptionMethod")] = "AES256";  // 5 is default
+    }
+
+    m_openArgs[QStringLiteral("encryptionPassword")] = password;
+
+    m_openArgs[QStringLiteral("encryptHeader")] = QStringLiteral("false");
+
+    m_openArgs[QStringLiteral("localFilePath")] = cFileInfo.path();
+    m_openArgs[QStringLiteral("filename")] =
+        cFileInfo.baseName() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+
+    m_openArgs[QStringLiteral("sourceFilePath")] = compresspath;
+    if (path.size()) {
+        QString paths = path[0];
+        for (int i = 1 ; i < path.size() ; i++) {
+            paths += "--" + path[i];
+        }
+        m_openArgs[QStringLiteral("ToCompressFilePath")] = paths;
+    }
+
+    emit sigUncompressStateAutoCompress(m_openArgs);
+
+    m_openArgs.remove(QStringLiteral("createNewArchive"));
+    m_openArgs.remove(QStringLiteral("fixedMimeType"));
+    m_openArgs.remove(QStringLiteral("compressionLevel"));
+    m_openArgs.remove(QStringLiteral("encryptionPassword"));
+    m_openArgs.remove(QStringLiteral("encryptHeader"));
+    m_openArgs.remove(QStringLiteral("localFilePath"));
+    m_openArgs.remove(QStringLiteral("filename"));
+    m_openArgs.remove(QStringLiteral("sourceFilePath"));
+    m_openArgs.remove(QStringLiteral("ToCompressFilePath"));
+}
+
+void CompressSetting::autoMoveToArchive(const QStringList &files, const QString &archive)
+{
+    qDebug() << "开始执行移动操作！" << ";movepath:" << archive << ";path:" << files[0];
+    for (int i = 0; i < files.count(); i++) {
+        if (archive == files.at(i)) {
+            showWarningDialog(tr("You cannot move the file to yourself"));
+            return;
+        }
+    }
+
+    QStringList cFileInfoList = files ;
+    QFileInfo cFileInfo(archive);
+    QDir dir(cFileInfo.path());//relative compress path
+
+    QString name = cFileInfo.fileName();
+    if (!checkfilename(name)) {
+        showWarningDialog(tr("Invalid file name"));
+        return;
+    }
+
+    if (name.isEmpty()) {
+        showWarningDialog(tr("Please enter the path"));
+        return;
+    }
+
+    if (false == dir.exists()) {
+        showWarningDialog(tr("The path does not exist, please retry"));
+        return;
+    }
+
+    for (int i = 0; i < cFileInfoList.count(); i++) {
+        QFileInfo m_fileName(cFileInfoList.at(i));
+        if (!m_fileName.exists()) {
+            filePermission = false;
+            showWarningDialog(tr("%1 was changed on the disk, please import it again.").arg(m_fileName.fileName()));
+            return;
+        }
+
+        if (m_fileName.isFile()) {
+            if (!m_fileName.isReadable()) {
+                filePermission = false;
+                showWarningDialog(tr("You do not have permission to compress %1").arg(m_fileName.fileName()), i);
+                return;
+            }
+        } else if (m_fileName.isDir()) {
+            if (!m_fileName.isReadable()) {
+                filePermission = false;
+                showWarningDialog(tr("You do not have permission to compress %1").arg(m_fileName.fileName()), i);
+                return;
+            } else {
+                filePermission = checkFilePermission(m_fileName.absoluteFilePath());
+                if (!filePermission) {
+                    showWarningDialog(tr("You do not have permission to compress %1").arg(m_fileName.fileName()), i);
+                    return;
+                }
+            }
+        }
+    }
+
+    qDebug() << "开始设置参数！";
+    QMap< QString, QString > m_openArgs;
+    const QString password = "";
+    QString fixedMimeType;
+    if (!m_supportedMimeTypes.size()) {
+        m_supportedMimeTypes = m_pluginManger.supportedWriteMimeTypes(PluginManager::SortByComment);
+    }
+    for (const QString &type : qAsConst(m_supportedMimeTypes)) {
+        if (0 == QMimeDatabase().mimeTypeForName(type).preferredSuffix().compare(cFileInfo.completeSuffix(), Qt::CaseInsensitive)) {
+            fixedMimeType = type;
+            break;
+        }
+    }
+
+    m_openArgs[QStringLiteral("createNewArchive")] = QStringLiteral("false");
+    m_openArgs[QStringLiteral("fixedMimeType")] = fixedMimeType;
+    if ("application/x-tar" == fixedMimeType || "application/x-tarz" == fixedMimeType) {
+        m_openArgs[QStringLiteral("compressionLevel")] = "-1";  //-1 is unuseful
+    } else {
+        m_openArgs[QStringLiteral("compressionLevel")] = "6";  // 6 is default
+    }
+
+    if (m_splitnumedit && m_splitnumedit->value() > 0) {
+        m_openArgs[QStringLiteral("volumeSize")] = QString::number(static_cast< int >(m_splitnumedit->value() * 1024));
+    }
+    //    if (!dialog.data()->compressionMethod().isEmpty()) {
+    //        m_openArgs.metaData()[QStringLiteral("compressionMethod")] = dialog.data()->compressionMethod();
+    //    }
+    if (m_password && !m_password->text().isEmpty()) {
+        m_openArgs[QStringLiteral("encryptionMethod")] = "AES256";  // 5 is default
+    }
+
+    m_openArgs[QStringLiteral("encryptionPassword")] = password;
+
+    m_openArgs[QStringLiteral("encryptHeader")] = QStringLiteral("false");
+
+    m_openArgs[QStringLiteral("localFilePath")] = cFileInfo.path();
+    m_openArgs[QStringLiteral("filename")] =
+        cFileInfo.baseName() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+
+    m_openArgs[QStringLiteral("sourceFilePath")] = archive;
+    if (files.size()) {
+        QString paths = files[0];
+        for (int i = 1 ; i < files.size() ; i++) {
+            paths += "--" + files[i];
+        }
+        m_openArgs[QStringLiteral("ToCompressFilePath")] = paths;
+    }
+
+    emit sigMoveFilesToArchive(m_openArgs);
+
+    m_openArgs.remove(QStringLiteral("createNewArchive"));
+    m_openArgs.remove(QStringLiteral("fixedMimeType"));
+    m_openArgs.remove(QStringLiteral("compressionLevel"));
+    m_openArgs.remove(QStringLiteral("encryptionPassword"));
+    m_openArgs.remove(QStringLiteral("encryptHeader"));
+    m_openArgs.remove(QStringLiteral("localFilePath"));
+    m_openArgs.remove(QStringLiteral("filename"));
+    m_openArgs.remove(QStringLiteral("sourceFilePath"));
+    m_openArgs.remove(QStringLiteral("ToCompressFilePath"));
+}
+
 int CompressSetting::showWarningDialog(const QString &msg, int index)
 {
     DDialog *dialog = new DDialog(this);

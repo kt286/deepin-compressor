@@ -27,6 +27,8 @@
 #include <DLog>
 #include "utils.h"
 #include <DApplicationSettings>
+#include "monitorAdaptor.h"
+#include "logwidget.h"
 #include "openwithdialog/openwithdialog.h"
 
 int main(int argc, char *argv[])
@@ -100,8 +102,17 @@ int main(int argc, char *argv[])
         QMetaObject::invokeMethod(&w, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, newfilelist));
     }
 
+    LogWidget widget;
+    w.initalizeLog(&widget);
+    widget.show();
+
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    MonitorAdaptor mAdaptor(&w);
+    bus.registerService("com.archive.mainwindow.monitor");
+    bus.registerObject("/QtDusServer/registry", &w);
+
     w.show();
-
-
     return app.exec();
 }
+
+#define LOGINFO(a) MainWindow::getLogger()->info(a)

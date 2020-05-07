@@ -18,7 +18,11 @@ DEFINES += QT_MESSAGELOGCONTEXT
 #DEFINES += __aarch64__
 
 INCLUDEPATH +=  $$PWD/source/inc/ \
-                $$PWD/interface/
+                $$PWD/interface/ \
+                $$PWD/../plugin/libLogPlugin
+
+LIBS += -L/data/home/hushiwei/workHS/jared-workNew/Debug/plugin/libLogPlugin -llibLogPlugin
+
 
 # Input
 HEADERS +=  \
@@ -80,9 +84,11 @@ HEADERS +=  \
     source/inc/openwithdialog/mimesappsmanager.h \
     source/inc/openwithdialog/openwithdialog.h \
     source/inc/openwithdialog/properties.h \
-    source/inc/openwithdialog/singleton.h
-
-
+    source/inc/openwithdialog/singleton.h \
+    source/inc/monitorAdaptor.h \
+    source/inc/monitorInterface.h \
+    source/inc/logwidget.h \
+    source/inc/logwidgetappender.h
 
 
 SOURCES +=  \
@@ -139,7 +145,11 @@ SOURCES +=  \
     source/src/openwithdialog/durl.cpp \
     source/src/openwithdialog/mimesappsmanager.cpp \
     source/src/openwithdialog/openwithdialog.cpp \
-    source/src/openwithdialog/properties.cpp
+    source/src/openwithdialog/properties.cpp \
+    source/src/monitorAdaptor.cpp \
+    source/src/monitorInterface.cpp \
+    source/src/logwidget.cpp \
+    source/src/logwidgetappender.cpp
 
 
 RESOURCES += deepin-compressor.qrc
