@@ -940,6 +940,7 @@ void fileViewer::slotCompressRePreviousDoubleClicked()
         qDebug() << pModel->fileInfo(m_indexmode).path() << m_indexmode.data();
     } else {
         m_pathindex--;
+//        QModelIndex parentIndex = m_decompressmodel->indexForEntry(m_decompressmodel->getParentEntry());
         if (0 == m_pathindex) {
             pTableViewFile->setRootIndex(QModelIndex());
             pTableViewFile->setPreviousButtonVisible(false);
@@ -1425,6 +1426,38 @@ void MyTableView::dragMoveEvent(QDragMoveEvent *event)
 {
     event->accept();
 }
+
+Archive::Entry *MyTableView::getParentArchiveEntry()
+{
+    QAbstractItemModel *model = this->model();
+
+    MyFileSystemModel *fileModel = qobject_cast<MyFileSystemModel *>(model);
+    if (fileModel) {
+
+        QString rootPath = fileModel->rootPath();
+
+        return nullptr;
+    }
+
+    QStandardItemModel *standModel = qobject_cast<QStandardItemModel *>(model);
+
+    if (standModel) {
+
+        return nullptr;
+    }
+
+    ArchiveSortFilterModel *archiveModel = qobject_cast<ArchiveSortFilterModel *>(model);
+    ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(archiveModel);
+
+    if (archiveModel) {
+        QModelIndex index = archiveModel->mapToSource(this->currentIndex());
+        Archive::Entry *item = static_cast<Archive::Entry *>(index.internalPointer());
+        item->row();
+        return item;
+    }
+    return nullptr;
+}
+
 void MyTableView::dropEvent(QDropEvent *event)
 {
     auto *const mime = event->mimeData();
@@ -1445,6 +1478,10 @@ void MyTableView::dropEvent(QDropEvent *event)
         }
         QStringList existFileList;
         QStringList FilterAddFileList;
+//        Archive::Entry *pParentEntry = this->getParentArchiveEntry();
+        ArchiveSortFilterModel *sortModel = qobject_cast<ArchiveSortFilterModel *>(this->model());
+        ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(sortModel->sourceModel());
+        pModel->getParentEntry();
         for (int i = 0; i < model()->rowCount() ; i++) {
             QString IndexStr = model()->index(i, 0).data().toString();
             existFileList << IndexStr;
@@ -1453,8 +1490,13 @@ void MyTableView::dropEvent(QDropEvent *event)
         QString dda =  selectionModel()->metaObject()->className();
         for (const QString &fileUrl : fileList) {
             QFileInfo fileInfo(fileUrl);
-            if (existFileList.contains(fileInfo.fileName())) {
-                //TODO TIPS
+//            if (existFileList.contains(fileInfo.fileName())) {
+//                //TODO TIPS
+//                continue;
+//            } else {
+//                FilterAddFileList.push_back(fileUrl);
+//            }
+            if (pModel->isExists(fileUrl) == true) {//need to check more attributes
                 continue;
             } else {
                 FilterAddFileList.push_back(fileUrl);

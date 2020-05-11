@@ -85,6 +85,12 @@ public:
     void setPathIndex(int *index);
     void setParentEntry(const QModelIndex &index);
     Archive::Entry *getParentEntry();
+    /**
+     * @brief check if exists archive with fullpath
+     * @param fullPath
+     * @return
+     */
+    bool isExists(QString fullPath);
     void setTableView(QTableView *tableview);
     QModelIndex createNoncolumnIndex(const QModelIndex &index) const;
 

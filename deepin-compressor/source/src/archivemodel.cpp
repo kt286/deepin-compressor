@@ -226,7 +226,33 @@ void ArchiveModel::setParentEntry(const QModelIndex &index)
 
 Archive::Entry *ArchiveModel::getParentEntry()
 {
-    return m_parent;
+    if (m_ppathindex == 0) {
+        return m_rootEntry.data();
+    } else {
+        return m_parent;
+    }
+}
+
+bool ArchiveModel::isExists(QString fullPath)
+{
+    QFileInfo fileInfo(fullPath);
+    Archive::Entry *parent = this->getParentEntry();
+    qint64 size = fileInfo.size();
+    if (parent == nullptr) {
+        return false;
+    }
+
+    QVector<Archive::Entry *> vector =  parent->entries();
+    QVector<Archive::Entry *>::iterator it = vector.begin();
+    while (it != vector.end()) {
+        Archive::Entry *entry = *it;
+        qint64 sizeOri = entry->property("size").toLongLong();
+        if (entry->name() == fileInfo.fileName() && size == sizeOri) {
+            return true;
+        }
+        it++;
+    }
+    return false;
 }
 
 void ArchiveModel::setTableView(QTableView *tableview)

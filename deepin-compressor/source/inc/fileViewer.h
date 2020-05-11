@@ -129,6 +129,9 @@ public slots:
     void slotDragpath(QUrl url);
 
 private:
+    // get parent archive::entry pointer
+    Archive::Entry *getParentArchiveEntry();
+private:
     QPoint dragpos;
     DFileDragServer *s = nullptr;
     QString m_path;
