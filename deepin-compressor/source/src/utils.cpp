@@ -104,7 +104,7 @@ bool Utils::isCompressed_file(const QString &filePath)
     qDebug() << file.suffix();
 
     QString confDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QString confPath = confDir + QDir::separator() + "deepin-compressor.confbf";
+    QString confPath = confDir + QDir::separator() + "deepin-compressor.conf";
     QFile confFile(confPath);
     bool readStatus = confFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QString fileValue = confFile.readAll();
@@ -113,7 +113,7 @@ bool Utils::isCompressed_file(const QString &filePath)
     if (readStatus == true) {
         if (fileValue.contains(file.suffix()) && !file.isDir()) {
             ret = true;
-        } else if (file.completeSuffix().contains(".7z.")) {
+        } else if (file.filePath().contains(".7z.")) {
             ret = true;
         } else if (file.suffix().contains("iso")) {
             ret = true;

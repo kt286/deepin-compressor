@@ -730,14 +730,17 @@ void MainWindow::refreshPage()
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
-        if (m_settingsDialog->isAutoOpen()) {
-            DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
-        }
-
+//        if (m_settingsDialog->isAutoOpen()) {
+//            DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
+//        }
         if (m_isrightmenu) {
             m_CompressSuccess->showfiledirSlot();
             slotquitApp();
             return;
+        } else {
+            if (m_settingsDialog->isAutoOpen()) {
+                DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
+            }
         }
 
         m_mainLayout->setCurrentIndex(5);
@@ -1773,11 +1776,15 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         Archive::Entry *entry = new Archive::Entry();
         entry->setFullPath(file);
         QFileInfo fi(file);
+        QString externalPath = fi.path() + QDir::separator();
+
+        QString parentPath = m_model->getParentEntry()->property("fullPath").toString();
+        entry->setFullPath(parentPath + file.remove(externalPath));//remove external path,added by hsw
+
         if (fi.isDir()) {
             entry->setIsDirectory(true);
             QHash<QString, QIcon> *map = new QHash<QString, QIcon>();
-            QString externalPath = fi.path() + QDir::separator();
-            Archive::CreateEntry(file, entry, externalPath, map);
+            Archive::CreateEntry(fi.absoluteFilePath(), entry, externalPath, map);
             m_model->appendEntryIcons(*map);
             delete map;
             map = nullptr;
@@ -1836,6 +1843,9 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     qDebug() << "开始执行添加任务12";
     //m_addJob = Archive::add(m_model->archive() , all_entries, sourceEntry, options );
 //    m_addJob =  m_model->addFiles(all_entries, sourceEntry, options);//this write by hanshuai
+    if (m_model->getParentEntry() != sourceEntry) {
+        sourceEntry = m_model->getParentEntry();
+    }
     m_addJob = m_model->addFiles(all_entries, sourceEntry, pIface, options);//this added by hsw
     if (!m_addJob) {
         return;
@@ -2042,11 +2052,66 @@ void MainWindow::renameCompress(QString &filename, QString fixedMimeType)
 {
     QString localname = filename;
     int num = 2;
-    while (QFileInfo::exists(filename)/* || QFileInfo::exists(filename + "." + "001")*/) {
-        filename = localname.remove("." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix()) + "(" + "0"
-                   + QString::number(num) + ")" + "."
-                   + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
-        num++;
+
+    if (m_CompressSetting->onSplitChecked()) {   // 7z分卷压缩
+        QFileInfo file(filename);
+        bool isFirstFileExist = false;
+        bool isOtherFileExist = false;
+
+        // 以文件名为1.7z.001验证
+        // 过滤 该路径下 1*.7z.*的文件
+        QStringList nameFilters;
+        nameFilters << file.baseName() + "*.7z.*";
+        QDir dir(file.path());
+        QStringList files = dir.entryList(nameFilters, QDir::Files | QDir::Dirs | QDir::Readable, QDir::Name);
+
+        //  循环判断 files列表 1.7z文件是否存在
+        foreach (QFileInfo firstFile, files) {
+            if (firstFile.baseName() == file.baseName()) {
+                isFirstFileExist = true;
+                break;
+            } else {
+                continue;
+            }
+        }
+
+        if (isFirstFileExist) {  // 1.7z文件已存在  文件名为1(2).7z ...
+            for (int newCount = 0; newCount < files.count(); newCount++) {
+                newCount += 2;
+                int count = 0;
+                filename = localname.remove("." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix()) + "(" + "0"
+                           + QString::number(newCount) + ")" + "."
+                           + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+                for (int i = 0; i < files.count(); i++) {
+                    if (files.at(i).contains(file.baseName() + "(0" + QString::number(newCount) + ").7z.")) {
+                        filename = localname.remove("." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix()) + "(" + "0"
+                                   + QString::number(newCount + 1) + ")" + "."
+                                   + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+
+                        isOtherFileExist = true;
+                        break;
+                    } else {
+                        count++;
+                        continue;
+                    }
+                }
+
+                if (isOtherFileExist) {
+                    isOtherFileExist = false;
+                    continue;
+                }
+                if (files.count() == count) {
+                    break;
+                }
+            }
+        }
+    } else {
+        while (QFileInfo::exists(filename)) {
+            filename = localname.remove("." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix()) + "(" + "0"
+                       + QString::number(num) + ")" + "."
+                       + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+            num++;
+        }
     }
 }
 
@@ -2113,10 +2178,26 @@ bool clearTempFiles(const QString &temp_path)
 
 void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/)
 {
-    QFile fi(createCompressFile_);
+    QFile fi(createCompressFile_);  // 没有判断 7z分卷压缩的 文件名
     if (fi.exists()) {
         fi.remove();
     }
+
+    if (m_CompressSetting->onSplitChecked()) {  // 7z分卷压缩
+        QFileInfo file(createCompressFile_);
+        QStringList nameFilters;
+        nameFilters << file.fileName() + ".0*";
+        QDir dir(file.path());
+        QStringList files = dir.entryList(nameFilters, QDir::Files | QDir::Readable, QDir::Name);
+
+        foreach (QFileInfo fi, files) {
+            QFile fiRemove(fi.filePath());
+            if (fiRemove.exists()) {
+                fiRemove.remove();
+            }
+        }
+    }
+
 //    if (newfiles.count() <= oldfiles.count()) {
 //        qDebug() << "No file to delete";
 //        return;
@@ -2570,11 +2651,14 @@ void MainWindow::onCancelCompressPressed(int compressType)
 
     if (compressType == COMPRESSING) {
         if (m_createJob) {
-            m_createJob->deleteLater();
+//            m_createJob->deleteLater();
+            m_createJob->kill();
             m_createJob = nullptr;
+
         } else if (batchJob != nullptr) {
 //            batchJob->doKill();
             batchJob->kill();
+            batchJob = nullptr;
         }
         m_pageid = PAGE_ZIP;
     } else if (compressType == DECOMPRESSING) {

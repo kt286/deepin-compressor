@@ -783,10 +783,10 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
                 setPassword(QString());
                 zip_set_default_password(archive, password().toUtf8().constData());
                 return false;
-            } else {
+            } /*else {
                 emit error(tr("Failed to open '%1':<nl/>%2"));
                 return false;
-            }
+            }*/
 
         }
     }
@@ -1058,6 +1058,14 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
 //            }
 //        }
 
+        QFile file1(destination);
+        bool isExists = file1.exists();
+        QFileDevice::Permissions pOldPermission =  file1.permissions();
+
+        if (pOldPermission.testFlag(QFileDevice::WriteOwner) == false) {
+            bool status = file1.setPermissions(pOldPermission | QFileDevice::WriteOwner);//set permission include writeowner.
+        }
+
         QFile file(destination);
         if (!file.open(QIODevice::WriteOnly)) {
             emit error(tr("Failed to open file for writing: %1"));
@@ -1077,6 +1085,9 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         zip_file *zipFile = zip_fopen(archive, name.constData(), 0);
         int writeSize = 0;
         while (sum != statBuffer.size) {
+            if (this->extractPsdStatus == ReadOnlyArchiveInterface::Canceled) { //if have canceled the extraction,so break.
+                break;
+            }
             const auto readBytes = zip_fread(zipFile, buf, 1000);
             if (readBytes < 0) {
                 emit error(tr("Failed to read data for entry: %1"));

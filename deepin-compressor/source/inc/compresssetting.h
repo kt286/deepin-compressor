@@ -90,6 +90,7 @@ public slots:
     void showRightMenu(QMouseEvent *e);
 
     void onThemeChanged();
+    bool onSplitChecked();
 
     void autoCompress(const QString &compresspath, const QStringList &path);
     void autoMoveToArchive(const QStringList &files, const QString &archive);
@@ -128,6 +129,7 @@ private:
     QStringList m_pathlist;
     bool filePermission = true;
     qint64 m_getFileSize;
+    bool isSplitChecked = false;
 };
 
 #endif // COMPRESSSETTING_H

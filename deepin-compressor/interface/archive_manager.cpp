@@ -243,17 +243,23 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString exter
         Archive::Entry *entry = new Archive::Entry();
 
         entry->setProperty("timestamp", QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss")));
+        QString parentPath = parent->fullPath();
+        if (parentPath.right(1) != QDir::separator()) {
+            parentPath += QDir::separator();
+        }
+
         parent->appendEntry(entry);
         if (is_dir) {
             entry->setIsDirectory(true);
-            entry->setFullPath(file_info.absoluteFilePath().remove(externalPath) + QDir::separator());  //remove external path
+//            entry->setFullPath(parentPath + file_info.absoluteFilePath().remove(externalPath) + QDir::separator()); //remove external path
+            entry->setFullPath(parentPath + file_info.fileName() + QDir::separator());
             entry->setParent(parent);
 
             CreateEntry(file_info.filePath(), entry, externalPath, map);    //recursive function
         } else {
             qint64 size = file_info.size();
             entry->setProperty("size", size);
-            entry->setFullPath(file_info.absoluteFilePath().remove(externalPath));
+            entry->setFullPath(parentPath + file_info.fileName().remove(externalPath));
             entry->setParent(parent);
         }
 

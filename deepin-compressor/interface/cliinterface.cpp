@@ -96,12 +96,12 @@ bool CliInterface::extractFiles(const QVector< Archive::Entry * > &files, const 
     this->extractPsdStatus = NotChecked;
 
 
-    return this->extractFF(files,destinationDirectory,options);
+    return this->extractFF(files, destinationDirectory, options);
 }
 
 bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QString &destinationDirectory, const ExtractionOptions &options)
 {
-    if(this->extractPsdStatus == ReadOnlyArchiveInterface::WrongPsd){
+    if (this->extractPsdStatus == ReadOnlyArchiveInterface::WrongPsd) {
         return false;
     }
 
@@ -116,8 +116,8 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
     QString destPath = "";
 
     ifReplaceTip = false;
-    if(this->extractPsdStatus == NotChecked){
-        pAnalyseHelp = new AnalyseHelp(destinationDirectory,this->extractTopFolderName);
+    if (this->extractPsdStatus == NotChecked) {
+        pAnalyseHelp = new AnalyseHelp(destinationDirectory, this->extractTopFolderName);
         destPath = pAnalyseHelp->getTempPath();
     } else {
         destPath = destinationDirectory;
@@ -131,17 +131,26 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
         destDirName = extractDst7z_;
         updateDestFileSignal(m_extractDestDir + "/" + extractDst7z_);
 //        extractDst7z_.clear();
-    }else{
-        if(destDirName == ""){
+    } else {
+        if (destDirName == "") {
             destDirName = extractTopFolderName;
         }
     }
 
 
-    bool b2 = options.encryptedArchiveHint();
+    bool ifNeedPsd = options.encryptedArchiveHint();
+    if (ifNeedPsd == false) {
+        //don't need psd
+        this->extractPsdStatus = ReadOnlyArchiveInterface::Reextract;
+        if (this->pAnalyseHelp != nullptr) {
+            return this->extractFF(m_extractedFiles, this->pAnalyseHelp->getDestDir(), m_extractionOptions);
+        }
+    }
+
+
     //get user input password
     QString psdd = password();
-    if (!m_cliProps->property("passwordSwitch").toStringList().isEmpty() && b2
+    if (!m_cliProps->property("passwordSwitch").toStringList().isEmpty() && ifNeedPsd
             && psdd.isEmpty()) {
         qDebug() << "Password hint enabled, querying user";
         if (m_extractionOptions.isBatchExtract()) {
@@ -461,26 +470,25 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
         }
     }
 
-    if(this->extractPsdStatus == Reextract){
-        qDebug()<<this->destDirName;
-        if(this->pAnalyseHelp!= nullptr){
-            this->extractFF(m_extractedFiles,this->pAnalyseHelp->getDestDir(),m_extractionOptions);
+    if (this->extractPsdStatus == Reextract) {
+        qDebug() << this->destDirName;
+        if (this->pAnalyseHelp != nullptr) {
+            this->extractFF(m_extractedFiles, this->pAnalyseHelp->getDestDir(), m_extractionOptions);
 //            qDebug()<<"==========直接解压文件";
             return;
         }
-    }else if(this->extractPsdStatus == Checked){
+    } else if (this->extractPsdStatus == Checked) {
 
-    }else if(this->extractPsdStatus == Canceled){
-        if(ifReplaceTip == false){
+    } else if (this->extractPsdStatus == Canceled) {
+        if (ifReplaceTip == false) {
 //            qDebug()<<"==========删除临时文件";
-            if(this->m_extractDestDir == "" || this->destDirName == ""){
+            if (this->m_extractDestDir == "" || this->destDirName == "") {
 
-            }else{
-                QString fullPath = m_extractDestDir+QDir::separator()+this->destDirName;
+            } else {
+                QString fullPath = m_extractDestDir + QDir::separator() + this->destDirName;
                 QFileInfo fileInfo(fullPath);
-                if(fileInfo.exists())
-                {
-                     ReadWriteArchiveInterface::clearPath(fullPath);
+                if (fileInfo.exists()) {
+                    ReadWriteArchiveInterface::clearPath(fullPath);
                 }
             }
         }
@@ -971,8 +979,8 @@ bool CliInterface::handleLine(const QString &line)
     }
 
 
-    if(pAnalyseHelp != nullptr){
-        if(pAnalyseHelp->isRightPsd() == 1){
+    if (pAnalyseHelp != nullptr) {
+        if (pAnalyseHelp->isRightPsd() == 1) {
 //            qDebug() << "%%%%%%RightPassword";
             this->extractPsdStatus = Reextract;
             return false;
@@ -1073,8 +1081,8 @@ bool CliInterface::handleLine(const QString &line)
             setPassword(QString());
             if (m_extractionOptions.isBatchExtract()) {
             } else {
-                if(this->extractPsdStatus != ReadOnlyArchiveInterface::WrongPsd){
-                    if(pAnalyseHelp != nullptr){
+                if (this->extractPsdStatus != ReadOnlyArchiveInterface::WrongPsd) {
+                    if (pAnalyseHelp != nullptr) {
                         pAnalyseHelp->mark(ENUMLINEINFO::WRONGPSD, line, true);
                     }
                     this->extractPsdStatus = ReadOnlyArchiveInterface::WrongPsd;

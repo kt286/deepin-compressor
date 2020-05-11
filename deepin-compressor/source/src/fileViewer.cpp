@@ -943,6 +943,7 @@ void fileViewer::slotCompressRePreviousDoubleClicked()
         if (0 == m_pathindex) {
             pTableViewFile->setRootIndex(QModelIndex());
             pTableViewFile->setPreviousButtonVisible(false);
+            m_decompressmodel->setParentEntry(QModelIndex());//set parentEntry,added by hsw
             restoreHeaderSort(rootPathUnique);
             //pTableViewFile->setRowHeight(0, ArchiveModelDefine::gTableHeight);
         } else {
@@ -951,6 +952,7 @@ void fileViewer::slotCompressRePreviousDoubleClicked()
             m_indexmode = m_decompressmodel->parent(m_indexmode);
             pTableViewFile->setRootIndex(m_sortmodel->mapFromSource(m_indexmode));
             Archive::Entry *entry = m_decompressmodel->entryForIndex(m_indexmode);
+            m_decompressmodel->setParentEntry(m_indexmode);//set parentEntry,added by hsw
             restoreHeaderSort(zipPathUnique + MainWindow::getLoadFile() + "/" + entry->fullPath());
         }
     }
@@ -1174,6 +1176,9 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
     if (index.isValid()) {
         QModelIndex sourceIndex = m_sortmodel->mapToSource(index);
         qDebug() << m_decompressmodel->isentryDir(sourceIndex);
+        if (m_decompressmodel->isentryDir(sourceIndex)) {
+            m_decompressmodel->setParentEntry(sourceIndex);
+        }
         if (0 == m_pathindex) {
             if (m_decompressmodel->isentryDir(sourceIndex)) {
                 m_decompressmodel->setPathIndex(&m_pathindex);
