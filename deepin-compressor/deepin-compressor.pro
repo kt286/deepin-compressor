@@ -21,7 +21,7 @@ INCLUDEPATH +=  $$PWD/source/inc/ \
                 $$PWD/interface/ \
                 $$PWD/../plugin/libLogPlugin
 
-LIBS += -L/data/home/hushiwei/workHS/jared-workNew2/Debug/plugin/libLogPlugin -llibLogPlugin
+LIBS += -L/data/home/hushiwei/workHS/jared-workNew2/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
 
 
 # Input

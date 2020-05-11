@@ -864,7 +864,7 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
             emit progress_filename(e->name());
 
             if (nofEntries < 5) {
-                pi.fileName = trans2uft8(zip_get_name(archive, e->row(), ZIP_FL_ENC_RAW));
+                pi.fileName = trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW));
                 pi.fileProgressProportion = float(1.0) / float(nofEntries);
                 pi.fileProgressStart = pi.fileProgressProportion * float(i);
             }
@@ -1058,7 +1058,6 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
 //            }
 //        }
 
-<<<<<<< HEAD
         QFile file1(destination);
         bool isExists = file1.exists();
         QFileDevice::Permissions pOldPermission =  file1.permissions();
@@ -1067,8 +1066,6 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
             bool status = file1.setPermissions(pOldPermission | QFileDevice::WriteOwner);//set permission include writeowner.
         }
 
-=======
->>>>>>> 6f97159dc44ddbd868dbf007349f7aa022f08d59
         QFile file(destination);
         if (!file.open(QIODevice::WriteOnly)) {
             emit error(tr("Failed to open file for writing: %1"));
