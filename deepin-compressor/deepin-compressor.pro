@@ -21,7 +21,11 @@ INCLUDEPATH +=  $$PWD/source/inc/ \
                 $$PWD/interface/ \
                 $$PWD/../plugin/libLogPlugin
 
+<<<<<<< HEAD
 LIBS += -L/data/home/hushiwei/workHS/jared-workNew3/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
+=======
+LIBS += -L/data/home/hushiwei/workHS/jared-workNew2/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
+>>>>>>> 27824283c33a8915483b03a1bda28861017488a0
 
 
 
