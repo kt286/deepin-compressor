@@ -214,6 +214,21 @@ void ArchiveModel::setPathIndex(int *index)
     m_ppathindex = index;
 }
 
+void ArchiveModel::setParentEntry(const QModelIndex &index)
+{
+    Archive::Entry *parentEntry = index.isValid()
+                                  ? static_cast<Archive::Entry *>(index.internalPointer())
+                                  : m_rootEntry.data();
+    if (parentEntry->isDir()) {
+        m_parent = parentEntry;
+    }
+}
+
+Archive::Entry *ArchiveModel::getParentEntry()
+{
+    return m_parent;
+}
+
 void ArchiveModel::setTableView(QTableView *tableview)
 {
     m_tableview = tableview;
@@ -613,6 +628,11 @@ void ArchiveModel::newEntry(Archive::Entry *receivedEntry, InsertBehaviour behav
 
     // Find parent entry, creating missing directory Archive::Entry's in the process.
     Archive::Entry *parent = parentFor(receivedEntry, behaviour);
+    //added by hsw for get valid parent begin
+    if (m_parent != nullptr && parent != m_parent) {
+        parent = m_parent;
+    }
+    //added end;
 
     // Create an Archive::Entry.
     const QStringList path = entryFileName.split(QLatin1Char('/'), QString::SkipEmptyParts);
@@ -621,6 +641,13 @@ void ArchiveModel::newEntry(Archive::Entry *receivedEntry, InsertBehaviour behav
         entry->copyMetaData(receivedEntry);
         entry->setProperty("fullPath", entryFileName);
     } else {
+        QString parentPath = QString(parent->property("fullPath").toString());
+        QString childPath = QString(receivedEntry->property("fullPath").toString());
+        if (parentPath != "" && childPath.contains(parentPath)) {
+            qDebug() << parentPath;
+        } else {
+            receivedEntry->setProperty("fullPath", parentPath + childPath);
+        }
         receivedEntry->setParent(parent);
         insertEntry(receivedEntry, behaviour);
     }
@@ -723,9 +750,9 @@ ExtractJob *ArchiveModel::extractFiles(const QVector<Archive::Entry *> &files, c
 {
     Q_ASSERT(m_archive);
     QString psd = m_archive->password();
-    if(m_archive->encryptionType() == Archive::Unencrypted){//没有加密的
+    if (m_archive->encryptionType() == Archive::Unencrypted) { //没有加密的
 
-    }else{
+    } else {
         //是否启用头部加密,如果启用头部加密，当前用户肯定已经输入正确密码；所以要记录密码，并且将加密状态设置为Archive::Encrypted
         //如果不是头部加密，那就是文件加密了，所以需要将密码设置空字符串，同样加密状态设置为Archive::Encrypted.
         bool headerEncrypted = m_archive->encryptionType() == Archive::HeaderEncrypted;

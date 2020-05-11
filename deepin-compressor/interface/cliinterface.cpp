@@ -96,12 +96,12 @@ bool CliInterface::extractFiles(const QVector< Archive::Entry * > &files, const 
     this->extractPsdStatus = NotChecked;
 
 
-    return this->extractFF(files,destinationDirectory,options);
+    return this->extractFF(files, destinationDirectory, options);
 }
 
 bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QString &destinationDirectory, const ExtractionOptions &options)
 {
-    if(this->extractPsdStatus == ReadOnlyArchiveInterface::WrongPsd){
+    if (this->extractPsdStatus == ReadOnlyArchiveInterface::WrongPsd) {
         return false;
     }
 
@@ -116,23 +116,23 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
     QString destPath = "";
 
     ifReplaceTip = false;
-    if(this->extractPsdStatus == NotChecked){
-        pAnalyseHelp = new AnalyseHelp(destinationDirectory,this->extractTopFolderName);
+    if (this->extractPsdStatus == NotChecked) {
+        pAnalyseHelp = new AnalyseHelp(destinationDirectory, this->extractTopFolderName);
         destPath = pAnalyseHelp->getTempPath();
     } else {
         destPath = destinationDirectory;
         this->extractPsdStatus = Checked;
         emit sigExtractPwdCheckDown();
     }
-    qDebug() << "####destpath：" << destPath;
+    m_extractDestDir = destinationDirectory;
     m_extractDestDir = destPath;
 //    qDebug() << m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
         destDirName = extractDst7z_;
         updateDestFileSignal(m_extractDestDir + "/" + extractDst7z_);
 //        extractDst7z_.clear();
-    }else{
-        if(destDirName == ""){
+    } else {
+        if (destDirName == "") {
             destDirName = extractTopFolderName;
         }
     }
@@ -470,26 +470,25 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
         }
     }
 
-    if(this->extractPsdStatus == Reextract){
-        qDebug()<<this->destDirName;
-        if(this->pAnalyseHelp!= nullptr){
-            this->extractFF(m_extractedFiles,this->pAnalyseHelp->getDestDir(),m_extractionOptions);
+    if (this->extractPsdStatus == Reextract) {
+        qDebug() << this->destDirName;
+        if (this->pAnalyseHelp != nullptr) {
+            this->extractFF(m_extractedFiles, this->pAnalyseHelp->getDestDir(), m_extractionOptions);
 //            qDebug()<<"==========直接解压文件";
             return;
         }
-    }else if(this->extractPsdStatus == Checked){
+    } else if (this->extractPsdStatus == Checked) {
 
-    }else if(this->extractPsdStatus == Canceled){
-        if(ifReplaceTip == false){
+    } else if (this->extractPsdStatus == Canceled) {
+        if (ifReplaceTip == false) {
 //            qDebug()<<"==========删除临时文件";
-            if(this->m_extractDestDir == "" || this->destDirName == ""){
+            if (this->m_extractDestDir == "" || this->destDirName == "") {
 
-            }else{
-                QString fullPath = m_extractDestDir+QDir::separator()+this->destDirName;
+            } else {
+                QString fullPath = m_extractDestDir + QDir::separator() + this->destDirName;
                 QFileInfo fileInfo(fullPath);
-                if(fileInfo.exists())
-                {
-                     ReadWriteArchiveInterface::clearPath(fullPath);
+                if (fileInfo.exists()) {
+                    ReadWriteArchiveInterface::clearPath(fullPath);
                 }
             }
         }
@@ -980,8 +979,8 @@ bool CliInterface::handleLine(const QString &line)
     }
 
 
-    if(pAnalyseHelp != nullptr){
-        if(pAnalyseHelp->isRightPsd() == 1){
+    if (pAnalyseHelp != nullptr) {
+        if (pAnalyseHelp->isRightPsd() == 1) {
 //            qDebug() << "%%%%%%RightPassword";
             this->extractPsdStatus = Reextract;
             return false;
@@ -1082,8 +1081,8 @@ bool CliInterface::handleLine(const QString &line)
             setPassword(QString());
             if (m_extractionOptions.isBatchExtract()) {
             } else {
-                if(this->extractPsdStatus != ReadOnlyArchiveInterface::WrongPsd){
-                    if(pAnalyseHelp != nullptr){
+                if (this->extractPsdStatus != ReadOnlyArchiveInterface::WrongPsd) {
+                    if (pAnalyseHelp != nullptr) {
                         pAnalyseHelp->mark(ENUMLINEINFO::WRONGPSD, line, true);
                     }
                     this->extractPsdStatus = ReadOnlyArchiveInterface::WrongPsd;

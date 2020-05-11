@@ -1776,11 +1776,15 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         Archive::Entry *entry = new Archive::Entry();
         entry->setFullPath(file);
         QFileInfo fi(file);
+        QString externalPath = fi.path() + QDir::separator();
+
+        QString parentPath = m_model->getParentEntry()->property("fullPath").toString();
+        entry->setFullPath(parentPath + file.remove(externalPath));//remove external path,added by hsw
+
         if (fi.isDir()) {
             entry->setIsDirectory(true);
             QHash<QString, QIcon> *map = new QHash<QString, QIcon>();
-            QString externalPath = fi.path() + QDir::separator();
-            Archive::CreateEntry(file, entry, externalPath, map);
+            Archive::CreateEntry(fi.absoluteFilePath(), entry, externalPath, map);
             m_model->appendEntryIcons(*map);
             delete map;
             map = nullptr;
@@ -1839,6 +1843,9 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     qDebug() << "开始执行添加任务12";
     //m_addJob = Archive::add(m_model->archive() , all_entries, sourceEntry, options );
 //    m_addJob =  m_model->addFiles(all_entries, sourceEntry, options);//this write by hanshuai
+    if (m_model->getParentEntry() != sourceEntry) {
+        sourceEntry = m_model->getParentEntry();
+    }
     m_addJob = m_model->addFiles(all_entries, sourceEntry, pIface, options);//this added by hsw
     if (!m_addJob) {
         return;
@@ -2536,8 +2543,6 @@ void MainWindow::slotStopSpinner()
     disconnect(m_encryptionjob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
 }
 
-<<<<<<< HEAD
-=======
 void MainWindow::deleteFromArchive(const QStringList &files, const QString &archive)
 {
     if (!m_UnCompressPage) {
@@ -2611,7 +2616,6 @@ void MainWindow::addToArchive(const QStringList &files, const QString &archive)
 
 }
 
->>>>>>> 6f97159dc44ddbd868dbf007349f7aa022f08d59
 void MainWindow::onCancelCompressPressed(int compressType)
 {
     slotResetPercentAndTime();

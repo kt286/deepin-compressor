@@ -650,11 +650,11 @@ void CompressSetting::onThemeChanged()
     m_filename->setPalette(plt);
 }
 
-<<<<<<< HEAD
 bool CompressSetting::onSplitChecked()
 {
     return isSplitChecked;
-=======
+}
+
 void CompressSetting::autoCompress(const QString &compresspath, const QStringList &path)
 {
     qDebug() << "开始执行添加操作！" << ";compresspath:" << compresspath << ";path:" << path;
@@ -901,7 +901,6 @@ void CompressSetting::autoMoveToArchive(const QStringList &files, const QString 
     m_openArgs.remove(QStringLiteral("filename"));
     m_openArgs.remove(QStringLiteral("sourceFilePath"));
     m_openArgs.remove(QStringLiteral("ToCompressFilePath"));
->>>>>>> 6f97159dc44ddbd868dbf007349f7aa022f08d59
 }
 
 int CompressSetting::showWarningDialog(const QString &msg, int index)
