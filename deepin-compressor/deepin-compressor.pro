@@ -24,6 +24,7 @@ INCLUDEPATH +=  $$PWD/source/inc/ \
 LIBS += -L/data/home/hushiwei/workHS/jared-workNew2/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
 
 
+
 # Input
 HEADERS +=  \
     source/inc/compressorapplication.h \
