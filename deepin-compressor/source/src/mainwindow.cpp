@@ -1778,7 +1778,10 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         QFileInfo fi(file);
         QString externalPath = fi.path() + QDir::separator();
 
-        QString parentPath = m_model->getParentEntry()->property("fullPath").toString();
+        QString parentPath = "";
+        if (m_model->getParentEntry() != nullptr) {
+            parentPath = m_model->getParentEntry()->property("fullPath").toString();
+        }
         entry->setFullPath(parentPath + file.remove(externalPath));//remove external path,added by hsw
 
         if (fi.isDir()) {
