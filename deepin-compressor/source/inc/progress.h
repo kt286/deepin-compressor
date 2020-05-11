@@ -55,6 +55,7 @@ public:
 
     void setSpeedAndTime(double speed, qint64 timeLeft);
     void displaySpeedAndTime(double speed, qint64 timeLeft);
+
     void setSpeedAndTimeText(COMPRESS_TYPE type);
 
     void setTempProgress();

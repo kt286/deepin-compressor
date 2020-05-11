@@ -20,9 +20,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "uncompresspage.h"
-#include "utils.h"
-
 #include <QVBoxLayout>
 #include <QDebug>
 #include <QFile>
@@ -30,6 +27,10 @@
 #include <DStandardPaths>
 #include <DMessageManager>
 #include <DDialog>
+
+#include "uncompresspage.h"
+#include "utils.h"
+
 
 DCORE_USE_NAMESPACE
 DWIDGET_USE_NAMESPACE
@@ -77,6 +78,13 @@ UnCompressPage::UnCompressPage(QWidget *parent)
     connect(m_extractpath, &DPushButton::clicked, this, &UnCompressPage::onPathButoonClicked);
     connect(m_fileviewer, &fileViewer::sigextractfiles, this, &UnCompressPage::onextractfilesSlot);
     connect(m_fileviewer, &fileViewer::sigOpenWith,     this, &UnCompressPage::onextractfilesOpenSlot);
+    connect(m_fileviewer, &fileViewer::sigFileRemoved, this, &UnCompressPage::onRefreshFilelist);
+    connect(m_fileviewer, &fileViewer::sigEntryRemoved, this, &UnCompressPage::onRefreshEntryList);
+    connect(m_fileviewer, &fileViewer::sigFileAutoCompress, this, &UnCompressPage::onAutoCompress);
+    connect(this, &UnCompressPage::subWindowTipsPopSig, m_fileviewer, &fileViewer::SubWindowDragMsgReceive);
+
+    connect(m_fileviewer, &fileViewer::sigFileRemovedFromArchive, this, &UnCompressPage::sigDeleteArchiveFiles);
+    connect(m_fileviewer, &fileViewer::sigFileAutoCompressToArchive, this, &UnCompressPage::sigAddArchiveFiles);
 }
 
 void UnCompressPage::oneCompressPress()
@@ -125,6 +133,11 @@ void UnCompressPage::setdefaultpath(QString path)
     m_extractpath->setText(tr("Extract to:") + m_pathstr);
 }
 
+void UnCompressPage::SetDefaultFile(QFileInfo info)
+{
+    m_info = info;
+}
+
 int UnCompressPage::getFileCount()
 {
     return m_fileviewer->getFileCount();
@@ -156,6 +169,28 @@ int UnCompressPage::showWarningDialog(const QString &msg)
 EXTRACT_TYPE UnCompressPage::getExtractType()
 {
     return extractType;
+}
+
+void UnCompressPage::slotCompressedAddFile()
+{
+    DFileDialog dialog(this);
+    dialog.setAcceptMode(DFileDialog::AcceptOpen);
+    dialog.setFileMode(DFileDialog::ExistingFiles);
+    dialog.setAllowMixedSelection(true);
+
+    const int mode = dialog.exec();;
+
+    // if click cancel button or close button.
+    if (mode != QDialog::Accepted) {
+        return;
+    }
+
+    emit sigAutoCompress(m_info.filePath(), dialog.selectedFiles());
+}
+
+fileViewer *UnCompressPage::getFileViewer()
+{
+    return m_fileviewer;
 }
 
 QString UnCompressPage::getDecompressPath()
@@ -206,7 +241,28 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
     } else {
         emit sigextractfiles(fileList, m_pathstr, type);
     }
+}
 
+void UnCompressPage::onRefreshFilelist(const QStringList &filelist)
+{
+    m_filelist = filelist;
+//    m_fileviewer->setFileList(m_filelist);
+
+    emit sigRefreshFileList(m_filelist);
+
+    if (m_filelist.size() == 0) {
+        emit sigFilelistIsEmpty();
+    }
+}
+
+void UnCompressPage::onRefreshEntryList(QVector<Archive::Entry *> &vectorDel)
+{
+    m_vectorDel = vectorDel;
+//    emit sigRefreshFileList(m_filelist);
+    emit sigRefreshEntryVector(m_vectorDel);
+    if (m_vectorDel.size() == 0) {
+        emit sigFilelistIsEmpty();
+    }
 }
 
 void UnCompressPage::onextractfilesOpenSlot(const QVector<Archive::Entry *> &fileList, const QString &programma)
@@ -214,3 +270,7 @@ void UnCompressPage::onextractfilesOpenSlot(const QVector<Archive::Entry *> &fil
     emit sigOpenExtractFile(fileList, programma);
 }
 
+void UnCompressPage::onAutoCompress(const QStringList &path)
+{
+    emit sigAutoCompress(m_info.filePath(), path);
+}

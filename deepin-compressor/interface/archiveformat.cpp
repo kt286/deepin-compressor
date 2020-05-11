@@ -21,7 +21,9 @@
  */
 #include "archiveformat.h"
 
+
 #include <QJsonArray>
+
 
 
 ArchiveFormat::ArchiveFormat()

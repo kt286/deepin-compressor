@@ -43,6 +43,7 @@ public:
     bool testArchive() override;
     void cleanIfCanceled()override;
 private:
+    bool deleteEntry(Archive::Entry *pEntry, zip_t *archive);
     bool extractEntry(zip_t *archive, const QString &entry, const QString &rootNode, const QString &destDir, bool preservePaths, bool removeRootNode, FileProgressInfo &pi);
     bool writeEntry(zip_t *archive, const QString &entry, const Archive::Entry *destination, const CompressionOptions &options, bool isDir = false);
     bool emitEntryForIndex(zip_t *archive, qlonglong index);
@@ -62,6 +63,7 @@ private:
     QByteArray m_codecstr;
     QByteArray m_codecname;
     ExtractionOptions m_extractionOptions;
+
     bool isWrongPassword = false;
     QString m_extractDestDir;
 };

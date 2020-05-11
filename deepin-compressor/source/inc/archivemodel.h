@@ -94,10 +94,16 @@ public:
     OpenWithJob *openWith(Archive::Entry *file) const;
 
     AddJob *addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
+    AddJob *addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, ReadOnlyArchiveInterface *pIface = nullptr, const CompressionOptions &options = CompressionOptions());
     MoveJob *moveFiles(QVector<Archive::Entry *> &entries, Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     CopyJob *copyFiles(QVector<Archive::Entry *> &entries, Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     DeleteJob *deleteFiles(QVector<Archive::Entry *> entries);
 
+    /**
+     * @brief insertEntryIcons
+     * @param map
+     */
+    void appendEntryIcons(const QHash<QString, QIcon> &map);
     /**
      * @param password The password to encrypt the archive with.
      * @param encryptHeader Whether to encrypt also the list of files.
@@ -119,7 +125,7 @@ public:
 
     QMap<QString, Archive::Entry *> filesToMove;
     QMap<QString, Archive::Entry *> filesToCopy;
-
+//    QList<Archive::Entry *> *getLeavesList();
 Q_SIGNALS:
     void loadingStarted();
     void loadingFinished(KJob *);
@@ -171,7 +177,6 @@ private:
     QScopedPointer<Archive::Entry> m_rootEntry;
     QHash<QString, QIcon> m_entryIcons;
     QMap<int, QByteArray> m_propertiesMap;
-
     QString m_dbusPathName;
 
     qulonglong m_numberOfFiles;

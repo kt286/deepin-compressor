@@ -149,7 +149,7 @@ void Job::connectToArchiveInterfaceSignals()
     connect(archiveInterface(), &ReadOnlyArchiveInterface::progress_filename, this, &Job::onProgressFilename, Qt::ConnectionType::UniqueConnection);
     connect(archiveInterface(), &ReadOnlyArchiveInterface::updateDestFileSignal, this, &Job::onUpdateDestFile, Qt::ConnectionType::UniqueConnection);
 
-    auto readWriteInterface = qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+    ReadWriteArchiveInterface *readWriteInterface = dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
     if (readWriteInterface) {
         connect(readWriteInterface, &ReadWriteArchiveInterface::entryRemoved, this, &Job::onEntryRemoved, Qt::ConnectionType::UniqueConnection);
     }
@@ -732,8 +732,12 @@ void AddJob::doWork()
 
 
     // The file paths must be relative to GlobalWorkDir.
-    for (Archive::Entry *entry : qAsConst(m_entries)) {
+    for (Archive::Entry *entry : /*qAsConst*/(m_entries)) {
         qDebug() << entry->fullPath();
+
+        QFileInfo file(entry->fullPath());
+        qulonglong  m_archiveSizeOnDisk = static_cast< qulonglong >(file.size());
+        entry->setProperty("size", m_archiveSizeOnDisk);
 
         const QString &fullPath = entry->fullPath();
         QString relativePath = workDir.relativeFilePath(fullPath);
@@ -759,6 +763,17 @@ void AddJob::onFinished(bool result)
         QDir::setCurrent(m_oldWorkingDir);
     }
 
+    if (result) {
+        foreach (Archive::Entry *pEntry, m_entries) {
+            if (!pEntry) {
+                continue;
+            }
+            pEntry->setProperty("timestamp", QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss")));
+
+            onEntry(pEntry);
+        }
+    }
+
     Job::onFinished(result);
 }
 
@@ -781,12 +796,15 @@ void MoveJob::doWork()
     //emit description(this, desc, qMakePair(tr("Archive"), archiveInterface()->filename()));
     emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
 
+//    ReadWriteArchiveInterface *m_writeInterface =
+//        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
     ReadWriteArchiveInterface *m_writeInterface =
-        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+        dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
 
     Q_ASSERT(m_writeInterface);
 
     connectToArchiveInterfaceSignals();
+
     bool ret = m_writeInterface->moveFiles(m_entries, m_destination, m_options);
 
     if (!archiveInterface()->waitForFinishedSignal()) {
@@ -855,8 +873,10 @@ void DeleteJob::doWork()
     //emit description(this, desc, qMakePair(tr("Archive"), archiveInterface()->filename()));
     emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
 
-    ReadWriteArchiveInterface *m_writeInterface =
-        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+//    ReadWriteArchiveInterface *m_writeInterface =
+//        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+
+    ReadWriteArchiveInterface *m_writeInterface = dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
 
     Q_ASSERT(m_writeInterface);
 
