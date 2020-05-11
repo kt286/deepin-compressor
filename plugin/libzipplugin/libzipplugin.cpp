@@ -577,10 +577,10 @@ bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive)
     char *path = fullpath.toUtf8().data();
     char *filenameDel = (char *)malloc((strlen(path) + 1) * sizeof(char));
     strcpy(filenameDel, path);
-//    const char *nn1 = zip_get_name(archive, 1, ZIP_FL_ENC_GUESS);
-//    const char *nn2 = zip_get_name(archive, 2, ZIP_FL_ENC_GUESS);
-//    const char *nn3 = zip_get_name(archive, 3, ZIP_FL_ENC_GUESS);
-//    const char *nn4 = zip_get_name(archive, 4, ZIP_FL_ENC_GUESS);
+    const char *nn1 = zip_get_name(archive, 0, ZIP_FL_ENC_GUESS);
+    const char *nn2 = zip_get_name(archive, 1, ZIP_FL_ENC_GUESS);
+    const char *nn3 = zip_get_name(archive, 2, ZIP_FL_ENC_GUESS);
+    const char *nn4 = zip_get_name(archive, 3, ZIP_FL_ENC_GUESS);
 //    const char *nn5 = zip_get_name(archive, 5, ZIP_FL_ENC_GUESS);
 //    const char *nn6 = zip_get_name(archive, 6, ZIP_FL_ENC_GUESS);
     zip_int64_t index = zip_name_locate(archive, filenameDel, ZIP_FL_ENC_GUESS);

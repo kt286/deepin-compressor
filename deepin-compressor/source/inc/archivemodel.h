@@ -83,6 +83,8 @@ public:
     Archive::Entry *entryForIndex(const QModelIndex &index);
     bool isentryDir(const QModelIndex &index);
     void setPathIndex(int *index);
+    void setParentEntry(const QModelIndex &index);
+    Archive::Entry *getParentEntry();
     void setTableView(QTableView *tableview);
     QModelIndex createNoncolumnIndex(const QModelIndex &index) const;
 
@@ -190,5 +192,6 @@ private:
     int *m_ppathindex;
     QTableView *m_tableview;
     MimeTypeDisplayManager *m_mimetype;
+    Archive::Entry *m_parent = nullptr;
 };
 #endif // ARCHIVEMODEL_H
