@@ -783,10 +783,10 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
                 setPassword(QString());
                 zip_set_default_password(archive, password().toUtf8().constData());
                 return false;
-            } /*else {
+            } else {
                 emit error(tr("Failed to open '%1':<nl/>%2"));
                 return false;
-            }*/
+            }
 
         }
     }
