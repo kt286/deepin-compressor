@@ -730,9 +730,10 @@ void MainWindow::refreshPage()
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
-//        if (m_settingsDialog->isAutoOpen()) {
-//            DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
-//        }
+        if (m_settingsDialog->isAutoOpen()) {
+            DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
+        }
+
         if (m_isrightmenu) {
             m_CompressSuccess->showfiledirSlot();
             slotquitApp();
