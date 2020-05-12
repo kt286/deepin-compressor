@@ -194,6 +194,32 @@ void Archive::Entry::countChildren(uint &dirs, uint &files) const
     }
 }
 
+QVector<Archive::Entry *> *Archive::Entry::getAllLeavesNode()
+{
+    QVector<Archive::Entry *> *pV = new QVector<Archive::Entry *>();
+    const auto archiveEntries = entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            this->checkLeavesNode(entry, pV);
+        } else {
+            pV->append(entry);
+        }
+    }
+    return pV;
+}
+
+void *Archive::Entry::checkLeavesNode(Entry *pE, QVector<Archive::Entry *> *pV)
+{
+    const auto archiveEntries = pE->entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            this->checkLeavesNode(entry, pV);
+        } else {
+            pV->append(entry);
+        }
+    }
+}
+
 bool Archive::Entry::operator==(const Archive::Entry &right) const
 {
     return m_fullPath == right.m_fullPath;

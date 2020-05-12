@@ -79,13 +79,14 @@ public:
     Entry *find(const QString &name) const;
     Entry *findByPath(const QStringList &pieces, int index = 0) const;
     void countChildren(uint &dirs, uint &files) const;
-
+    QVector<Archive::Entry *> *getAllLeavesNode();
     bool operator==(const Archive::Entry &right) const;
 
 public:
     QString rootNode;
     bool compressedSizeIsSet;
-
+private:
+    void *checkLeavesNode(Archive::Entry *pE, QVector<Archive::Entry *> *pV);
 private:
     QVector<Entry *> m_entries;
     QString         m_name;

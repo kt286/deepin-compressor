@@ -227,7 +227,7 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString exter
     if (map == nullptr) {
         map = new QHash<QString, QIcon>();
     }
-    dir.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks);
+    dir.setFilter(QDir::Files | QDir::Dirs | QDir::Hidden);
     dir.setSorting(QDir::DirsFirst);
     QFileInfoList list = dir.entryInfoList();
     int i = 0;

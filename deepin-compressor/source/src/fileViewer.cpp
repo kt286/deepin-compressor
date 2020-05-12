@@ -990,11 +990,11 @@ void fileViewer::slotDecompressRowDelete()
     if (pTableViewFile && selectedModel) {
         for (const QModelIndex &iter :  selectedModel->selectedRows()) {
 
-            QModelIndex delegateIndex = m_sortmodel->index(iter.row(), iter.column(), iter.parent());//获取代理索引
+            QModelIndex delegateIndex = m_sortmodel->index(iter.row(), iter.column(), iter.parent());//get delegate index
             QVariant var = m_sortmodel->data(delegateIndex);
-            QModelIndex sourceIndex = m_sortmodel->mapToSource(delegateIndex);//获取源索引
-            QVariant varSource = m_decompressmodel->data(sourceIndex, Qt::DisplayRole);
-            Archive::Entry *entry = m_decompressmodel->entryForIndex(sourceIndex);//获取对应的压缩文档
+            QModelIndex sourceIndex = m_sortmodel->mapToSource(delegateIndex);                      //get source index
+//            QVariant varSource = m_decompressmodel->data(sourceIndex, Qt::DisplayRole);
+            Archive::Entry *entry = m_decompressmodel->entryForIndex(sourceIndex);                  //get entry by sourceindex
             vectorEntry.push_back(entry);
 //            QString fullPath = iter.data().value<QString>();
 //            filelist.push_back(fullPath);
