@@ -102,6 +102,16 @@ void Archive::Entry::setParent(Archive::Entry *parent)
     m_parent = parent;
 }
 
+qint64 Archive::Entry::getSize()
+{
+    return m_size;
+}
+
+void Archive::Entry::setSize(qint64 size)
+{
+    m_size = size;
+}
+
 void Archive::Entry::setFullPath(const QString &fullPath)
 {
     m_fullPath = fullPath;

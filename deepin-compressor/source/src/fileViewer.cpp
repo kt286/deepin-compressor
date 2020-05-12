@@ -1201,7 +1201,6 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
                 if (tempFile.exists()) {
                     tempFile.remove();
                 }
-                emit sigextractfiles(fileList, EXTRACT_TEMP);
                 if (m_tempProcessId.empty()) {
                     emit sigextractfiles(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), EXTRACT_TEMP);
                 }
@@ -1224,7 +1223,6 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
             if (tempFile.exists()) {
                 tempFile.remove();
             }
-            emit sigextractfiles(fileList, EXTRACT_TEMP);
             if (m_tempProcessId.empty()) {
                 emit sigextractfiles(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), EXTRACT_TEMP);
             }
@@ -1481,7 +1479,6 @@ void MyTableView::dropEvent(QDropEvent *event)
 //        Archive::Entry *pParentEntry = this->getParentArchiveEntry();
         ArchiveSortFilterModel *sortModel = qobject_cast<ArchiveSortFilterModel *>(this->model());
         ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(sortModel->sourceModel());
-        pModel->getParentEntry();
         for (int i = 0; i < model()->rowCount() ; i++) {
             QString IndexStr = model()->index(i, 0).data().toString();
             existFileList << IndexStr;

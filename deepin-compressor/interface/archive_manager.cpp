@@ -259,6 +259,7 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString exter
         } else {
             qint64 size = file_info.size();
             entry->setProperty("size", size);
+            entry->setSize(size);
             entry->setFullPath(parentPath + file_info.fileName().remove(externalPath));
             entry->setParent(parent);
         }

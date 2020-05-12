@@ -68,6 +68,8 @@ public:
     void removeEntryAt(int index);
     Entry *getParent() const;
     void setParent(Entry *parent);
+    qint64 getSize();
+    void setSize(qint64 size);
     void setFullPath(const QString &fullPath);
     QString fullPath(PathFormat format = WithTrailingSlash) const;
     QString name() const;
@@ -93,7 +95,7 @@ private:
     QString m_permissions;
     QString m_owner;
     QString m_group;
-    qulonglong m_size;
+    qint64 m_size;
     qulonglong m_compressedSize;
     QString m_link;
     QString m_ratio;

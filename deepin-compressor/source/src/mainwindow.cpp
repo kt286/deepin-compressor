@@ -1791,6 +1791,8 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
             m_model->appendEntryIcons(*map);
             delete map;
             map = nullptr;
+        } else {
+            entry->setProperty("size", fi.size());
         }
 
         all_entries.append(entry);

@@ -227,7 +227,6 @@ void Job::onUserQuery(Query *query)
     if (archiveInterface()->waitForFinishedSignal()) {
         qDebug() << "Plugins run from the main thread should call directly query->execute()";
     }
-
     emit userQuery(query);
 }
 
@@ -735,9 +734,9 @@ void AddJob::doWork()
     for (Archive::Entry *entry : /*qAsConst*/(m_entries)) {
         qDebug() << entry->fullPath();
 
-        QFileInfo file(entry->fullPath());
-        qulonglong  m_archiveSizeOnDisk = static_cast< qulonglong >(file.size());
-        entry->setProperty("size", m_archiveSizeOnDisk);
+//        QFileInfo file(entry->fullPath());
+//        qint64  m_archiveSizeOnDisk = file.size();
+//        entry->setSize(m_archiveSizeOnDisk);
 
         const QString &fullPath = entry->fullPath();
         QString relativePath = workDir.relativeFilePath(fullPath);
