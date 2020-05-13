@@ -545,9 +545,9 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
     QElapsedTimer timer;
     timer.start();
 
-    for (int i = 1; i < 110; i++) {
-        qDebug() << i << ":>>>" << zip_get_name(archive, i, ZIP_FL_ENC_GUESS);
-    }
+//    for (int i = 1; i < 110; i++) {
+//        qDebug() << i << ":>>>" << zip_get_name(archive, i, ZIP_FL_ENC_GUESS);
+//    }
 
     qulonglong i = 0;
     for (Archive::Entry *pCurEntry : files) {
