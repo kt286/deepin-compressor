@@ -43,6 +43,10 @@ class MonitorAdaptor: public QDBusAbstractAdaptor
 "      <arg direction=\"out\" type=\"b\"/>\n"
 "      <arg direction=\"in\" type=\"x\" name=\"pid\"/>\n"
 "    </method>\n"
+"    <method name=\"createSubWindow\">\n"
+"      <arg direction=\"out\" type=\"b\"/>\n"
+"      <arg direction=\"in\" type=\"as\" name=\"urls\"/>\n"
+"    </method>\n"
 "  </interface>\n"
         "")
 public:
@@ -51,6 +55,7 @@ public:
 
 public: // PROPERTIES
 public Q_SLOTS: // METHODS
+    bool createSubWindow(const QStringList &urls);
     bool onSubWindowActionFinished(int mode, qlonglong pid, const QStringList &urls);
     bool popUpChangedDialog(qlonglong pid);
 Q_SIGNALS: // SIGNALS

@@ -208,6 +208,24 @@ QVector<Archive::Entry *> *Archive::Entry::getAllLeavesNode()
     return pV;
 }
 
+/**
+ * @brief Archive::Entry::getFilesCount,include file,exclude dir
+ * @param pEntry
+ * @param count
+ */
+void Archive::Entry::getFilesCount(Archive::Entry *pEntry, int &count)
+{
+    if (pEntry->isDir() == false) {
+        count ++;
+        return;
+    }
+
+    const auto archiveEntries = pEntry->entries();
+    for (auto entry : archiveEntries) {
+        this->getFilesCount(entry, count);
+    }
+}
+
 void *Archive::Entry::checkLeavesNode(Entry *pE, QVector<Archive::Entry *> *pV)
 {
     const auto archiveEntries = pE->entries();

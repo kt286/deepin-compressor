@@ -29,6 +29,7 @@
 #include <QRegularExpression>
 #include "kpluginloader.h"
 #include "kpluginfactory.h"
+#include "globalarchivemanager.h"
 
 Q_DECLARE_METATYPE(KPluginMetaData)
 
@@ -46,7 +47,7 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
     }
 
     const QMimeType mimeType = fixedMimeType.isEmpty() ? determineMimeType(fileName) : QMimeDatabase().mimeTypeForName(fixedMimeType);
-
+    QString nnn = mimeType.name();
     const QVector<Plugin *> offers = pluginManager.preferredPluginsFor(mimeType);
     if (offers.isEmpty()) {
         qDebug() << "Could not find a plugin to handle" << fileName;
@@ -58,6 +59,7 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
         archive = create(fileName, plugin, parent);
         // Use the first valid plugin, according to the priority sorting.
         if (archive->isValid()) {
+            //GlobalArchiveManager::Instance()->setCurrentArchive(archive);
             return archive;
         }
     }
@@ -106,6 +108,7 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
         archive = create(fileName, plugin, parent);
         // Use the first valid plugin, according to the priority sorting.
         if (archive->isValid()) {
+           //GlobalArchiveManager::Instance()->setCurrentArchive(archive);
             return archive;
         }
     }
@@ -180,6 +183,7 @@ ReadOnlyArchiveInterface *Archive::createInterface(const QString &fileName, Plug
 Archive *Archive::create(const QString &fileName, Plugin *plugin, QObject *parent)
 {
     Q_ASSERT(plugin);
+    QString dddd = plugin->metaData().fileName();
 
     KPluginFactory *factory = KPluginLoader(plugin->metaData().fileName()).factory();
     if (!factory) {

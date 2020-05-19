@@ -11,5 +11,9 @@
       <arg type="b" direction="out"/>
       <arg name="pid" type="x" direction="in"/>
     </method>
+    <method name="createSubWindow">
+      <arg type="b" direction="out"/>
+      <arg name="urls" type="as" direction="in"/>
+    </method>
   </interface>
 </node>

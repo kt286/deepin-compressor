@@ -135,6 +135,8 @@ void Progress::setSpeedAndTimeText(COMPRESS_TYPE type)
         m_speedLabel->setText(tr("Speed", "compress") + ": " + tr("Calculating..."));
     } else if (type == DECOMPRESSING) {
         m_speedLabel->setText(tr("Speed", "uncompress") + ": " + tr("Calculating..."));
+    } else if (type == DELETEING) {
+        m_speedLabel->setText(tr("Speed", "delete") + ": " + tr("Calculating..."));
     }
     m_restTimeLabel->setText(tr("Time left") + ": " + tr("Calculating..."));
 }
@@ -206,6 +208,8 @@ void Progress::displaySpeedAndTime(double speed, qint64 timeLeft)
         } else {
             m_speedLabel->setText(tr("Speed", "compress") + ": " + ">300MB/S");
         }
+    } else if (m_type == DELETEING) {
+        m_speedLabel->setText(tr("Speed", "delete") + ": " + QString::number((speed / 1024), 'f', 2) + "MB/S");
     } else {
         if (speed < 1024) {
             m_speedLabel->setText(tr("Speed", "uncompress") + ": " + QString::number(speed, 'f', 2) + "KB/S");

@@ -88,7 +88,17 @@ HEADERS +=  \
     source/inc/monitorAdaptor.h \
     source/inc/monitorInterface.h \
     source/inc/logwidget.h \
-    source/inc/logwidgetappender.h
+    source/inc/logwidgetappender.h \
+    logfwidget_p.h \
+    interface/TSMutex.h \
+    interface/TSSingleton.h \
+    interface/globalarchivemanager.h \
+    interface/tsconstval.h \
+    interface/tscommontypes.h \
+    interface/tstypes.h \
+    interface/globalarchivemanager_p.h \
+    interface/archiverunnable.h
+
 
 
 SOURCES +=  \
@@ -149,7 +159,11 @@ SOURCES +=  \
     source/src/monitorAdaptor.cpp \
     source/src/monitorInterface.cpp \
     source/src/logwidget.cpp \
-    source/src/logwidgetappender.cpp
+    source/src/logwidgetappender.cpp \
+    interface/TSMutex.cpp \
+    interface/globalarchivemanager.cpp \
+    interface/archiverunnable.cpp
+
 
 
 RESOURCES += deepin-compressor.qrc

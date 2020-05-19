@@ -27,7 +27,9 @@
 #include <DLog>
 #include "utils.h"
 #include <DApplicationSettings>
+#include <QMessageBox>
 #include "monitorAdaptor.h"
+#include "monitorInterface.h"
 #include "logwidget.h"
 #include "openwithdialog/openwithdialog.h"
 
@@ -39,6 +41,61 @@ int main(int argc, char *argv[])
 
     // init Dtk application's attrubites.
     CompressorApplication app(argc, argv);
+
+    // add command line parser to app.
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Deepin Compressor.");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("filename", "File path.", "file [file..]");
+    parser.process(app);
+
+    const QStringList fileList = parser.positionalArguments();
+
+    QStringList newfilelist;
+    foreach (QString file, fileList) {
+        if (file.contains("file://")) {
+            file.remove("file://");
+        }
+        newfilelist.append(file);
+    }
+
+
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    bool busRegistered = bus.registerService("com.archive.mainwindow.monitor");
+    if (busRegistered == false) {
+        //get line function
+//        if (newfilelist.isEmpty()) {
+//            QStringList cmdLineArgs = DApplication::arguments();
+//            if (cmdLineArgs.size() > 1) {
+//                QString path = cmdLineArgs.at(1);
+//                newfilelist.push_back(path);
+//            }
+//        }
+
+//        QString tip = "";
+//        for (int i = 0; i < newfilelist.length(); i++) {
+//            tip += newfilelist[i];
+//        }
+//        QMessageBox::information(NULL, "Title", tip,
+//                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+
+        com::archive::mainwindow::monitor monitor("com.archive.mainwindow.monitor", "/QtDusServer/registry", QDBusConnection::sessionBus());
+        if (monitor.isValid()) {
+            QDBusPendingReply<bool> reply = monitor.createSubWindow(newfilelist);
+            reply.waitForFinished();
+            if (reply.isValid()) {
+                bool isClosed = reply.value();
+                if (isClosed) {
+//                    app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+                    app.exit();
+                    return 0;
+                }
+            }
+        }
+    }
+
 
     app.loadTranslator();
     app.setOrganizationName("deepin");
@@ -53,17 +110,7 @@ int main(int argc, char *argv[])
     DLogManager::registerConsoleAppender();
     DLogManager::registerFileAppender();
 
-    // add command line parser to app.
-    QCommandLineParser parser;
-    parser.setApplicationDescription("Deepin Compressor.");
-    parser.addHelpOption();
-    parser.addVersionOption();
-    parser.addPositionalArgument("filename", "File path.", "file [file..]");
-    parser.process(app);
 
-    // init modules.
-    MainWindow w;
-    app.setMainWindow(&w);
 
     QIcon appIcon = QIcon::fromTheme("deepin-compressor");
 
@@ -75,19 +122,7 @@ int main(int argc, char *argv[])
     app.setWindowIcon(appIcon);
     //w.titlebar()->setIcon(appIcon);
 
-    if (app.setSingleInstance("deepin-compressor")) {
-        Dtk::Widget::moveToCenter(&w);
-    }
 
-    const QStringList fileList = parser.positionalArguments();
-
-    QStringList newfilelist;
-    foreach (QString file, fileList) {
-        if (file.contains("file://")) {
-            file.remove("file://");
-        }
-        newfilelist.append(file);
-    }
 
     QStringList multilist;
     if (newfilelist.count() > 0 && ((newfilelist.last() == QStringLiteral("extract_here_split_multi") || newfilelist.last() == QStringLiteral("extract_split_multi")))) {
@@ -95,24 +130,34 @@ int main(int argc, char *argv[])
         multilist.append(newfilelist.last().remove("_multi"));
         newfilelist = multilist;
     }
-
-    QObject::connect(&w, &MainWindow::sigquitApp, &app, DApplication::quit);
-    // handle command line parser.
-    if (!fileList.isEmpty()) {
-        QMetaObject::invokeMethod(&w, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, newfilelist));
-    }
-
-    LogWidget widget;
-    w.initalizeLog(&widget);
-    widget.show();
-
-    QDBusConnection bus = QDBusConnection::sessionBus();
+    MainWindow w;
     MonitorAdaptor mAdaptor(&w);
-    bus.registerService("com.archive.mainwindow.monitor");
-    bus.registerObject("/QtDusServer/registry", &w);
 
-    w.show();
+
+    if (busRegistered == true) {
+
+        // init modules.
+
+        app.setMainWindow(&w);
+        if (app.setSingleInstance("deepin-compressor")) {
+            Dtk::Widget::moveToCenter(&w);
+        }
+
+
+        bus.registerObject("/QtDusServer/registry", &w);
+
+        QObject::connect(&w, &MainWindow::sigquitApp, &app, &DApplication::quit);
+        // handle command line parser.
+        if (!newfilelist.isEmpty()) {
+            QMetaObject::invokeMethod(&w, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, newfilelist));
+        }
+
+        LogWidget widget;
+        w.initalizeLog(&widget);
+        widget.show();
+        w.show();
+    }
     return app.exec();
 }
 
-#define LOGINFO(a) MainWindow::getLogger()->info(a)
+//#define LOGINFO(a) MainWindow::getLogger()->info(a)

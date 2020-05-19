@@ -80,6 +80,7 @@ public:
     Entry *findByPath(const QStringList &pieces, int index = 0) const;
     void countChildren(uint &dirs, uint &files) const;
     QVector<Archive::Entry *> *getAllLeavesNode();
+    void getFilesCount(Archive::Entry *pEntry, int &count);
     bool operator==(const Archive::Entry &right) const;
 
 public:

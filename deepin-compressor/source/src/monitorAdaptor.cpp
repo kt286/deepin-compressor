@@ -33,6 +33,14 @@ MonitorAdaptor::~MonitorAdaptor()
     // destructor
 }
 
+bool MonitorAdaptor::createSubWindow(const QStringList &urls)
+{
+    // handle method call com.archive.mainwindow.monitor.createSubWindow
+    bool out0;
+    QMetaObject::invokeMethod(parent(), "createSubWindow", Q_RETURN_ARG(bool, out0), Q_ARG(QStringList, urls));
+    return out0;
+}
+
 bool MonitorAdaptor::onSubWindowActionFinished(int mode, qlonglong pid, const QStringList &urls)
 {
     // handle method call com.archive.mainwindow.monitor.onSubWindowActionFinished

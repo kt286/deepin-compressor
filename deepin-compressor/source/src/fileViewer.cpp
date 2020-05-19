@@ -309,14 +309,14 @@ void fileViewer::onDropSlot(QStringList files)
 {
     emit sigFileAutoCompress(files);
 
-    subWindowChangedMsg(ACTION_DRAG, files);
+//    subWindowChangedMsg(ACTION_DRAG, files);
 }
 
 void fileViewer::deleteJobFinishedSlot()
 {
     QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
                        + QDir::separator() + "tempfiles" + QDir::separator() + m_ActionInfo.packageFile;
-    qDebug() << "添加文件：" << tempPath;
+    qDebug() << "添加文件====：" << tempPath;
     emit sigFileAutoCompress(QStringList() << tempPath);
 }
 
@@ -826,7 +826,16 @@ void fileViewer::upDateArchive(const SubActionInfo &dragInfo)
 
     //delete file from dest
     qDebug() << "删除文件：" << dragInfo.packageFile;
-    emit sigFileRemoved(QStringList() <<  dragInfo.packageFile);
+    QString fullPath = dragInfo.ActionFiles[0];
+//    emit sigFileRemoved(QStringList() <<  dragInfo.packageFile);
+    if (this->m_decompressmodel->mapFilesUpdate.contains(fullPath)) {
+        Archive::Entry *pEntry = this->m_decompressmodel->mapFilesUpdate[fullPath];
+        QVector<Archive::Entry *> pV;
+        pV.append(pEntry);
+        emit sigEntryRemoved(pV);//先移除后添加的更新方法
+    } else {
+        return;
+    }
     //add file from temp path
 //    QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
 //                       + QDir::separator() + "tempfiles" + QDir::separator() + dragInfo.packageFile;
@@ -901,6 +910,11 @@ void fileViewer::setSelectFiles(const QStringList &files)
 int fileViewer::getFileCount()
 {
     return m_curfilelist.size();
+}
+
+int fileViewer::getDeFileCount()
+{
+    return pTableViewFile->model()->rowCount();
 }
 
 void fileViewer::slotCompressRePreviousDoubleClicked()
@@ -1074,6 +1088,11 @@ void fileViewer::clickedSlot(int index, const QString &text)
         //update select archive
         upDateArchive(m_ActionInfo);
     }
+}
+
+void fileViewer::SubWindowDragUpdateEntry(int mode, QVector<Archive::Entry *> &pVector)
+{
+    qDebug() << "拖拽后处理！";
 }
 
 void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)

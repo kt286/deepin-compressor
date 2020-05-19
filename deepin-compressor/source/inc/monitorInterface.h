@@ -36,6 +36,13 @@ public:
     ~ComArchiveMainwindowMonitorInterface();
 
 public Q_SLOTS: // METHODS
+    inline QDBusPendingReply<bool> createSubWindow(const QStringList &urls)
+    {
+        QList<QVariant> argumentList;
+        argumentList << QVariant::fromValue(urls);
+        return asyncCallWithArgumentList(QStringLiteral("createSubWindow"), argumentList);
+    }
+
     inline QDBusPendingReply<bool> onSubWindowActionFinished(int mode, qlonglong pid, const QStringList &urls)
     {
         QList<QVariant> argumentList;

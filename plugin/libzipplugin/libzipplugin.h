@@ -43,7 +43,7 @@ public:
     bool testArchive() override;
     void cleanIfCanceled()override;
 private:
-    bool deleteEntry(Archive::Entry *pEntry, zip_t *archive);
+    bool deleteEntry(Archive::Entry *pEntry, zip_t *archive, int &curNo, int count = -1);
 //    bool delEntry(Archive::Entry *pEntry, zip_t *archive);
     bool extractEntry(zip_t *archive, const QString &entry, const QString &rootNode, const QString &destDir, bool preservePaths, bool removeRootNode, FileProgressInfo &pi);
     bool writeEntry(zip_t *archive, const QString &entry, const Archive::Entry *destination, const CompressionOptions &options, bool isDir = false);

@@ -161,6 +161,7 @@ public:
     void setFileList(const QStringList &files);
     void setSelectFiles(const QStringList &files);
     int getFileCount();
+    int getDeFileCount();
     void setDecompressModel(ArchiveSortFilterModel *model);
 
     QVector<Archive::Entry *> filesAndRootNodesForIndexes(const QModelIndexList &list) const;
@@ -184,7 +185,7 @@ public slots:
 
     void clickedSlot(int index, const QString &text);
     void SubWindowDragMsgReceive(int mode, const QStringList &urls);
-
+    void SubWindowDragUpdateEntry(int mode, QVector<Archive::Entry *> &pVector);
 protected:
     void resizecolumn();
     void resizeEvent(QResizeEvent *size) override;

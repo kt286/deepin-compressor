@@ -85,6 +85,7 @@ public:
     void setPathIndex(int *index);
     void setParentEntry(const QModelIndex &index);
     Archive::Entry *getParentEntry();
+    Archive::Entry *getRootEntry();
     /**
      * @brief check if exists archive with fullpath
      * @param fullPath
@@ -133,6 +134,8 @@ public:
 
     QMap<QString, Archive::Entry *> filesToMove;
     QMap<QString, Archive::Entry *> filesToCopy;
+    //store the map what key is path,value is entryChild. If open a new view to see the entryChild,you need to store it.
+    QMap<QString, Archive::Entry *> mapFilesUpdate;
 //    QList<Archive::Entry *> *getLeavesList();
 Q_SIGNALS:
     void loadingStarted();
@@ -145,6 +148,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void slotNewEntry(Archive::Entry *entry);
+    void slotAddEntry(Archive::Entry *entry);
     void slotListEntry(Archive::Entry *entry);
     void slotLoadingFinished(KJob *job);
     void slotEntryRemoved(const QString &path);
@@ -185,6 +189,7 @@ private:
     QScopedPointer<Archive::Entry> m_rootEntry;
     QHash<QString, QIcon> m_entryIcons;
     QMap<int, QByteArray> m_propertiesMap;
+
     QString m_dbusPathName;
 
     qulonglong m_numberOfFiles;
@@ -199,5 +204,8 @@ private:
     QTableView *m_tableview;
     MimeTypeDisplayManager *m_mimetype;
     Archive::Entry *m_parent = nullptr;
+//    Used to speed up the loading of large archives.
+    Archive::Entry *s_previousMatch = nullptr;
+    QStringList *s_previousPieces = new QStringList();
 };
 #endif // ARCHIVEMODEL_H

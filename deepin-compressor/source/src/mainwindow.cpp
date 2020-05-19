@@ -43,19 +43,24 @@
 #include <DStandardPaths>
 #include <QStackedLayout>
 #include "monitorInterface.h"
-//#include <boost/foreach.hpp>
-
+#include <DApplication>
+#include <monitorAdaptor.h>
 #include <log4qt/basicconfigurator.h>
 #include "logwidgetappender.h"
 #include <log4qt/ttcclayout.h>
 #include <log4qt/logmanager.h>
-
+#include <DWidgetUtil>
 #include "jobs.h"
 #include "kprocess.h"
 #include <DStandardPaths>
 #include <QStackedLayout>
+#include <QUuid>
 #include "unistd.h"
+#include "compressorapplication.h"
 
+DWIDGET_USE_NAMESPACE
+
+#define SEPARATOR_ARGUMENT ".winid."
 #define DEFAUTL_PATH DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"+ QDir::separator()
 
 
@@ -113,12 +118,14 @@ bool MainWindow::applicationQuit()
         }
 
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
-
+        deleteDecompressFile();
         if (m_encryptionjob) {
+            m_encryptionjob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
             m_encryptionjob->Killjob();
             m_encryptionjob = nullptr;
         }
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
+        deleteDecompressFile();
         if (m_createJob) {
             m_createJob->kill();
             m_createJob = nullptr;
@@ -177,13 +184,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
 
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
+        deleteDecompressFile();
         event->accept();
 
         if (m_encryptionjob) {
-            m_encryptionjob->deleteLater();
+            m_encryptionjob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
+            m_encryptionjob->Killjob();
             m_encryptionjob = nullptr;
         }
+
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
+        deleteDecompressFile();
         if (m_createJob) {
             m_createJob->kill();
             m_createJob = nullptr;
@@ -366,7 +377,7 @@ void MainWindow::InitConnection()
     connect(m_UnCompressPage, &UnCompressPage::sigFilelistIsEmpty, this, &MainWindow::onCompressPageFilelistIsEmpty);
     connect(m_encryptionpage, &EncryptionPage::sigExtractPassword, this, &MainWindow::SlotExtractPassword);
     connect(m_UnCompressPage, &UnCompressPage::sigextractfiles, this, &MainWindow::slotExtractSimpleFiles);
-    connect(this, &MainWindow::sigTipsWindowPopUp, m_UnCompressPage, &UnCompressPage::subWindowTipsPopSig);
+//    connect(this, &MainWindow::sigTipsWindowPopUp, m_UnCompressPage, &UnCompressPage::subWindowTipsPopSig);
     connect(m_UnCompressPage, &UnCompressPage::sigAutoCompress, m_CompressSetting, &CompressSetting::autoCompress);
     connect(m_UnCompressPage, &UnCompressPage::sigOpenExtractFile, this, &MainWindow::slotExtractSimpleFilesOpen);
     connect(m_UnCompressPage, &UnCompressPage::sigDeleteArchiveFiles, this, &MainWindow::deleteFromArchive);
@@ -613,6 +624,27 @@ bool MainWindow::popUpChangedDialog(const qint64 &pid)
     return true;
 }
 
+bool MainWindow::createSubWindow(const QStringList &urls)
+{
+    //create sub mainwindow
+    MainWindow *subWindow = new MainWindow();
+    subWindow->resize(100, 100);
+//    MonitorAdaptor mAdaptor(subWindow);
+//    Dtk::Widget::moveToCenter(subWindow);
+//    QObject::connect(&subWindow, &MainWindow::sigquitApp, qApp, &DApplication::quit);
+    if (!urls.isEmpty()) {
+        connect(subWindow, &MainWindow::sigTipsWindowPopUp, this->m_UnCompressPage, &UnCompressPage::subWindowTipsPopSig);
+//        QMetaObject::invokeMethod(subWindow, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, urls));
+        subWindow->m_pageid = PAGE_ZIP;
+        subWindow->onRightMenuSelected(urls);
+//        subWindow->onSelected(urls);
+    }
+    ++m_windowcount;
+
+    subWindow->show();
+    return true;
+}
+
 void MainWindow::setEnable()
 {
     setAcceptDrops(true);
@@ -700,6 +732,16 @@ void MainWindow::refreshPage()
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
         setQLabelText(m_titlelabel, tr("Extracting"));
+        m_Progess->setFilename(m_decompressfilename);
+        m_mainLayout->setCurrentIndex(4);
+        m_timer.start();
+        break;
+    case PAGE_DELETEPROGRESS:
+        m_Progess->setSpeedAndTimeText(DELETEING);
+        m_openAction->setEnabled(false);
+        setAcceptDrops(false);
+        m_titlebutton->setVisible(false);
+        setQLabelText(m_titlelabel, tr("Deleteing"));
         m_Progess->setFilename(m_decompressfilename);
         m_mainLayout->setCurrentIndex(4);
         m_timer.start();
@@ -1328,7 +1370,7 @@ void MainWindow::SlotProgress(KJob * /*job*/, unsigned long percent)
             }
             m_progressdialog->setProcess(percent);
         }
-    } else if (PAGE_ZIPPROGRESS == m_pageid || PAGE_UNZIPPROGRESS == m_pageid) {
+    } else if (PAGE_ZIPPROGRESS == m_pageid || PAGE_UNZIPPROGRESS == m_pageid || PAGE_DELETEPROGRESS == m_pageid) {
         m_Progess->setprogress(percent);
     } else if ((PAGE_UNZIP == m_pageid || PAGE_ENCRYPTION == m_pageid) && (percent < 100) && m_encryptionjob) {
         /*if (!m_progressTransFlag) {
@@ -1373,7 +1415,9 @@ void MainWindow::slotBatchExtractError(const QString &name)
 void MainWindow::slotExtractionDone(KJob *job)
 {
     m_workstatus = WorkNone;
+    Archive::Entry *pExtractWorkEntry = nullptr;
     if (m_encryptionjob) {
+        pExtractWorkEntry = this->m_encryptionjob->getWorkEntry();
         m_encryptionjob->deleteLater();
         m_encryptionjob = nullptr;
     }
@@ -1426,10 +1470,16 @@ void MainWindow::slotExtractionDone(KJob *job)
                           + QDir::separator() + tempFileName;
                 p.execute(commandCreate, args);
             } else {
-                arguments << DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
-                          + QDir::separator() + m_extractSimpleFiles.at(0)->name();
+                QString destPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
+                                   + QDir::separator() + m_extractSimpleFiles.at(0)->name();
+                if (pExtractWorkEntry != nullptr) {
+                    this->m_model->mapFilesUpdate.insert(destPath, pExtractWorkEntry);
+                }
+
+                arguments << destPath;
             }
         }
+
         qDebug() << arguments;
         cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
         cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
@@ -1774,7 +1824,7 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
 
     foreach (QString file, filesToAdd) {
         Archive::Entry *entry = new Archive::Entry();
-        entry->setFullPath(file);
+
         QFileInfo fi(file);
         QString externalPath = fi.path() + QDir::separator();
 
@@ -1782,8 +1832,9 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         if (m_model->getParentEntry() != nullptr) {
             parentPath = m_model->getParentEntry()->property("fullPath").toString();
         }
-        entry->setFullPath(parentPath + file.remove(externalPath));//remove external path,added by hsw
-
+//        QString tempFile = file;
+        entry->setFullPath(parentPath + fi.fileName());//remove external path,added by hsw
+        entry->setParent(m_model->getParentEntry());
         if (fi.isDir()) {
             entry->setIsDirectory(true);
             QHash<QString, QIcon> *map = new QHash<QString, QIcon>();
@@ -1794,7 +1845,7 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         } else {
             entry->setProperty("size", fi.size());
         }
-
+        entry->setFullPath(file);
         all_entries.append(entry);
         m_addFile = file;
     }
@@ -1906,9 +1957,9 @@ void MainWindow::removeFromArchive(const QStringList &removeFilePaths)
 
     connect(m_DeleteJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
 
-    m_pageid = PAGE_UNZIPPROGRESS;
+    m_pageid = PAGE_DELETEPROGRESS;
 
-    m_Progess->settype(DECOMPRESSING);
+    m_Progess->settype(DELETEING);
     m_jobState = JOB_DELETE;
     //refreshPage();
 
@@ -1929,10 +1980,13 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel)
     }
 
     connect(m_DeleteJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
+    connect(m_DeleteJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)), Qt::ConnectionType::UniqueConnection);
 
-    m_pageid = PAGE_UNZIPPROGRESS;
+    m_pageid = PAGE_DELETEPROGRESS;
+    m_Progess->settype(DELETEING);
+    refreshPage();
 
-    m_Progess->settype(DECOMPRESSING);
+    //m_Progess->settype(DECOMPRESSING);
     m_jobState = JOB_DELETE;
     //refreshPage();
 
@@ -2038,7 +2092,7 @@ void MainWindow::moveToArchive(QMap<QString, QString> &Args)
     m_workstatus = WorkProcess;
 }
 
-void MainWindow::transSplitFileName(QString &fileName)  // *.7z.003 -> *.7z.001
+void MainWindow::transSplitFileName(QString &fileName)    // *.7z.003 -> *.7z.001
 {
     QRegExp reg("^([\\s\\S]*.)[0-9]{3}$");
 
@@ -2239,6 +2293,20 @@ void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles
     //    }
 }
 
+//解压取消时删除临时文件
+void MainWindow::deleteDecompressFile()
+{
+//    qDebug() << "deleteDecompressFile" << m_decompressfilepath << m_decompressfilename;
+
+    if (!m_decompressfilepath.isEmpty() && m_UnCompressPage->getDeFileCount() > 1) { //需判断是否空字符串，同时判断被解压文件里是否有多个一级文件（夹），只有一个一级文件（夹）时，在取消解压缩时就被删除了
+        QDir fi(m_decompressfilepath);  //若m_decompressfilepath为空字符串，则使用（"."）构造目录
+        qDebug() << fi.exists();
+        if (fi.exists()) {
+            fi.removeRecursively(); //删除解压后的文件夹
+        }
+    }
+}
+
 void MainWindow::creatArchive(QMap< QString, QString > &Args)
 {
     QStringList filesToAdd = m_CompressPage->getCompressFilelist();
@@ -2270,8 +2338,6 @@ void MainWindow::creatArchive(QMap< QString, QString > &Args)
     foreach (QString file, filesToAdd) {
         Archive::Entry *entry = new Archive::Entry();
         entry->setFullPath(file);
-
-
 
         QFileInfo fi(file);
         if (fi.isDir()) {
@@ -2379,18 +2445,23 @@ void MainWindow::slotJobFinished(KJob *job)
         }
         refreshPage();
 
-        qDebug() << "拖拽添加任务完成，当前进程pid为：" << getpid();
-        com::archive::mainwindow::monitor monitor1("com.archive.mainwindow.monitor", "/QtDusServer/registry", QDBusConnection::sessionBus());
-        QDBusPendingReply<bool> reply1 = monitor1.popUpChangedDialog(getppid());
-        reply1.waitForFinished();
-        if (reply1.isValid()) {
-            bool isClosed = reply1.value();
-            if (isClosed) {
-                qDebug() << "更新主进程界面，弹出对话框！";
-            }
-        } else {
-            qDebug() << "msg handle failed!\n";
-        }
+//        qDebug() << "拖拽添加任务完成，当前进程pid为：" << getpid();
+//        com::archive::mainwindow::monitor monitor1("com.archive.mainwindow.monitor", "/QtDusServer/registry", QDBusConnection::sessionBus());
+//        QDBusPendingReply<bool> reply1 = monitor1.popUpChangedDialog(getppid());
+//        reply1.waitForFinished();
+//        if (reply1.isValid()) {
+//            bool isClosed = reply1.value();
+//            if (isClosed) {
+//                qDebug() << "更新主进程界面，弹出对话框！";
+//            }
+//        } else {
+//            qDebug() << "msg handle failed!\n";
+//        }
+
+        emit sigTipsWindowPopUp(SUBACTION_MODE::ACTION_DRAG, ArchivePath);
+//        QVector< Archive::Entry * > all_entries;
+//        all_entries.append(m_model->getRootEntry());
+//        emit sigTipsUpdateEntry(SUBACTION_MODE::ACTION_DRAG, all_entries);
     }
 
     break;
@@ -2411,6 +2482,7 @@ void MainWindow::slotJobFinished(KJob *job)
         //refresh valid end
         qDebug() << "删除完成信号";
         emit deleteJobComplete();
+        emit sigTipsWindowPopUp(SUBACTION_MODE::ACTION_DELETE, ArchivePath);
     }
     break;
     case JOB_LOAD:
@@ -2596,7 +2668,7 @@ void MainWindow::deleteFromArchive(const QStringList &files, const QString &arch
 
     connect(m_DeleteJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
 
-    m_pageid = PAGE_UNZIPPROGRESS;
+    m_pageid = PAGE_DELETEPROGRESS;
 
     m_Progess->settype(DECOMPRESSING);
     m_jobState = JOB_DELETE;
@@ -2624,6 +2696,7 @@ void MainWindow::addToArchive(const QStringList &files, const QString &archive)
 void MainWindow::onCancelCompressPressed(int compressType)
 {
     slotResetPercentAndTime();
+
     if (m_encryptionjob) {
         //append the spiner animation to the eventloop, so can play the spinner animation
         if (pEventloop == nullptr) {
@@ -2653,6 +2726,7 @@ void MainWindow::onCancelCompressPressed(int compressType)
     }
 
     deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
+    deleteDecompressFile();
 
     if (compressType == COMPRESSING) {
         if (m_createJob) {
@@ -2687,16 +2761,20 @@ void MainWindow::slotClearTempfile()
 
 void MainWindow::slotquitApp()
 {
-    openTempFileLink = 0;
-    QProcess p;
-    QString command = "rm";
-    QStringList args;
-    args.append("-rf");
-    args.append(DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles");
-    p.execute(command, args);
-    p.waitForFinished();
+    --m_windowcount;
 
-    emit sigquitApp();
+    if (m_windowcount == 0) {
+        QProcess p;
+        QString command = "rm";
+        QStringList args;
+        args.append("-rf");
+        args.append(DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles");
+        p.execute(command, args);
+        p.waitForFinished();
+
+        emit sigquitApp();
+    }
+
 }
 
 void MainWindow::onUpdateDestFile(QString destFile)
@@ -2838,18 +2916,18 @@ void MainWindow::onCompressAddfileSlot(bool status)
 
 void MainWindow::initalizeLog(QWidget *widget)
 {
-    Log4Qt::BasicConfigurator::configure();
-    Log4Qt::LogManager::setHandleQtMessages(true);
-    m_logger = Log4Qt::Logger::rootLogger();
-    m_logger->removeAllAppenders();
-    Log4Qt::LogWidgetAppender *appender = new Log4Qt::LogWidgetAppender();
-    appender->setName("WidgetAppender");
-    Log4Qt::TTCCLayout *layout = new Log4Qt::TTCCLayout(Log4Qt::TTCCLayout::ISO8601);
-    layout->setThreadPrinting(true);
-    appender->setLayout(layout);
-    appender->activateOptions();
-    appender->setLogWidget(widget);
-    m_logger->addAppender(appender);
+//    Log4Qt::BasicConfigurator::configure();
+//    Log4Qt::LogManager::setHandleQtMessages(true);
+//    m_logger = Log4Qt::Logger::rootLogger();
+//    m_logger->removeAllAppenders();
+//    Log4Qt::LogWidgetAppender *appender = new Log4Qt::LogWidgetAppender();
+//    appender->setName("WidgetAppender");
+//    Log4Qt::TTCCLayout *layout = new Log4Qt::TTCCLayout(Log4Qt::TTCCLayout::ISO8601);
+//    layout->setThreadPrinting(true);
+//    appender->setLayout(layout);
+//    appender->activateOptions();
+//    appender->setLogWidget(widget);
+//    m_logger->addAppender(appender);
 }
 
 void MainWindow::logShutDown()
@@ -2857,7 +2935,7 @@ void MainWindow::logShutDown()
     m_logger->removeAllAppenders();
 }
 
-Log4Qt::Logger *MainWindow::getLogger()
-{
-    return  m_logger;
-}
+//Log4Qt::Logger *MainWindow::getLogger()
+//{
+//    return  m_logger;
+//}

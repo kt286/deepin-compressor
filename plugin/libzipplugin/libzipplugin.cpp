@@ -549,12 +549,16 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
 //        qDebug() << i << ":>>>" << zip_get_name(archive, i, ZIP_FL_ENC_GUESS);
 //    }
 
-    qulonglong i = 0;
+
     for (Archive::Entry *pCurEntry : files) {
-        bool status = this->deleteEntry(pCurEntry, archive); //delete from archive
+        int i = 0;
+        int count = 0;
+        pCurEntry->getFilesCount(pCurEntry, count);
+
+        bool status = this->deleteEntry(pCurEntry, archive, i, count); //delete from archive
         if (status == true) {
             emit entryRemoved(pCurEntry->fullPath());       //delete from model
-            emit progress(float(++i) / files.size());
+//            emit progress(float(++i) / files.size());
         }
     }
 
@@ -593,14 +597,11 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
 //    return true;
 //}
 
-bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive)
+bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive, int &curNo, int count)
 {
-    if (pCurEntry->name().contains(".git")) {
-        qDebug() << "test";
-    }
     if (pCurEntry->isDir() == true) {
         for (int i = 0; i < pCurEntry->entries().length(); i++) {
-            this->deleteEntry(pCurEntry->entries().at(i), archive);
+            this->deleteEntry(pCurEntry->entries().at(i), archive, curNo, count);
         }
     }
     if (QThread::currentThread()->isInterruptionRequested()) {
@@ -651,6 +652,11 @@ bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive)
                 return false;
             }
             return false;
+        } else {
+            if (curNo >= 0) {
+                qDebug() << ">>>>>>" << float(++curNo) / count;
+                emit progress(float(++curNo) / count);
+            }
         }
     }
 //    zip_uint64_t indexDel = index;

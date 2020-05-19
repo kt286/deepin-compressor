@@ -82,6 +82,7 @@ UnCompressPage::UnCompressPage(QWidget *parent)
     connect(m_fileviewer, &fileViewer::sigEntryRemoved, this, &UnCompressPage::onRefreshEntryList);
     connect(m_fileviewer, &fileViewer::sigFileAutoCompress, this, &UnCompressPage::onAutoCompress);
     connect(this, &UnCompressPage::subWindowTipsPopSig, m_fileviewer, &fileViewer::SubWindowDragMsgReceive);
+//    connect(this, &UnCompressPage::subWindowTipsUpdateEntry, m_fileviewer, &fileViewer::SubWindowDragUpdateEntry);
 
     connect(m_fileviewer, &fileViewer::sigFileRemovedFromArchive, this, &UnCompressPage::sigDeleteArchiveFiles);
     connect(m_fileviewer, &fileViewer::sigFileAutoCompressToArchive, this, &UnCompressPage::sigAddArchiveFiles);
@@ -141,6 +142,12 @@ void UnCompressPage::SetDefaultFile(QFileInfo info)
 int UnCompressPage::getFileCount()
 {
     return m_fileviewer->getFileCount();
+}
+
+//获取被解压文件里一级文件(夹)个数
+int UnCompressPage::getDeFileCount()
+{
+    return m_fileviewer->getDeFileCount();
 }
 
 int UnCompressPage::showWarningDialog(const QString &msg)

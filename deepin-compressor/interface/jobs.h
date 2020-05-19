@@ -73,6 +73,7 @@ protected Q_SLOTS:
 Q_SIGNALS:
     void entryRemoved(const QString &entry);
     void newEntry(Archive::Entry *);
+    void addEntry(Archive::Entry *);
     void userQuery(Query *);
     void sigWrongPassword();
     void sigCancelled();
@@ -203,7 +204,12 @@ public Q_SLOTS:
     void onFinished(bool result)override;
 public:
     bool Killjob();
-
+    /**
+     * get the work archiveEntry
+     * @brief getWorkEntry
+     * @return
+     */
+    Archive::Entry *getWorkEntry();
 signals:
     void sigExtractJobPassword();
     void sigExtractJobFinished();

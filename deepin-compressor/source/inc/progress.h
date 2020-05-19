@@ -34,6 +34,7 @@ DWIDGET_USE_NAMESPACE
 enum COMPRESS_TYPE {
     COMPRESSING,
     DECOMPRESSING,
+    DELETEING
 };
 
 class Progress: public DWidget

@@ -49,6 +49,7 @@ public:
     void setdefaultpath(QString path);
     void SetDefaultFile(QFileInfo info);
     int getFileCount();
+    int getDeFileCount();
     int showWarningDialog(const QString &msg);
     EXTRACT_TYPE getExtractType();
     void slotCompressedAddFile();
@@ -66,7 +67,7 @@ signals:
     void sigUpdateUnCompreeTableView(const QFileInfo &);
     void sigSelectedFiles(QStringList &files);
     void subWindowTipsPopSig(int, const QStringList &);
-
+    void subWindowTipsUpdateEntry(int, QVector<Archive::Entry *> &vectorDel);
     void sigDeleteArchiveFiles(const QStringList &files, const QString &);
     void sigAddArchiveFiles(const QStringList &files, const QString &);
 
@@ -76,9 +77,9 @@ public slots:
     void oneCompressPress();
     void onPathButoonClicked();
     void onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTRACT_TYPE type, QString path);
-    void onextractfilesOpenSlot(const QVector<Archive::Entry *> &fileList, const QString &programma);
     void onRefreshFilelist(const QStringList &filelist);
     void onRefreshEntryList(QVector<Archive::Entry *> &vectorDel);
+    void onextractfilesOpenSlot(const QVector<Archive::Entry *> &fileList, const QString &programma);
     void onAutoCompress(const QStringList &path);
 
 private:

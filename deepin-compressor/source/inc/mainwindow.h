@@ -51,6 +51,7 @@
 #include "batchcompress.h"
 #include <DFileWatcher>
 #include <QElapsedTimer>
+#include <QQueue>
 
 
 #define TITLE_FIXED_HEIGHT 50
@@ -69,6 +70,7 @@ enum Page_ID {
     PAGE_UNZIP_SUCCESS,
     PAGE_UNZIP_FAIL,
     PAGE_ENCRYPTION,
+    PAGE_DELETEPROGRESS,
     PAGE_MAX
 };
 
@@ -107,14 +109,14 @@ enum JobState {
 static QVector<qint64> m_tempProcessId;
 static Log4Qt::Logger *m_logger = nullptr;
 class QStackedLayout;
-
+static int m_windowcount = 1;
 class MainWindow : public DMainWindow
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "com.archive.mainwindow.monitor")
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
     void closeEvent(QCloseEvent *event) override;
@@ -151,7 +153,7 @@ public:
     void initalizeLog(QWidget *widget);
     void logShutDown();
 
-    static Log4Qt::Logger *getLogger();
+//    static Log4Qt::Logger *getLogger();
 
 private:
     void saveWindowState();
@@ -168,6 +170,8 @@ public slots:
     bool onSubWindowActionFinished(int mode, const qint64 &pid, const QStringList &urls);
 
     bool popUpChangedDialog(const qint64 &pid);
+
+    bool createSubWindow(const QStringList &urls);
 
 private slots:
     void setEnable();
@@ -224,6 +228,7 @@ signals:
     void loadingStarted();
     void sigUpdateTableView(const QFileInfo &);
     void sigTipsWindowPopUp(int, const QStringList &);
+    void sigTipsUpdateEntry(int, QVector<Archive::Entry *> &vectorDel);
     void deleteJobComplete();
 
 private:
@@ -241,6 +246,7 @@ private:
 
     QStringList CheckAllFiles(QString path);
     void deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/);
+    void deleteDecompressFile();
 
 private:
     DLabel *m_logo;
@@ -295,7 +301,9 @@ private:
     int openTempFileLink = 0;
     QEventLoop *pEventloop = nullptr;
     DSpinner *m_spinner = nullptr;
+
     bool IsAddArchive = false;
+
 
 private:
     void calSelectedTotalFileSize(const QStringList &files);

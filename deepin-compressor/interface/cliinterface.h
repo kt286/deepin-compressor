@@ -28,7 +28,8 @@
 
 #include <QProcess>
 #include <QRegularExpression>
-
+#include <QThreadPool>
+#include <QReadWriteLock>
 
 class KProcess;
 
@@ -149,7 +150,7 @@ protected:
 
 protected Q_SLOTS:
     virtual void readStdout(bool handleAll = false);
-
+    void handleLineSlot(const QString &line);
 private:
 
     bool handleFileExistsMessage(const QString &filename);
@@ -223,6 +224,9 @@ private:
     QString extractDst7z_;
 
     AnalyseHelp* pAnalyseHelp = nullptr;
+
+    QThreadPool m_threadPool;
+    QReadWriteLock m_RWLock;
 
 protected Q_SLOTS:
     virtual void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
