@@ -320,12 +320,12 @@
 <context>
     <name>Main</name>
     <message>
-        <location filename="../main.cpp" line="50"/>
+        <location filename="../main.cpp" line="106"/>
         <source>Archive Manager</source>
         <translation>مدير اﻷرشيفات</translation>
     </message>
     <message>
-        <location filename="../main.cpp" line="51"/>
+        <location filename="../main.cpp" line="107"/>
         <source>Archive Manager is a fast and lightweight application for creating and extracting archives.</source>
         <translation>مدير الأرشيفات هو تطبيق سريع وخفيف الوزن لإنشاء واستخراج اﻷرشيفات</translation>
     </message>
@@ -333,168 +333,168 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="302"/>
+        <location filename="../source/src/mainwindow.cpp" line="311"/>
         <source>Close</source>
         <translation>إغلاق</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="306"/>
+        <location filename="../source/src/mainwindow.cpp" line="315"/>
         <source>Help</source>
         <translation>المساعدة</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="310"/>
+        <location filename="../source/src/mainwindow.cpp" line="319"/>
         <source>Select the file</source>
         <translation>فتح</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="314"/>
+        <location filename="../source/src/mainwindow.cpp" line="323"/>
         <source>Delete</source>
         <translation>حذف</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="334"/>
+        <location filename="../source/src/mainwindow.cpp" line="343"/>
         <source>Shortcuts</source>
         <translation>اختصارات</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="412"/>
+        <location filename="../source/src/mainwindow.cpp" line="421"/>
         <source>Open file</source>
         <translation>فتح ملف</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="442"/>
+        <location filename="../source/src/mainwindow.cpp" line="451"/>
         <source>Settings</source>
         <translation>اﻹعدادات</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="688"/>
         <location filename="../source/src/mainwindow.cpp" line="698"/>
-        <location filename="../source/src/mainwindow.cpp" line="1664"/>
+        <location filename="../source/src/mainwindow.cpp" line="708"/>
+        <location filename="../source/src/mainwindow.cpp" line="1682"/>
         <source>Create New Archive</source>
         <translation>إنشاء أرشيف جديد</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="734"/>
+        <location filename="../source/src/mainwindow.cpp" line="744"/>
         <source>Deleteing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="741"/>
+        <location filename="../source/src/mainwindow.cpp" line="751"/>
         <source>Compression successful</source>
         <translation>تم الضغط بنجاح</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1478"/>
-        <location filename="../source/src/mainwindow.cpp" line="1519"/>
+        <location filename="../source/src/mainwindow.cpp" line="1496"/>
+        <location filename="../source/src/mainwindow.cpp" line="1537"/>
         <source>Skip all files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1503"/>
+        <location filename="../source/src/mainwindow.cpp" line="1521"/>
         <source>Choose default programma</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1521"/>
+        <location filename="../source/src/mainwindow.cpp" line="1539"/>
         <source>Extraction successful</source>
         <translation>تم الاستخراج بنجاح</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="227"/>
+        <location filename="../source/src/mainwindow.cpp" line="236"/>
         <source>%1 was changed on the disk, please import it again.</source>
         <translation>%1 تم تغييره على القرص ، يرجى استيراده مرة أخرى</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="929"/>
+        <location filename="../source/src/mainwindow.cpp" line="939"/>
         <source>Do you want to add the archive to the list or open it in new window?</source>
         <translation>هل تريد إضافة الأرشيف إلى القائمة أم فتحه في نافذة جديدة؟</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="322"/>
+        <location filename="../source/src/mainwindow.cpp" line="331"/>
         <source>Display shortcuts</source>
         <translation>عرض الاختصارات</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="930"/>
+        <location filename="../source/src/mainwindow.cpp" line="940"/>
         <source>Cancel</source>
         <translation>إلغاء</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="78"/>
+        <location filename="../source/src/mainwindow.cpp" line="81"/>
         <source>Archive Manager</source>
         <translation>مدير اﻷرشيفات</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="233"/>
-        <location filename="../source/src/mainwindow.cpp" line="1246"/>
+        <location filename="../source/src/mainwindow.cpp" line="242"/>
+        <location filename="../source/src/mainwindow.cpp" line="1256"/>
         <source>OK</source>
         <translation>موافق</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="714"/>
+        <location filename="../source/src/mainwindow.cpp" line="724"/>
         <source>Compressing</source>
         <translation>يتم الضغط</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="724"/>
+        <location filename="../source/src/mainwindow.cpp" line="734"/>
         <source>Extracting</source>
         <translation>يتم الاستخراج</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="750"/>
+        <location filename="../source/src/mainwindow.cpp" line="760"/>
         <source>Compression failed</source>
         <translation>تعذر الضغط</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="783"/>
+        <location filename="../source/src/mainwindow.cpp" line="793"/>
         <source>Extraction failed</source>
         <translation>فشل الاستخراج</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="931"/>
+        <location filename="../source/src/mainwindow.cpp" line="941"/>
         <source>Add</source>
         <translation>إضافة</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="932"/>
+        <location filename="../source/src/mainwindow.cpp" line="942"/>
         <source>Open in new window</source>
         <translation>فتح في نافذة جديدة</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1052"/>
+        <location filename="../source/src/mainwindow.cpp" line="1062"/>
         <source>Find directory</source>
         <translation>بحث عن دليل</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1400"/>
+        <location filename="../source/src/mainwindow.cpp" line="1410"/>
         <source>Wrong password</source>
         <translation>كلمة سر خاطىة</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1128"/>
-        <location filename="../source/src/mainwindow.cpp" line="1149"/>
-        <location filename="../source/src/mainwindow.cpp" line="1186"/>
-        <location filename="../source/src/mainwindow.cpp" line="1430"/>
+        <location filename="../source/src/mainwindow.cpp" line="1138"/>
+        <location filename="../source/src/mainwindow.cpp" line="1159"/>
+        <location filename="../source/src/mainwindow.cpp" line="1196"/>
+        <location filename="../source/src/mainwindow.cpp" line="1442"/>
         <source>Damaged file, unable to extract</source>
         <translation>ملف تالف ، تعذر استخراجه</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1245"/>
+        <location filename="../source/src/mainwindow.cpp" line="1255"/>
         <source>The archive was changed on the disk, please import it again.</source>
         <translation>تم تغيير الأرشيف على القرص ، يرجى استيراده مرة أخرى.</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1426"/>
-        <location filename="../source/src/mainwindow.cpp" line="1428"/>
-        <location filename="../source/src/mainwindow.cpp" line="2366"/>
-        <location filename="../source/src/mainwindow.cpp" line="2372"/>
+        <location filename="../source/src/mainwindow.cpp" line="1438"/>
+        <location filename="../source/src/mainwindow.cpp" line="1440"/>
+        <location filename="../source/src/mainwindow.cpp" line="2398"/>
+        <location filename="../source/src/mainwindow.cpp" line="2404"/>
         <source>Insufficient space, please clear and retry</source>
         <translation>المساحة غير كافية، يرجى المسح وإعادة المحاولة</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="2368"/>
-        <location filename="../source/src/mainwindow.cpp" line="2374"/>
+        <location filename="../source/src/mainwindow.cpp" line="2400"/>
+        <location filename="../source/src/mainwindow.cpp" line="2406"/>
         <source>Damaged file</source>
         <translation>ملف معطوب</translation>
     </message>
@@ -732,47 +732,47 @@
 <context>
     <name>QInstaller</name>
     <message>
-        <location filename="../source/src/utils.cpp" line="163"/>
+        <location filename="../source/src/utils.cpp" line="165"/>
         <source>B</source>
         <translation>بايت</translation>
     </message>
     <message>
-        <location filename="../source/src/utils.cpp" line="164"/>
+        <location filename="../source/src/utils.cpp" line="166"/>
         <source>KB</source>
         <translation>ك.ب</translation>
     </message>
     <message>
-        <location filename="../source/src/utils.cpp" line="165"/>
+        <location filename="../source/src/utils.cpp" line="167"/>
         <source>MB</source>
         <translation>م.ب</translation>
     </message>
     <message>
-        <location filename="../source/src/utils.cpp" line="166"/>
+        <location filename="../source/src/utils.cpp" line="168"/>
         <source>GB</source>
         <translation>غ.ب</translation>
     </message>
     <message>
-        <location filename="../source/src/utils.cpp" line="167"/>
+        <location filename="../source/src/utils.cpp" line="169"/>
         <source>TB</source>
         <translation>تيرا بايت</translation>
     </message>
     <message>
-        <location filename="../source/src/utils.cpp" line="168"/>
+        <location filename="../source/src/utils.cpp" line="170"/>
         <source>PB</source>
         <translation>بيتا بايت</translation>
     </message>
     <message>
-        <location filename="../source/src/utils.cpp" line="169"/>
+        <location filename="../source/src/utils.cpp" line="171"/>
         <source>EB</source>
         <translation>إكسابايت</translation>
     </message>
     <message>
-        <location filename="../source/src/utils.cpp" line="170"/>
+        <location filename="../source/src/utils.cpp" line="172"/>
         <source>ZB</source>
         <translation>زيتا بايت</translation>
     </message>
     <message>
-        <location filename="../source/src/utils.cpp" line="171"/>
+        <location filename="../source/src/utils.cpp" line="173"/>
         <source>YB</source>
         <translation>يوتا بايت</translation>
     </message>
@@ -830,22 +830,22 @@
         <translation type="vanished">التأكيد</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="449"/>
+        <location filename="../source/src/fileViewer.cpp" line="450"/>
         <source>Name</source>
         <translation>الاسم</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="452"/>
+        <location filename="../source/src/fileViewer.cpp" line="453"/>
         <source>Time modified</source>
         <translation>وقت التعديل</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="455"/>
+        <location filename="../source/src/fileViewer.cpp" line="456"/>
         <source>Type</source>
         <translation>النوع</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="458"/>
+        <location filename="../source/src/fileViewer.cpp" line="459"/>
         <source>Size</source>
         <translation>الحجم</translation>
     </message>
@@ -947,23 +947,23 @@
     </message>
     <message>
         <location filename="../source/src/uncompresspage.cpp" line="49"/>
-        <location filename="../source/src/uncompresspage.cpp" line="126"/>
-        <location filename="../source/src/uncompresspage.cpp" line="133"/>
+        <location filename="../source/src/uncompresspage.cpp" line="127"/>
+        <location filename="../source/src/uncompresspage.cpp" line="134"/>
         <source>Extract to:</source>
         <translation>استخراج إلى :</translation>
     </message>
     <message>
-        <location filename="../source/src/uncompresspage.cpp" line="96"/>
+        <location filename="../source/src/uncompresspage.cpp" line="97"/>
         <source>You do not have permission to save files here, please change and retry</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/uncompresspage.cpp" line="114"/>
+        <location filename="../source/src/uncompresspage.cpp" line="115"/>
         <source>Find directory</source>
         <translation>بحث عن دليل</translation>
     </message>
     <message>
-        <location filename="../source/src/uncompresspage.cpp" line="153"/>
+        <location filename="../source/src/uncompresspage.cpp" line="160"/>
         <source>OK</source>
         <translation type="unfinished">موافق</translation>
     </message>
@@ -971,96 +971,101 @@
 <context>
     <name>fileViewer</name>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1263"/>
+        <location filename="../source/src/fileViewer.cpp" line="1294"/>
         <source>Extract</source>
         <translation>استخراج</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="416"/>
-        <location filename="../source/src/fileViewer.cpp" line="1281"/>
+        <location filename="../source/src/fileViewer.cpp" line="417"/>
+        <location filename="../source/src/fileViewer.cpp" line="1312"/>
         <source>Delete</source>
         <translation>حذف</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="399"/>
-        <location filename="../source/src/fileViewer.cpp" line="418"/>
-        <location filename="../source/src/fileViewer.cpp" line="1269"/>
-        <location filename="../source/src/fileViewer.cpp" line="1278"/>
+        <location filename="../source/src/fileViewer.cpp" line="400"/>
+        <location filename="../source/src/fileViewer.cpp" line="419"/>
+        <location filename="../source/src/fileViewer.cpp" line="1300"/>
+        <location filename="../source/src/fileViewer.cpp" line="1309"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="400"/>
-        <location filename="../source/src/fileViewer.cpp" line="1271"/>
+        <location filename="../source/src/fileViewer.cpp" line="401"/>
+        <location filename="../source/src/fileViewer.cpp" line="1302"/>
         <source>DELETE</source>
         <comment>slotDecompressRowDelete</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="402"/>
-        <location filename="../source/src/fileViewer.cpp" line="419"/>
+        <location filename="../source/src/fileViewer.cpp" line="403"/>
+        <location filename="../source/src/fileViewer.cpp" line="420"/>
         <source>Open style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="482"/>
+        <location filename="../source/src/fileViewer.cpp" line="483"/>
         <source>item(s)</source>
         <translation>العنصر(عناصر)</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="498"/>
+        <location filename="../source/src/fileViewer.cpp" line="499"/>
         <source>yyyy/MM/dd hh:mm:ss</source>
         <translation>yyyy/MM/dd hh:mm:ss</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="534"/>
-        <location filename="../source/src/fileViewer.cpp" line="1292"/>
+        <location filename="../source/src/fileViewer.cpp" line="535"/>
+        <location filename="../source/src/fileViewer.cpp" line="1323"/>
         <source>Choose default programma</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="736"/>
-        <location filename="../source/src/fileViewer.cpp" line="1101"/>
+        <location filename="../source/src/fileViewer.cpp" line="737"/>
+        <location filename="../source/src/fileViewer.cpp" line="1132"/>
         <source>cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="738"/>
+        <location filename="../source/src/fileViewer.cpp" line="739"/>
         <source>confirm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="740"/>
-        <location filename="../source/src/fileViewer.cpp" line="1102"/>
+        <location filename="../source/src/fileViewer.cpp" line="741"/>
+        <location filename="../source/src/fileViewer.cpp" line="1133"/>
         <source>update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1090"/>
-        <source>update file &apos;%1&apos; from package &apos;%2&apos; ? 
- %3</source>
+        <location filename="../source/src/fileViewer.cpp" line="1120"/>
+        <source>update file &apos;%1&apos; from package &apos;%2&apos;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1271"/>
+        <location filename="../source/src/fileViewer.cpp" line="1122"/>
+        <source>one file has been modified by other application.if you update package file ,
+ your modifications will lose.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../source/src/fileViewer.cpp" line="1302"/>
         <source>DELETE</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1273"/>
+        <location filename="../source/src/fileViewer.cpp" line="1304"/>
         <source>Do you want to detele the selected file?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="397"/>
-        <location filename="../source/src/fileViewer.cpp" line="1263"/>
+        <location filename="../source/src/fileViewer.cpp" line="398"/>
+        <location filename="../source/src/fileViewer.cpp" line="1294"/>
         <source>Extract</source>
         <comment>slotDecompressRowDoubleClicked</comment>
         <translation>استخراج</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="398"/>
-        <location filename="../source/src/fileViewer.cpp" line="1265"/>
+        <location filename="../source/src/fileViewer.cpp" line="399"/>
+        <location filename="../source/src/fileViewer.cpp" line="1296"/>
         <source>Extract to current directory</source>
         <translation>استخراج إلى الدليل الحالي</translation>
     </message>

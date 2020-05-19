@@ -741,7 +741,7 @@ int fileViewer::popUpDialog(const QString &desc)
         dialog->addButton(tr("update"));
     }
 
-    dialog->setMinimumSize(380, 140);
+    dialog->setMinimumSize(500, 140);
     DLabel *pContent = new DLabel(desc, dialog);
     pContent->setAlignment(Qt::AlignmentFlag::AlignHCenter);
     DPalette pa;
@@ -1117,8 +1117,9 @@ void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
 
         QString sourceArchive = m_decompressmodel->archive()->fileName();
 
-        QString warningStr = QString(tr("update file '%1' from package '%2' ? \n %3")).arg(destName).arg(sourceArchive)
-                             .arg("one file has been modified by other application.if you update package file ,\n your modifications will lose.");
+        QString warningStr = QString(tr("update file '%1' from package '%2'?")).arg(destName).arg(sourceArchive)
+                             + "\n" +
+                             QString(tr("one file has been modified by other application.if you update package file ,\n your modifications will lose."));
         m_ActionInfo.mode = (SUBACTION_MODE)mode;
         m_ActionInfo.archive = sourceArchive;
         m_ActionInfo.packageFile = destFile;
@@ -1131,7 +1132,7 @@ void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
         dialog.getButton(dialog.addButton(tr("cancel")))->setShortcut(Qt::Key_C);
         dialog.getButton(dialog.addButton(tr("update")))->setShortcut(Qt::Key_U);
 
-        dialog.setMinimumSize(380, 140);
+        dialog.setFixedSize(480, 140);
         DLabel *pContent = new DLabel(warningStr, &dialog);
         pContent->setAlignment(Qt::AlignmentFlag::AlignHCenter);
         DPalette pa;
@@ -1139,6 +1140,7 @@ void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
         pa.setBrush(DPalette::Text, pa.color(DPalette::ButtonText));
         DFontSizeManager::instance()->bind(pContent, DFontSizeManager::T6, QFont::Medium);
         pContent->setMinimumWidth(this->width());
+        pContent->setMinimumHeight(50);
         pContent->move(dialog.width() / 2 - pContent->width() / 2, dialog.height() / 2 - pContent->height() / 2 - 10);
         connect(&dialog, &DDialog::buttonClicked, this, &fileViewer::clickedSlot);
         dialog.exec();
