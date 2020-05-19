@@ -314,8 +314,9 @@ void fileViewer::onDropSlot(QStringList files)
 
 void fileViewer::deleteJobFinishedSlot()
 {
-    QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
-                       + QDir::separator() + "tempfiles" + QDir::separator() + m_ActionInfo.packageFile;
+//    QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
+//                       + QDir::separator() + "tempfiles" + QDir::separator() + m_ActionInfo.packageFile;
+    QString tempPath = m_ActionInfo.packageFile;
     qDebug() << "添加文件====：" << tempPath;
     emit sigFileAutoCompress(QStringList() << tempPath);
 }
@@ -1099,18 +1100,28 @@ void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
 {
     qDebug() << "拖拽后处理！";
     if (!urls.isEmpty()) {
-        QString curRowName;
-        Archive::Entry *entry = m_decompressmodel->entryForIndex(m_sortmodel->mapToSource(pTableViewFile->currentIndex()));
-        if (entry) {
-            curRowName = entry->fullPath();
+//        QString curRowName;
+//        /**
+//         * @brief currentIndex不可靠
+//         */
+//        Archive::Entry *entry = m_decompressmodel->entryForIndex(m_sortmodel->mapToSource(pTableViewFile->currentIndex()));
+//        if (entry) {
+//            curRowName = entry->fullPath();
+//        }
+        if (urls.length() == 0) {
+            return;
         }
+        QString destFile = urls[0];
+        QStringList list = destFile.split(QDir::separator());
+        QString destName = list.last();
+
         QString sourceArchive = m_decompressmodel->archive()->fileName();
 
-        QString warningStr = QString(tr("update file '%1' from package '%2' ? \n %3")).arg(curRowName).arg(sourceArchive)
+        QString warningStr = QString(tr("update file '%1' from package '%2' ? \n %3")).arg(destName).arg(sourceArchive)
                              .arg("one file has been modified by other application.if you update package file ,\n your modifications will lose.");
         m_ActionInfo.mode = (SUBACTION_MODE)mode;
         m_ActionInfo.archive = sourceArchive;
-        m_ActionInfo.packageFile = curRowName;
+        m_ActionInfo.packageFile = destFile;
         m_ActionInfo.ActionFiles = urls;
 
         DDialog dialog(this);
