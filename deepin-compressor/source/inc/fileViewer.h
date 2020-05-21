@@ -185,7 +185,6 @@ public slots:
 
     void clickedSlot(int index, const QString &text);
     void SubWindowDragMsgReceive(int mode, const QStringList &urls);
-    void SubWindowDragUpdateEntry(int mode, QVector<Archive::Entry *> &pVector);
 protected:
     void resizecolumn();
     void resizeEvent(QResizeEvent *size) override;
@@ -201,12 +200,17 @@ protected slots:
     void onRightMenuOpenWithClicked(QAction *action);
     void slotDragLeave(QString path);
     void onDropSlot(QStringList files);
-    void deleteJobFinishedSlot();
+    void slotDeletedFinshedAddStart();
 
 
 signals:
     void sigFileRemoved(const QStringList &);
-    void sigEntryRemoved(QVector<Archive::Entry *> &vectorDel);
+    /**
+     * @brief sigEntryRemoved
+     * @param vectorDel
+     * @param isManual,true:by action clicked; false: by message emited.
+     */
+    void sigEntryRemoved(QVector<Archive::Entry *> &vectorDel, bool isManual);
     void sigFileRemovedFromArchive(const QStringList &, const QString &);
     void sigextractfiles(QVector<Archive::Entry *> fileList, EXTRACT_TYPE type, QString path = "");
     void sigpathindexChanged();

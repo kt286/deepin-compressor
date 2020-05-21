@@ -60,8 +60,13 @@ signals:
     void sigextractfiles(QVector<Archive::Entry *>, QString path, EXTRACT_TYPE type);
     void sigOpenExtractFile(const QVector<Archive::Entry *> &fileList, const QString &programma);
     void sigFilelistIsEmpty();
-    void sigRefreshFileList(const QStringList &files);
-    void sigRefreshEntryVector(QVector<Archive::Entry *> &vectorDel);
+//    void sigRefreshFileList(const QStringList &files);
+    /**
+     * @brief sigRefreshEntryVector
+     * @param vectorDel
+     * @param isManual,true:by action clicked; false: by message emited.
+     */
+    void sigRefreshEntryVector(QVector<Archive::Entry *> &vectorDel, bool isManual);
     void sigAutoCompress(const QString &, const QStringList &);
 
     void sigUpdateUnCompreeTableView(const QFileInfo &);
@@ -77,11 +82,16 @@ public slots:
     void oneCompressPress();
     void onPathButoonClicked();
     void onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTRACT_TYPE type, QString path);
-    void onRefreshFilelist(const QStringList &filelist);
-    void onRefreshEntryList(QVector<Archive::Entry *> &vectorDel);
+//    void onRefreshFilelist(const QStringList &filelist);
+    /**
+     * @brief onRefreshEntryList
+     * @param vectorDel
+     * @param isManual,true:by action clicked; false: by message emited.
+     */
+    void onRefreshEntryList(QVector<Archive::Entry *> &vectorDel, bool isManual);
     void onextractfilesOpenSlot(const QVector<Archive::Entry *> &fileList, const QString &programma);
     void onAutoCompress(const QStringList &path);
-
+    void slotSubWindowTipsPopSig(int, const QStringList &);
 private:
 
     fileViewer *m_fileviewer;

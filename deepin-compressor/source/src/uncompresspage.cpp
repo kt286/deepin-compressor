@@ -78,7 +78,7 @@ UnCompressPage::UnCompressPage(QWidget *parent)
     connect(m_extractpath, &DPushButton::clicked, this, &UnCompressPage::onPathButoonClicked);
     connect(m_fileviewer, &fileViewer::sigextractfiles, this, &UnCompressPage::onextractfilesSlot);
     connect(m_fileviewer, &fileViewer::sigOpenWith,     this, &UnCompressPage::onextractfilesOpenSlot);
-    connect(m_fileviewer, &fileViewer::sigFileRemoved, this, &UnCompressPage::onRefreshFilelist);
+//    connect(m_fileviewer, &fileViewer::sigFileRemoved, this, &UnCompressPage::onRefreshFilelist);
     connect(m_fileviewer, &fileViewer::sigEntryRemoved, this, &UnCompressPage::onRefreshEntryList);
     connect(m_fileviewer, &fileViewer::sigFileAutoCompress, this, &UnCompressPage::onAutoCompress);
     connect(this, &UnCompressPage::subWindowTipsPopSig, m_fileviewer, &fileViewer::SubWindowDragMsgReceive);
@@ -250,23 +250,23 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
     }
 }
 
-void UnCompressPage::onRefreshFilelist(const QStringList &filelist)
-{
-    m_filelist = filelist;
-//    m_fileviewer->setFileList(m_filelist);
+//void UnCompressPage::onRefreshFilelist(const QStringList &filelist)
+//{
+//    m_filelist = filelist;
+////    m_fileviewer->setFileList(m_filelist);
 
-    emit sigRefreshFileList(m_filelist);
+//    emit sigRefreshFileList(m_filelist);
 
-    if (m_filelist.size() == 0) {
-        emit sigFilelistIsEmpty();
-    }
-}
+//    if (m_filelist.size() == 0) {
+//        emit sigFilelistIsEmpty();
+//    }
+//}
 
-void UnCompressPage::onRefreshEntryList(QVector<Archive::Entry *> &vectorDel)
+void UnCompressPage::onRefreshEntryList(QVector<Archive::Entry *> &vectorDel, bool isManual)
 {
     m_vectorDel = vectorDel;
 //    emit sigRefreshFileList(m_filelist);
-    emit sigRefreshEntryVector(m_vectorDel);
+    emit sigRefreshEntryVector(m_vectorDel, isManual);
     if (m_vectorDel.size() == 0) {
         emit sigFilelistIsEmpty();
     }
@@ -280,4 +280,9 @@ void UnCompressPage::onextractfilesOpenSlot(const QVector<Archive::Entry *> &fil
 void UnCompressPage::onAutoCompress(const QStringList &path)
 {
     emit sigAutoCompress(m_info.filePath(), path);
+}
+
+void UnCompressPage::slotSubWindowTipsPopSig(int mode, const QStringList &args)
+{
+    emit subWindowTipsPopSig(mode, args);
 }

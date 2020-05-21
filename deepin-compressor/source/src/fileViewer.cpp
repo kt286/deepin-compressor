@@ -312,7 +312,7 @@ void fileViewer::onDropSlot(QStringList files)
 //    subWindowChangedMsg(ACTION_DRAG, files);
 }
 
-void fileViewer::deleteJobFinishedSlot()
+void fileViewer::slotDeletedFinshedAddStart()
 {
 //    QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
 //                       + QDir::separator() + "tempfiles" + QDir::separator() + m_ActionInfo.packageFile;
@@ -807,24 +807,6 @@ void fileViewer::subWindowChangedMsg(const SUBACTION_MODE &mode, const QStringLi
 
 void fileViewer::upDateArchive(const SubActionInfo &dragInfo)
 {
-//    switch (dragInfo.mode) {
-//    case ACTION_DELETE: {
-//        qDebug() << "删除文件：" << dragInfo.ActionFiles[0];
-//        emit sigFileRemovedFromArchive(dragInfo.ActionFiles, dragInfo.packageFile);
-//    }
-//    break;
-//    case ACTION_DRAG:
-//    case ACTION_OPEN: {
-//        QString addInfo = QString("给压缩包：%1中的压缩文件：%2添加拖拽文件：%3")
-//                          .arg(dragInfo.archive).arg(dragInfo.packageFile).arg(dragInfo.ActionFiles[0]);
-//        qDebug() << addInfo;
-//        emit sigFileAutoCompressToArchive(dragInfo.ActionFiles, dragInfo.packageFile);
-//    }
-//    break;
-//    case ACTION_INVALID:
-//        break;
-//    }
-
     //delete file from dest
     qDebug() << "删除文件：" << dragInfo.packageFile;
     QString fullPath = dragInfo.ActionFiles[0];
@@ -833,17 +815,14 @@ void fileViewer::upDateArchive(const SubActionInfo &dragInfo)
         Archive::Entry *pEntry = this->m_decompressmodel->mapFilesUpdate[fullPath];
         QVector<Archive::Entry *> pV;
         pV.append(pEntry);
-        emit sigEntryRemoved(pV);//先移除后添加的更新方法
+        if (UnCompressPage *pPage = qobject_cast<UnCompressPage *>(parentWidget())) {
+//            disconnect(pPage, &UnCompressPage::sigDeleteJobFinished, this, &fileViewer::slotDeletedFinshedAddStart);
+            auto type = static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::QueuedConnection);
+            connect(pPage, &UnCompressPage::sigDeleteJobFinished, this, &fileViewer::slotDeletedFinshedAddStart, type); //移除后，会发送添加的信号
+        }
+        emit sigEntryRemoved(pV, false); //先移除后添加的更新方法
     } else {
         return;
-    }
-    //add file from temp path
-//    QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
-//                       + QDir::separator() + "tempfiles" + QDir::separator() + dragInfo.packageFile;
-//    qDebug() << "添加文件：" << tempPath;
-    //emit sigFileAutoCompress(QStringList() << tempPath);
-    if (UnCompressPage *pPage = qobject_cast<UnCompressPage *>(parentWidget())) {
-        connect(pPage, &UnCompressPage::sigDeleteJobFinished, this, &fileViewer::deleteJobFinishedSlot);
     }
 }
 
@@ -1018,7 +997,7 @@ void fileViewer::slotDecompressRowDelete()
     const QStringList filelist;
 //    emit sigFileRemoved(filelist);
     this->m_sortmodel->refreshNow();
-    emit sigEntryRemoved(vectorEntry);
+    emit sigEntryRemoved(vectorEntry, true);
 
     subWindowChangedMsg(ACTION_DELETE, filelist);
 }
@@ -1091,23 +1070,10 @@ void fileViewer::clickedSlot(int index, const QString &text)
     }
 }
 
-void fileViewer::SubWindowDragUpdateEntry(int mode, QVector<Archive::Entry *> &pVector)
-{
-    qDebug() << "拖拽后处理！";
-}
-
 void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
 {
-    qDebug() << "拖拽后处理！";
+    qDebug() << "更新消息通知接受处理，弹窗提问" << urls;
     if (!urls.isEmpty()) {
-//        QString curRowName;
-//        /**
-//         * @brief currentIndex不可靠
-//         */
-//        Archive::Entry *entry = m_decompressmodel->entryForIndex(m_sortmodel->mapToSource(pTableViewFile->currentIndex()));
-//        if (entry) {
-//            curRowName = entry->fullPath();
-//        }
         if (urls.length() == 0) {
             return;
         }

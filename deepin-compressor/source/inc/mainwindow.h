@@ -55,6 +55,7 @@
 
 
 #define TITLE_FIXED_HEIGHT 50
+#define HEADBUS "/QtDusServer/registry"
 
 DWIDGET_USE_NAMESPACE
 
@@ -95,6 +96,7 @@ enum JobState {
     JOB_NULL,
     JOB_ADD,
     JOB_DELETE,
+    JOB_DELETE_MANUAL,//手动delete，而非消息通知的delete
     JOB_CREATE,
     JOB_LOAD,
     JOB_COPY,
@@ -106,10 +108,43 @@ enum JobState {
     JOB_BATCHCOMPRESS,
 };
 
+class MainWindow;
+
+/**
+ * this can help us to get the map of all mainwindow created.
+ * @brief The GlobalMainWindowMap struct
+ */
+struct GlobalMainWindowMap {
+public:
+    void insert(const QString &strWinId, MainWindow *wnd)
+    {
+        if (this->mMapGlobal.contains(strWinId) == false) {
+            this->mMapGlobal.insert(strWinId, wnd);
+        }
+    }
+
+    MainWindow *getOne(const QString &strWinId)
+    {
+        if (this->mMapGlobal.contains(strWinId) == false) {
+            return nullptr;
+        } else {
+            return this->mMapGlobal[strWinId];
+        }
+    }
+
+    void clear()
+    {
+        this->mMapGlobal.clear();
+    }
+
+    QMap<QString, MainWindow *> mMapGlobal;
+};
+
 static QVector<qint64> m_tempProcessId;
 static Log4Qt::Logger *m_logger = nullptr;
 class QStackedLayout;
 static int m_windowcount = 1;
+class MonitorAdaptor;
 class MainWindow : public DMainWindow
 {
     Q_OBJECT
@@ -130,8 +165,13 @@ public:
     void creatArchive(QMap<QString, QString> &Args);
     void creatBatchArchive(QMap<QString, QString> &Args, QMap<QString, QStringList> &filetoadd);
     void addArchive(QMap<QString, QString> &Args);
-    void removeFromArchive(const QStringList &removeFilePaths);
-    void removeEntryVector(QVector<Archive::Entry *> &vectorDel);
+//    void removeFromArchive(const QStringList &removeFilePaths);
+    /**
+     * @brief removeEntryVector
+     * @param vectorDel
+     * @param isManual,true:by action clicked; false: by message emited.
+     */
+    void removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool isManual);
     void moveToArchive(QMap<QString, QString> &Args);
 
     void transSplitFileName(QString &fileName); // *.7z.003 -> *.7z.001
@@ -152,7 +192,7 @@ public:
     //log
     void initalizeLog(QWidget *widget);
     void logShutDown();
-
+    void bindAdapter();
 //    static Log4Qt::Logger *getLogger();
 
 private:
@@ -207,8 +247,13 @@ private slots:
     void onCompressPageFilelistIsEmpty();
 
     void slotCalDeleteRefreshTotalFileSize(const QStringList &files);
-    void slotUncompressCalDeleteRefreshTotalFileSize(const QStringList &files);
-    void slotUncompressCalDeleteRefreshTotoalSize(QVector<Archive::Entry *> &vectorDel);
+//    void slotUncompressCalDeleteRefreshTotalFileSize(const QStringList &files);
+    /**
+     * @brief slotUncompressCalDeleteRefreshTotoalSize
+     * @param vectorDel
+     * @param isManual,true:by action clicked; false: by message emited.
+     */
+    void slotUncompressCalDeleteRefreshTotoalSize(QVector<Archive::Entry *> &vectorDel, bool isManual);
 
     void resetMainwindow();
     void slotBackButtonClicked();
@@ -304,7 +349,8 @@ private:
 
     bool IsAddArchive = false;
 
-
+    GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
+    MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
 private:
     void calSelectedTotalFileSize(const QStringList &files);
     void calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel);

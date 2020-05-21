@@ -32,23 +32,23 @@ class MonitorAdaptor: public QDBusAbstractAdaptor
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "com.archive.mainwindow.monitor")
     Q_CLASSINFO("D-Bus Introspection", ""
-"  <interface name=\"com.archive.mainwindow.monitor\">\n"
-"    <method name=\"onSubWindowActionFinished\">\n"
-"      <arg direction=\"out\" type=\"b\"/>\n"
-"      <arg direction=\"in\" type=\"i\" name=\"mode\"/>\n"
-"      <arg direction=\"in\" type=\"x\" name=\"pid\"/>\n"
-"      <arg direction=\"in\" type=\"as\" name=\"urls\"/>\n"
-"    </method>\n"
-"    <method name=\"popUpChangedDialog\">\n"
-"      <arg direction=\"out\" type=\"b\"/>\n"
-"      <arg direction=\"in\" type=\"x\" name=\"pid\"/>\n"
-"    </method>\n"
-"    <method name=\"createSubWindow\">\n"
-"      <arg direction=\"out\" type=\"b\"/>\n"
-"      <arg direction=\"in\" type=\"as\" name=\"urls\"/>\n"
-"    </method>\n"
-"  </interface>\n"
-        "")
+                "  <interface name=\"com.archive.mainwindow.monitor\">\n"
+                "    <method name=\"onSubWindowActionFinished\">\n"
+                "      <arg direction=\"out\" type=\"b\"/>\n"
+                "      <arg direction=\"in\" type=\"i\" name=\"mode\"/>\n"
+                "      <arg direction=\"in\" type=\"x\" name=\"pid\"/>\n"
+                "      <arg direction=\"in\" type=\"as\" name=\"urls\"/>\n"
+                "    </method>\n"
+                "    <method name=\"popUpChangedDialog\">\n"
+                "      <arg direction=\"out\" type=\"b\"/>\n"
+                "      <arg direction=\"in\" type=\"x\" name=\"pid\"/>\n"
+                "    </method>\n"
+                "    <method name=\"createSubWindow\">\n"
+                "      <arg direction=\"out\" type=\"b\"/>\n"
+                "      <arg direction=\"in\" type=\"as\" name=\"urls\"/>\n"
+                "    </method>\n"
+                "  </interface>\n"
+                "")
 public:
     MonitorAdaptor(QObject *parent);
     virtual ~MonitorAdaptor();

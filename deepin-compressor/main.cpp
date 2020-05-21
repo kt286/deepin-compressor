@@ -64,24 +64,7 @@ int main(int argc, char *argv[])
     QDBusConnection bus = QDBusConnection::sessionBus();
     bool busRegistered = bus.registerService("com.archive.mainwindow.monitor");
     if (busRegistered == false) {
-        //get line function
-//        if (newfilelist.isEmpty()) {
-//            QStringList cmdLineArgs = DApplication::arguments();
-//            if (cmdLineArgs.size() > 1) {
-//                QString path = cmdLineArgs.at(1);
-//                newfilelist.push_back(path);
-//            }
-//        }
-
-//        QString tip = "";
-//        for (int i = 0; i < newfilelist.length(); i++) {
-//            tip += newfilelist[i];
-//        }
-//        QMessageBox::information(NULL, "Title", tip,
-//                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-
-
-        com::archive::mainwindow::monitor monitor("com.archive.mainwindow.monitor", "/QtDusServer/registry", QDBusConnection::sessionBus());
+        com::archive::mainwindow::monitor monitor("com.archive.mainwindow.monitor", HEADBUS, QDBusConnection::sessionBus());
         if (monitor.isValid()) {
             QDBusPendingReply<bool> reply = monitor.createSubWindow(newfilelist);
             reply.waitForFinished();
@@ -131,20 +114,21 @@ int main(int argc, char *argv[])
         newfilelist = multilist;
     }
     MainWindow w;
-    MonitorAdaptor mAdaptor(&w);
+
+    w.bindAdapter();
 
 
     if (busRegistered == true) {
 
         // init modules.
 
-        app.setMainWindow(&w);
+//        app.setMainWindow(&w);
         if (app.setSingleInstance("deepin-compressor")) {
             Dtk::Widget::moveToCenter(&w);
         }
 
-
-        bus.registerObject("/QtDusServer/registry", &w);
+        QString strWId = QString::number(w.winId());
+        bus.registerObject(HEADBUS, &w);
 
         QObject::connect(&w, &MainWindow::sigquitApp, &app, &DApplication::quit);
         // handle command line parser.
@@ -152,9 +136,9 @@ int main(int argc, char *argv[])
             QMetaObject::invokeMethod(&w, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, newfilelist));
         }
 
-        LogWidget widget;
-        w.initalizeLog(&widget);
-        widget.show();
+//        LogWidget widget;
+//        w.initalizeLog(&widget);
+//        widget.show();
         w.show();
     }
     return app.exec();

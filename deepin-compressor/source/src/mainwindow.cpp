@@ -60,7 +60,6 @@
 
 DWIDGET_USE_NAMESPACE
 
-#define SEPARATOR_ARGUMENT ".winid."
 #define DEFAUTL_PATH DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"+ QDir::separator()
 
 
@@ -68,6 +67,8 @@ QString MainWindow::m_loadfile;
 
 MainWindow::MainWindow(QWidget *parent) : DMainWindow(parent)
 {
+//    setAttribute(Qt::WA_DeleteOnClose);
+
     m_model = new ArchiveModel(this);
     m_filterModel = new ArchiveSortFilterModel(this);
 
@@ -92,7 +93,19 @@ MainWindow::MainWindow(QWidget *parent) : DMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
+
+    if (m_windowcount == 0) {
+
+        if (this->pMapGlobalWnd != nullptr) {
+            this->pMapGlobalWnd->mMapGlobal.clear();
+        }
+    }
     saveWindowState();
+}
+
+void MainWindow::bindAdapter()
+{
+    MonitorAdaptor *adaptor = new MonitorAdaptor(this);
 }
 
 qint64 MainWindow::getMediaFreeSpace()
@@ -372,7 +385,7 @@ void MainWindow::InitConnection()
     connect(this, &MainWindow::sigZipSelectedFiles, m_CompressPage, &CompressPage::onSelectedFilesSlot);
     connect(m_model, &ArchiveModel::loadingFinished, this, &MainWindow::slotLoadingFinished);
     connect(m_UnCompressPage, &UnCompressPage::sigDecompressPress, this, &MainWindow::slotextractSelectedFilesTo);
-    connect(m_UnCompressPage, &UnCompressPage::sigRefreshFileList, this, &MainWindow::slotUncompressCalDeleteRefreshTotalFileSize);
+//    connect(m_UnCompressPage, &UnCompressPage::sigRefreshFileList, this, &MainWindow::slotUncompressCalDeleteRefreshTotalFileSize);
     connect(m_UnCompressPage, &UnCompressPage::sigRefreshEntryVector, this, &MainWindow::slotUncompressCalDeleteRefreshTotoalSize);
     connect(m_UnCompressPage, &UnCompressPage::sigFilelistIsEmpty, this, &MainWindow::onCompressPageFilelistIsEmpty);
     connect(m_encryptionpage, &EncryptionPage::sigExtractPassword, this, &MainWindow::SlotExtractPassword);
@@ -626,18 +639,47 @@ bool MainWindow::popUpChangedDialog(const qint64 &pid)
 
 bool MainWindow::createSubWindow(const QStringList &urls)
 {
+    QStringList inUrls = std::move(const_cast<QStringList & >(urls));
+    qDebug() << "=================urls:" << inUrls;
+
+    QString winid = "";
+    for (int i = 0; i < inUrls.length(); i++) {
+        if (inUrls[i].contains(HEADBUS)) {
+            winid = inUrls[i];
+            inUrls.removeOne(winid);
+            winid.remove(HEADBUS);
+            break;
+        }
+    }
+    MainWindow *pSrcWnd = nullptr;
+    if (this->pMapGlobalWnd != nullptr) {
+        pSrcWnd = this->pMapGlobalWnd->getOne(winid);
+    }
     //create sub mainwindow
+    if (inUrls.length() == 0) {
+        return false;
+    }
     MainWindow *subWindow = new MainWindow();
+    subWindow->pMapGlobalWnd = this->pMapGlobalWnd;
+    if (this->pMapGlobalWnd == nullptr) {
+        this->pMapGlobalWnd = new GlobalMainWindowMap();
+    }
+    pMapGlobalWnd->insert(QString::number(subWindow->winId()), subWindow);
+
     subWindow->resize(100, 100);
-//    MonitorAdaptor mAdaptor(subWindow);
-//    Dtk::Widget::moveToCenter(subWindow);
-//    QObject::connect(&subWindow, &MainWindow::sigquitApp, qApp, &DApplication::quit);
-    if (!urls.isEmpty()) {
-        connect(subWindow, &MainWindow::sigTipsWindowPopUp, this->m_UnCompressPage, &UnCompressPage::subWindowTipsPopSig);
-//        QMetaObject::invokeMethod(subWindow, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, urls));
+    if (!inUrls.isEmpty()) {
+        if (pSrcWnd != nullptr) {
+            qDebug() << "find the window success,winid:" << winid;
+            connect(subWindow, &MainWindow::sigTipsWindowPopUp, pSrcWnd->m_UnCompressPage, &UnCompressPage::slotSubWindowTipsPopSig);
+        } else {
+            qDebug() << "warn: can not find the window,winid:" << winid;
+//            connect(subWindow, &MainWindow::sigTipsWindowPopUp, this->m_UnCompressPage, &UnCompressPage::slotSubWindowTipsPopSig);
+        }
+//        QMetaObject::invokeMethod(subWindow, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, inUrls));
         subWindow->m_pageid = PAGE_ZIP;
-        subWindow->onRightMenuSelected(urls);
-//        subWindow->onSelected(urls);
+//        subWindow->onRightMenuSelected(inUrls);
+        QMetaObject::invokeMethod(subWindow, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, inUrls));
+//        subWindow->onSelected(inUrls);
     }
     ++m_windowcount;
 
@@ -1450,35 +1492,45 @@ void MainWindow::slotExtractionDone(KJob *job)
         QStringList arguments;
         QString programPath = QStandardPaths::findExecutable("xdg-open");
         /*for (int i = 0; i < m_extractSimpleFiles.count(); i++)*/
-        {
-            QFileInfo file = m_extractSimpleFiles.at(0)->name();
+//        {
+        QString firstFileName = m_extractSimpleFiles.at(0)->name();
+        bool isCompressedFile = Utils::isCompressed_file(firstFileName);
+        if (isCompressedFile == true) {
+            programPath = QStandardPaths::findExecutable("deepin-compressor");
+        }
+        QFileInfo file(firstFileName);
+        if (file.fileName().contains("%")/* && file.fileName().contains(".png")*/) {
 
-
-            if (file.fileName().contains("%")/* && file.fileName().contains(".png")*/) {
-
-                QProcess p;
+            QProcess p;
 //                QString tempFileName = QString("%1.png").arg(openTempFileLink);
-                QString tempFileName = QString("%1").arg(openTempFileLink) + "." + file.suffix();
-                openTempFileLink++;
-                QString commandCreate = "ln";
-                QStringList args;
-                args.append(DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
-                            + QDir::separator() + m_extractSimpleFiles.at(0)->name());
-                args.append(DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
-                            + QDir::separator() + tempFileName);
-                arguments << DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
-                          + QDir::separator() + tempFileName;
-                p.execute(commandCreate, args);
-            } else {
-                QString destPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
-                                   + QDir::separator() + m_extractSimpleFiles.at(0)->name();
-                if (pExtractWorkEntry != nullptr) {
-                    this->m_model->mapFilesUpdate.insert(destPath, pExtractWorkEntry);
-                }
+            QString tempFileName = QString("%1").arg(openTempFileLink) + "." + file.suffix();
+            openTempFileLink++;
+            QString commandCreate = "ln";
+            QStringList args;
+            args.append(DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
+                        + QDir::separator() + firstFileName);
+            args.append(DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
+                        + QDir::separator() + tempFileName);
+            arguments << DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
+                      + QDir::separator() + tempFileName;
+            p.execute(commandCreate, args);
+        } else {
+            QString destPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
+                               + QDir::separator() + firstFileName;
+            if (pExtractWorkEntry != nullptr) {
+                this->m_model->mapFilesUpdate.insert(destPath, pExtractWorkEntry);
+            }
 
-                arguments << destPath;
+            arguments << destPath;
+            if (isCompressedFile == true) {
+                if (pMapGlobalWnd == nullptr) {
+                    pMapGlobalWnd = new GlobalMainWindowMap();
+                }
+                pMapGlobalWnd->insert(QString::number(this->winId()), this);
+                arguments << HEADBUS + QString::number(this->winId());
             }
         }
+//        }
 
         qDebug() << arguments;
         cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
@@ -1855,13 +1907,10 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         return;
     }
 
-    qDebug() << "开始执行添加任务11:" << sourceArchivePath;
     QFileInfo fi(sourceArchivePath);
     Archive::Entry *sourceEntry  = nullptr;
     if (fi.isAbsolute()) {
         sourceEntry = new Archive::Entry();
-        //sourceEntry->setFullPath(sourceArchivePath);
-
         if (fi.isDir()) {
             sourceEntry->setIsDirectory(true);
         }
@@ -1896,8 +1945,6 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         options.setGlobalWorkDir(sourceArchivePath);
     }
 
-    qDebug() << "开始执行添加任务12";
-    //m_addJob = Archive::add(m_model->archive() , all_entries, sourceEntry, options );
 //    m_addJob =  m_model->addFiles(all_entries, sourceEntry, options);//this write by hanshuai
     if (m_model->getParentEntry() != sourceEntry) {
         sourceEntry = m_model->getParentEntry();
@@ -1906,11 +1953,6 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     if (!m_addJob) {
         return;
     }
-
-
-//    if (!password.isEmpty()) {
-//        m_addJob->enableEncryption(password, enableHeaderEncryption.compare("true") ? false : true);
-//    }
 
     connect(m_addJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)), Qt::ConnectionType::UniqueConnection);
     connect(m_addJob, &CreateJob::percentfilename, this, &MainWindow::SlotProgressFile, Qt::ConnectionType::UniqueConnection);
@@ -1921,53 +1963,50 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
 
     m_jobState = JOB_ADD;
     refreshPage();
-    m_pathstore = Args[QStringLiteral("localFilePath")];
-    //m_compressDirFiles = CheckAllFiles(m_pathstore);
-    qDebug() << "开始执行添加任务13";
+    //m_pathstore = Args[QStringLiteral("localFilePath")];
     m_addJob->start();
     m_workstatus = WorkProcess;
-//    m_progressdialog->setFinished(m_pathstore);
 }
 
-void MainWindow::removeFromArchive(const QStringList &removeFilePaths)
-{
-    QVector< Archive::Entry * > all_entries;
+//void MainWindow::removeFromArchive(const QStringList &removeFilePaths)
+//{
+//    QVector< Archive::Entry * > all_entries;
 
-    foreach (QString file, removeFilePaths) {
-        Archive::Entry *entry = new Archive::Entry();
-        entry->setFullPath(file);
+//    foreach (QString file, removeFilePaths) {
+//        Archive::Entry *entry = new Archive::Entry();
+//        entry->setFullPath(file);
 
-        QFileInfo fi(file);
-        if (fi.isDir()) {
-            entry->setIsDirectory(false);
-        }
+//        QFileInfo fi(file);
+//        if (fi.isDir()) {
+//            entry->setIsDirectory(false);
+//        }
 
-        all_entries.append(entry);
-    }
+//        all_entries.append(entry);
+//    }
 
-    if (all_entries.isEmpty()) {
-        qDebug() << "all_entries.isEmpty()";
-        return;
-    }
+//    if (all_entries.isEmpty()) {
+//        qDebug() << "all_entries.isEmpty()";
+//        return;
+//    }
 
-    m_DeleteJob =  m_model->deleteFiles(all_entries);
-    if (!m_DeleteJob) {
-        return;
-    }
+//    m_DeleteJob =  m_model->deleteFiles(all_entries);
+//    if (!m_DeleteJob) {
+//        return;
+//    }
 
-    connect(m_DeleteJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
+//    connect(m_DeleteJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
 
-    m_pageid = PAGE_DELETEPROGRESS;
+//    m_pageid = PAGE_DELETEPROGRESS;
 
-    m_Progess->settype(DELETEING);
-    m_jobState = JOB_DELETE;
-    //refreshPage();
+//    m_Progess->settype(DELETEING);
+//    m_jobState = JOB_DELETE;
+//    //refreshPage();
 
-    m_DeleteJob->start();
-    m_workstatus = WorkProcess;
-}
+//    m_DeleteJob->start();
+//    m_workstatus = WorkProcess;
+//}
 
-void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel)
+void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool isManual)
 {
     if (vectorDel.isEmpty()) {
         qDebug() << "all_entries.isEmpty()";
@@ -1987,9 +2026,14 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel)
     refreshPage();
 
     //m_Progess->settype(DECOMPRESSING);
-    m_jobState = JOB_DELETE;
-    //refreshPage();
+    if (isManual) {
+        m_jobState = JOB_DELETE_MANUAL;
+    } else {
+        m_jobState = JOB_DELETE;
+    }
 
+    //refreshPage();
+    qDebug() << "delete job start";
     m_DeleteJob->start();
     m_workstatus = WorkProcess;
 }
@@ -2444,24 +2488,7 @@ void MainWindow::slotJobFinished(KJob *job)
             m_addJob = nullptr;
         }
         refreshPage();
-
-//        qDebug() << "拖拽添加任务完成，当前进程pid为：" << getpid();
-//        com::archive::mainwindow::monitor monitor1("com.archive.mainwindow.monitor", "/QtDusServer/registry", QDBusConnection::sessionBus());
-//        QDBusPendingReply<bool> reply1 = monitor1.popUpChangedDialog(getppid());
-//        reply1.waitForFinished();
-//        if (reply1.isValid()) {
-//            bool isClosed = reply1.value();
-//            if (isClosed) {
-//                qDebug() << "更新主进程界面，弹出对话框！";
-//            }
-//        } else {
-//            qDebug() << "msg handle failed!\n";
-//        }
-
         emit sigTipsWindowPopUp(SUBACTION_MODE::ACTION_DRAG, ArchivePath);
-//        QVector< Archive::Entry * > all_entries;
-//        all_entries.append(m_model->getRootEntry());
-//        emit sigTipsUpdateEntry(SUBACTION_MODE::ACTION_DRAG, all_entries);
     }
 
     break;
@@ -2480,7 +2507,26 @@ void MainWindow::slotJobFinished(KJob *job)
         m_filterModel->clear();
         m_filterModel->setSourceModel(m_model);
         //refresh valid end
-        qDebug() << "删除完成信号";
+        qDebug() << "自动删除完成信号" << ArchivePath;
+        emit deleteJobComplete();//要不要把这句注释掉？
+    }
+    break;
+    case JOB_DELETE_MANUAL: {
+        m_pageid = PAGE_UNZIP;
+        //reload package archive
+        QString filename =   m_model->archive()->fileName();
+        QStringList ArchivePath = QStringList() << filename;
+        //onSelected(ArchivePath);
+        if (m_DeleteJob) {
+            m_DeleteJob->deleteLater();
+            m_DeleteJob = nullptr;
+        }
+        refreshPage();
+        //refresh valid begin
+        m_filterModel->clear();
+        m_filterModel->setSourceModel(m_model);
+        //refresh valid end
+        qDebug() << "手动删除完成信号" << ArchivePath;
         emit deleteJobComplete();
         emit sigTipsWindowPopUp(SUBACTION_MODE::ACTION_DELETE, ArchivePath);
     }
@@ -2795,22 +2841,22 @@ void MainWindow::slotCalDeleteRefreshTotalFileSize(const QStringList &files)
     calSelectedTotalFileSize(files);
 }
 
-void MainWindow::slotUncompressCalDeleteRefreshTotalFileSize(const QStringList &files)
-{
-    resetMainwindow();
+//void MainWindow::slotUncompressCalDeleteRefreshTotalFileSize(const QStringList &files)
+//{
+//    resetMainwindow();
 
-    calSelectedTotalFileSize(files);
+//    calSelectedTotalFileSize(files);
 
-    removeFromArchive(files);
-}
+//    removeFromArchive(files);
+//}
 
-void MainWindow::slotUncompressCalDeleteRefreshTotoalSize(QVector<Archive::Entry *> &vectorDel)
+void MainWindow::slotUncompressCalDeleteRefreshTotoalSize(QVector<Archive::Entry *> &vectorDel, bool isManual)
 {
     resetMainwindow();
 
     calSelectedTotalEntrySize(vectorDel);
 
-    removeEntryVector(vectorDel);
+    removeEntryVector(vectorDel, isManual);
 }
 
 void MainWindow::resetMainwindow()
