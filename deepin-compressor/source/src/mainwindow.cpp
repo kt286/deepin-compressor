@@ -1530,24 +1530,14 @@ void MainWindow::slotExtractionDone(KJob *job)
             m_progressdialog->setFinished(m_decompressfilepath);
         }
 
-        DDesktopServices::showFileItem(QUrl(m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString(), QUrl::TolerantMode));
-
         m_pageid = PAGE_UNZIP;
         refreshPage();
-    }
-    //    else if( job->error() && job->error() == KJob::KilledJobError )
-    //    {
-    //        m_pageid = PAGE_UNZIP;
-    //        refreshPage();
-    //    }
-//    else if (Encryption_TempExtract_Open == m_encryptiontype)
-//    {
-
-    if (m_encryptiontype != Encryption_DRAG) {
-        QString fullpath = m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString();
-        QFileInfo fileinfo(fullpath);
-        if (fileinfo.exists()) {
-            DDesktopServices::showFileItem(fullpath);
+        if (m_encryptiontype != Encryption_DRAG) {
+            QString fullpath = m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString();
+            QFileInfo fileinfo(fullpath);
+            if (fileinfo.exists()) {
+                DDesktopServices::showFileItem(fullpath);
+            }
         }
     } else if (Encryption_TempExtract_Open_Choose == m_encryptiontype) {
         QString ppp = program;

@@ -20,9 +20,7 @@ DEFINES += QT_MESSAGELOGCONTEXT
 INCLUDEPATH +=  $$PWD/source/inc/ \
                 $$PWD/interface/ \
                 $$PWD/../plugin/libLogPlugin
-
-LIBS += -L/data/home/hushiwei/workHS/workNew0522/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
-
+LIBS += -L/data/home/hushiwei/workHS/jaredwork0522/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
 
 # Input
 HEADERS +=  \
