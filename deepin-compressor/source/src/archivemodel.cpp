@@ -790,7 +790,7 @@ void ArchiveModel::newEntry(Archive::Entry *receivedEntry, InsertBehaviour behav
         QString parentPath = QString(parent->property("fullPath").toString());
         QString childPath = QString(receivedEntry->property("fullPath").toString());
         if (parentPath != "" && childPath.contains(parentPath)) {
-            qDebug() << parentPath;
+//            qDebug() << parentPath;
         } else {
             receivedEntry->setProperty("fullPath", parentPath + childPath);
         }

@@ -121,6 +121,24 @@ qint64 Archive::Entry::getSize()
     return m_size;
 }
 
+void Archive::Entry::calAllSize(qint64 &size)
+{
+    if (this->isDir() == false) {
+        //            size += entry->getSize();
+        size += 1;
+        return ;
+    }
+    const auto archiveEntries = this->entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            entry->calAllSize(size);
+        } else {
+//            size += entry->getSize();
+            size += 1;//如果计算真实的大小就用上面getSize，如果计算有效文件的个数，就+1
+        }
+    }
+}
+
 void Archive::Entry::setSize(qint64 size)
 {
     m_size = size;

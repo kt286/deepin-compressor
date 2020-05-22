@@ -69,6 +69,11 @@ public:
     Entry *getParent() const;
     void setParent(Entry *parent);
     qint64 getSize();
+    /**
+     * @brief calAllSize(include child entry's size)
+     * @param size
+     */
+    void calAllSize(qint64 &size);
     void setSize(qint64 size);
     void setFullPath(const QString &fullPath);
     QString fullPath(PathFormat format = WithTrailingSlash) const;

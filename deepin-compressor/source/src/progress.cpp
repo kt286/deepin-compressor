@@ -142,6 +142,7 @@ void Progress::setSpeedAndTimeText(COMPRESS_TYPE type)
         m_speedLabel->setText(tr("Speed", "compress") + ": " + tr("Calculating..."));
     }
     m_restTimeLabel->setText(tr("Time left") + ": " + tr("Calculating..."));
+    qDebug() << "setspeedandtimetext";
 }
 
 void Progress::setTempProgress()
@@ -214,7 +215,14 @@ void Progress::displaySpeedAndTime(double speed, qint64 timeLeft)
     } else if (m_type == DELETEING) {
         m_speedLabel->setText(tr("Speed", "delete") + ": " + QString::number((speed / 1024), 'f', 2) + "MB/S");
     } else if (m_type == COMPRESSDRAGADD) {
-        m_speedLabel->setText(tr("Speed", "compress") + ": " + tr("Calculating..."));
+//        m_speedLabel->setText(tr("Speed", "compress") + ": " + tr("Calculating..."));
+        if (speed < 1024) {
+            m_speedLabel->setText(tr("Speed", "compress") + ": " + QString::number(speed, 'f', 2) + "KB/S");
+        } else if (speed > 1024 && speed < 1024 * 300) {
+            m_speedLabel->setText(tr("Speed", "compress") + ": " + QString::number((speed / 1024), 'f', 2) + "MB/S");
+        } else {
+            m_speedLabel->setText(tr("Speed", "compress") + ": " + ">300MB/S");
+        }
     } else {
         if (speed < 1024) {
             m_speedLabel->setText(tr("Speed", "uncompress") + ": " + QString::number(speed, 'f', 2) + "KB/S");

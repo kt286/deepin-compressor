@@ -879,21 +879,23 @@ void MainWindow::calSelectedTotalFileSize(const QStringList &files)
 
 void MainWindow::calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel)
 {
+
     foreach (Archive::Entry *entry, vectorDel) {
 
-        if (entry->isDir() == false) {
-            qint64 curFileSize = entry->property("size").toInt();
+//        if (entry->isDir() == false) {
+//            qint64 curFileSize = entry->property("size").toInt();
 
-#ifdef __aarch64__
-            if (maxFileSize_ < curFileSize) {
-                maxFileSize_ = curFileSize;
-            }
-#endif
+//#ifdef __aarch64__
+//            if (maxFileSize_ < curFileSize) {
+//                maxFileSize_ = curFileSize;
+//            }
+//#endif
 
-            selectedTotalFileSize += curFileSize;
-        } else {
-            selectedTotalFileSize += calFileSize(entry->fullPath());//这里或许应该传入参数类型为Entry,待优化，hushiwei
-        }
+//            selectedTotalFileSize += curFileSize;
+//        } else {
+//          selectedTotalFileSize += calFileSize(entry->fullPath());
+//        }
+        entry->calAllSize(selectedTotalFileSize);
     }
 }
 
@@ -1930,6 +1932,10 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     if (m_model->getParentEntry() != sourceEntry) {
         sourceEntry = m_model->getParentEntry();
     }
+
+    resetMainwindow();
+    calSelectedTotalEntrySize(all_entries);
+
     m_addJob = m_model->addFiles(all_entries, sourceEntry, pIface, options);//this added by hsw
     if (!m_addJob) {
         return;
