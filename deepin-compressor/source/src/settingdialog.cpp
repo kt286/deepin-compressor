@@ -336,13 +336,11 @@ void SettingDialog::readFromConfbf()
                 if (column.length() > 1) {
                     m_data.insert(column[0], column[1]);
                 }
-
             }
         }
     } else {
         m_data.clear();
     }
-
 
     file.close();
 }
@@ -364,7 +362,6 @@ void SettingDialog::writeToConfbf()
 
     file.close();
 }
-
 
 QString SettingDialog::getCurExtractPath()
 {

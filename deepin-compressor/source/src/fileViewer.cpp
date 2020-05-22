@@ -417,14 +417,8 @@ void fileViewer::InitUI()
         deleteAction = new QAction(tr("Delete"), this);
         m_pRightMenu->addAction(deleteAction);
         m_pRightMenu->addAction(tr("Open"));
-<<<<<<< HEAD
-
         openWithDialogMenu = new  DMenu(tr("Open style"), this);
-=======
-        openWithDialogMenu = new  DMenu(tr("Open style"));
         m_pRightMenu->addMenu(openWithDialogMenu);
-
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         pTableViewFile->setDragDropMode(QAbstractItemView::DragDrop);
         pTableViewFile->setAcceptDrops(false);
     }
@@ -1163,6 +1157,7 @@ void fileViewer::slotCompressRowDoubleClicked(const QModelIndex index)
             cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
             cmdprocess->setProgram(programPath, arguments);
             cmdprocess->start();
+
         }
 
         emit sigpathindexChanged();
@@ -1197,7 +1192,7 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
                 if (tempFile.exists()) {
                     tempFile.remove();
                 }
-                if (m_tempProcessId.empty()) {
+                if (m_tempProcessId.empty()) {//this check should be commented.
                     emit sigextractfiles(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), EXTRACT_TEMP);
                 }
 

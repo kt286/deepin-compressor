@@ -20,6 +20,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "uncompresspage.h"
+#include "utils.h"
+
 #include <QVBoxLayout>
 #include <QDebug>
 #include <QFile>
@@ -28,10 +31,6 @@
 #include <DMessageManager>
 #include <DDialog>
 #include <QFontMetrics>
-
-#include "uncompresspage.h"
-#include "utils.h"
-
 
 DCORE_USE_NAMESPACE
 DWIDGET_USE_NAMESPACE
@@ -79,9 +78,6 @@ UnCompressPage::UnCompressPage(QWidget *parent)
     connect(m_nextbutton, &DPushButton::clicked, this, &UnCompressPage::oneCompressPress);
     connect(m_extractpath, &DPushButton::clicked, this, &UnCompressPage::onPathButoonClicked);
     connect(m_fileviewer, &fileViewer::sigextractfiles, this, &UnCompressPage::onextractfilesSlot);
-<<<<<<< HEAD
-    connect(m_fileviewer, &fileViewer::sigOpenWith, this, &UnCompressPage::onextractfilesOpenSlot);
-=======
     connect(m_fileviewer, &fileViewer::sigOpenWith,     this, &UnCompressPage::onextractfilesOpenSlot);
 //    connect(m_fileviewer, &fileViewer::sigFileRemoved, this, &UnCompressPage::onRefreshFilelist);
     connect(m_fileviewer, &fileViewer::sigEntryRemoved, this, &UnCompressPage::onRefreshEntryList);
@@ -91,7 +87,6 @@ UnCompressPage::UnCompressPage(QWidget *parent)
 
     connect(m_fileviewer, &fileViewer::sigFileRemovedFromArchive, this, &UnCompressPage::sigDeleteArchiveFiles);
     connect(m_fileviewer, &fileViewer::sigFileAutoCompressToArchive, this, &UnCompressPage::sigAddArchiveFiles);
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 }
 
 void UnCompressPage::oneCompressPress()
@@ -141,7 +136,7 @@ void UnCompressPage::onPathButoonClicked()
     m_pathstr = curpath;
 }
 
-void UnCompressPage::setdefaultpath(const QString path)
+void UnCompressPage::setdefaultpath(QString path)
 {
     m_pathstr = path;
     m_extractpath->setText(tr("Extract to:") + m_pathstr);

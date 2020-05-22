@@ -367,7 +367,6 @@ void CompressSetting::onNextButoonClicked()
     m_openArgs[QStringLiteral("localFilePath")] = m_savepath->text();
     m_openArgs[QStringLiteral("filename")] =
         m_filename->text() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
-<<<<<<< HEAD
 
     //check exist file
     QFileInfo eFile(m_savepath->text() + QDir::separator() + m_filename->text() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix());
@@ -379,8 +378,6 @@ void CompressSetting::onNextButoonClicked()
             return;
         }
     }
-=======
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
     //check if folderName valid
     QString unvalidStr = "";
@@ -754,6 +751,8 @@ void CompressSetting::autoCompress(const QString &compresspath, const QStringLis
     m_openArgs[QStringLiteral("fixedMimeType")] = fixedMimeType;
     if ("application/x-tar" == fixedMimeType || "application/x-tarz" == fixedMimeType) {
         m_openArgs[QStringLiteral("compressionLevel")] = "-1";  //-1 is unuseful
+    } else if ("application/zip" == fixedMimeType) {
+        m_openArgs[QStringLiteral("compressionLevel")] = "3";  // 1:Extreme 3:Fast 4:Standard
     } else {
         m_openArgs[QStringLiteral("compressionLevel")] = "6";  // 6 is default
     }

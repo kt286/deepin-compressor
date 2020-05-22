@@ -21,7 +21,7 @@ INCLUDEPATH +=  $$PWD/source/inc/ \
                 $$PWD/interface/ \
                 $$PWD/../plugin/libLogPlugin
 
-LIBS += -L/data/home/hushiwei/workHS/jared-workNew3/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
+LIBS += -L/data/home/hushiwei/workHS/workNew0522/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
 
 
 # Input
@@ -85,10 +85,7 @@ HEADERS +=  \
     source/inc/openwithdialog/openwithdialog.h \
     source/inc/openwithdialog/properties.h \
     source/inc/openwithdialog/singleton.h \
-<<<<<<< HEAD
-    interface/filewatcher.h
-
-=======
+    interface/filewatcher.h\
     source/inc/monitorAdaptor.h \
     source/inc/monitorInterface.h \
     source/inc/logwidget.h \
@@ -102,7 +99,6 @@ HEADERS +=  \
     interface/tstypes.h \
     interface/globalarchivemanager_p.h \
     interface/archiverunnable.h
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
 
 
@@ -161,9 +157,7 @@ SOURCES +=  \
     source/src/openwithdialog/mimesappsmanager.cpp \
     source/src/openwithdialog/openwithdialog.cpp \
     source/src/openwithdialog/properties.cpp \
-<<<<<<< HEAD
-    interface/filewatcher.cpp
-=======
+    interface/filewatcher.cpp\
     source/src/monitorAdaptor.cpp \
     source/src/monitorInterface.cpp \
     source/src/logwidget.cpp \
@@ -172,7 +166,6 @@ SOURCES +=  \
     interface/globalarchivemanager.cpp \
     interface/archiverunnable.cpp
 
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
 
 RESOURCES += deepin-compressor.qrc

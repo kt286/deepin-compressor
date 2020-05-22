@@ -36,11 +36,8 @@
 #include <QTemporaryFile>
 #include <QUrl>
 #include "analysepsdtool.h"
-<<<<<<< HEAD
 #include "filewatcher.h"
-=======
 #include "archiverunnable.h"
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
 CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWriteArchiveInterface(parent, args)
 {
@@ -58,6 +55,7 @@ CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWrit
 CliInterface::~CliInterface()
 {
 //    Q_ASSERT(!m_process);
+
     if (m_process != nullptr) {
         m_process->kill();
         m_process->waitForFinished(1);
@@ -141,7 +139,7 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
         this->extractPsdStatus = Checked;
         emit sigExtractPwdCheckDown();
     }
-    m_extractDestDir = destinationDirectory;
+    qDebug() << "####destpath：" << destPath;
     m_extractDestDir = destPath;
 //    qDebug() << m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
@@ -288,7 +286,6 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
 bool CliInterface::moveFiles(const QVector< Archive::Entry * > &files, Archive::Entry *destination,
                              const CompressionOptions &options)
 {
-
     Q_UNUSED(options);
 
     m_operationMode = Move;
@@ -1043,15 +1040,12 @@ bool CliInterface::handleLine(const QString &line)
     // TODO: This should be implemented by each plugin; the way progress is
     //       shown by each CLI application is subject to a lot of variation.
 
-<<<<<<< HEAD
 //    qDebug() << "#####" << line;
 //    if (line == QString("没有那个文件或目录") || line == QString("No such file or directory")) {
 //        emit cancelled();
 //        emit finished(false);
 //        return false;
 //    }
-=======
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
     if (pAnalyseHelp != nullptr) {
         pAnalyseHelp->analyseLine(line);
@@ -1060,7 +1054,6 @@ bool CliInterface::handleLine(const QString &line)
             return false;
         }
     }
-
 
     if (pAnalyseHelp != nullptr) {
         if (pAnalyseHelp->isRightPsd() == 1) {

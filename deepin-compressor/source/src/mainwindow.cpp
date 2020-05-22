@@ -68,7 +68,6 @@ QString MainWindow::m_loadfile;
 MainWindow::MainWindow(QWidget *parent) : DMainWindow(parent)
 {
 //    setAttribute(Qt::WA_DeleteOnClose);
-
     m_model = new ArchiveModel(this);
     m_filterModel = new ArchiveSortFilterModel(this);
 
@@ -131,7 +130,6 @@ bool MainWindow::applicationQuit()
         }
 
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
-<<<<<<< HEAD
 //        deleteDecompressFile();
         QString destDirName;
         if (m_encryptionjob) {
@@ -142,16 +140,6 @@ bool MainWindow::applicationQuit()
         }
         deleteDecompressFile(destDirName);
 
-=======
-        deleteDecompressFile();
-        if (m_encryptionjob) {
-            m_encryptionjob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
-            m_encryptionjob->Killjob();
-            m_encryptionjob = nullptr;
-        }
-        deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
-        deleteDecompressFile();
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         if (m_createJob) {
             m_createJob->kill();
             m_createJob = nullptr;
@@ -194,10 +182,8 @@ QString MainWindow::getLoadFile()
 
 qint64 MainWindow::getDiskFreeSpace()
 {
-//    QStorageInfo storage = QStorageInfo::root();
-    QStorageInfo storage(m_pathstore);
+    QStorageInfo storage = QStorageInfo::root();
     storage.refresh();
-//    qDebug() << storage.name() << storage.bytesTotal() / 1024 / 1024 << "MB";
     qDebug() << "availableSize:" << storage.bytesAvailable() / 1024 / 1024 << "MB";
     return storage.bytesAvailable() / 1024 / 1024;
 }
@@ -212,31 +198,19 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
 
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
-<<<<<<< HEAD
-//        deleteDecompressFile();
-        QString destDirName;
-=======
         deleteDecompressFile();
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
+        QString destDirName;
         event->accept();
 
         if (m_encryptionjob) {
             m_encryptionjob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
-<<<<<<< HEAD
             destDirName = m_encryptionjob->archiveInterface()->destDirName;
-=======
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
             m_encryptionjob->Killjob();
             m_encryptionjob = nullptr;
         }
 
-<<<<<<< HEAD
         //deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
         deleteDecompressFile(destDirName);
-=======
-        deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
-        deleteDecompressFile();
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         if (m_createJob) {
             m_createJob->kill();
             m_createJob = nullptr;
@@ -283,16 +257,12 @@ void MainWindow::timerEvent(QTimerEvent *event)
                 dialog->addSpacing(32);
                 dialog->setMinimumSize(380, 140);
                 dialog->addButton(tr("OK"), true, DDialog::ButtonNormal);
-<<<<<<< HEAD
 //                QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
 //                effect->setOffset(0, 4);
 //                effect->setColor(QColor(0, 145, 255, 76));
 //                effect->setBlurRadius(4);
 //                dialog->getButton(0)->setFixedWidth(340);
 //                dialog->getButton(0)->setGraphicsEffect(effect);
-=======
-                dialog->getButton(0)->setFixedWidth(340);
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
                 DLabel *pLblContent = new DLabel(strTips, dialog);
                 pLblContent->setAlignment(Qt::AlignmentFlag::AlignHCenter);
@@ -797,7 +767,7 @@ void MainWindow::refreshPage()
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
-        setQLabelText(m_titlelabel, tr("Deleteing"));
+        titlebar()->setTitle(tr("Deleteing"));
         m_Progess->setFilename(m_decompressfilename);
         m_mainLayout->setCurrentIndex(4);
         m_timer.start();
@@ -1550,9 +1520,6 @@ void MainWindow::slotExtractionDone(KJob *job)
         cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
         cmdprocess->setProgram(programPath, arguments);
         cmdprocess->start();
-        if (!m_tempProcessId.contains(cmdprocess->processId())) {
-            m_tempProcessId.push_back(cmdprocess->processId());
-        }
         m_pageid = PAGE_UNZIP;
         refreshPage();
     } else if (Encryption_SingleExtract == m_encryptiontype || m_encryptiontype == Encryption_DRAG) {
@@ -1562,15 +1529,25 @@ void MainWindow::slotExtractionDone(KJob *job)
         } else {
             m_progressdialog->setFinished(m_decompressfilepath);
         }
+
+        DDesktopServices::showFileItem(QUrl(m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString(), QUrl::TolerantMode));
+
         m_pageid = PAGE_UNZIP;
         refreshPage();
+    }
+    //    else if( job->error() && job->error() == KJob::KilledJobError )
+    //    {
+    //        m_pageid = PAGE_UNZIP;
+    //        refreshPage();
+    //    }
+//    else if (Encryption_TempExtract_Open == m_encryptiontype)
+//    {
 
-        if (m_encryptiontype != Encryption_DRAG) {
-            QString fullpath = m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString();
-            QFileInfo fileinfo(fullpath);
-            if (fileinfo.exists()) {
-                DDesktopServices::showFileItem(fullpath);
-            }
+    if (m_encryptiontype != Encryption_DRAG) {
+        QString fullpath = m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString();
+        QFileInfo fileinfo(fullpath);
+        if (fileinfo.exists()) {
+            DDesktopServices::showFileItem(fullpath);
         }
     } else if (Encryption_TempExtract_Open_Choose == m_encryptiontype) {
         QString ppp = program;
@@ -1812,7 +1789,7 @@ void MainWindow::creatBatchArchive(QMap< QString, QString > &Args, QMap< QString
     }
 
     connect(batchJob, SIGNAL(batchProgress(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)));
-    connect(batchJob, &KJob::result, this, &MainWindow::slotJobFinished);
+    connect(batchJob, &KJob::result, this, &MainWindow::slotCompressFinished);
     connect(batchJob,
             SIGNAL(batchFilenameProgress(KJob *, const QString &)),
             this,
@@ -2138,7 +2115,7 @@ void MainWindow::moveToArchive(QMap<QString, QString> &Args)
     m_workstatus = WorkProcess;
 }
 
-void MainWindow::transSplitFileName(QString &fileName)    // *.7z.003 -> *.7z.001
+void MainWindow::transSplitFileName(QString &fileName)  // *.7z.003 -> *.7z.001
 {
     QRegExp reg("^([\\s\\S]*.)[0-9]{3}$");
 
@@ -2340,7 +2317,6 @@ void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles
 }
 
 //解压取消时删除临时文件
-<<<<<<< HEAD
 void MainWindow::deleteDecompressFile(QString destDirName)
 {
 //    qDebug() << "deleteDecompressFile" << m_decompressfilepath << m_decompressfilename << m_UnCompressPage->getDeFileCount() << m_model->archive()->isSingleFile() << m_model->archive()->isSingleFolder();
@@ -2366,24 +2342,13 @@ void MainWindow::deleteDecompressFile(QString destDirName)
                     fi.remove();
                 }
             }
-=======
-void MainWindow::deleteDecompressFile()
-{
-//    qDebug() << "deleteDecompressFile" << m_decompressfilepath << m_decompressfilename;
-
-    if (!m_decompressfilepath.isEmpty() && m_UnCompressPage->getDeFileCount() > 1) { //需判断是否空字符串，同时判断被解压文件里是否有多个一级文件（夹），只有一个一级文件（夹）时，在取消解压缩时就被删除了
-        QDir fi(m_decompressfilepath);  //若m_decompressfilepath为空字符串，则使用（"."）构造目录
-        qDebug() << fi.exists();
-        if (fi.exists()) {
-            fi.removeRecursively(); //删除解压后的文件夹
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         }
     }
 }
 
 void MainWindow::creatArchive(QMap< QString, QString > &Args)
 {
-    QStringList filesToAdd = m_CompressPage->getCompressFilelist();
+    const QStringList filesToAdd = m_CompressPage->getCompressFilelist();
     const QString fixedMimeType = Args[QStringLiteral("fixedMimeType")];
     const QString password = Args[QStringLiteral("encryptionPassword")];
     const QString enableHeaderEncryption = Args[QStringLiteral("encryptHeader")];
@@ -2445,10 +2410,9 @@ void MainWindow::creatArchive(QMap< QString, QString > &Args)
         m_createJob->enableEncryption(password, enableHeaderEncryption.compare("true") ? false : true);
     }
 
-    connect(m_createJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
+    connect(m_createJob, &KJob::result, this, &MainWindow::slotCompressFinished, Qt::ConnectionType::UniqueConnection);
     connect(m_createJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)), Qt::ConnectionType::UniqueConnection);
     connect(m_createJob, &CreateJob::percentfilename, this, &MainWindow::SlotProgressFile, Qt::ConnectionType::UniqueConnection);
-
 
     m_pageid = PAGE_ZIPPROGRESS;
     m_Progess->settype(COMPRESSING);
@@ -2461,7 +2425,38 @@ void MainWindow::creatArchive(QMap< QString, QString > &Args)
     m_createJob->start();
     m_workstatus = WorkProcess;
 }
+void MainWindow::slotCompressFinished(KJob *job)
+{
+    qDebug() << "job finished" << job->error();
+    m_workstatus = WorkNone;
+    if (job->error() && (job->error() != KJob::KilledJobError)) {
+        if (m_pathstore.left(6) == "/media") {
+            if (getMediaFreeSpace() <= 50) {
+                m_CompressFail->setFailStrDetail(tr("Insufficient space, please clear and retry"));
+            } else {
+                m_CompressFail->setFailStrDetail(tr("Damaged file"));
+            }
+        } else {
+            if (getDiskFreeSpace() <= 50) {
+                m_CompressFail->setFailStrDetail(tr("Insufficient space, please clear and retry"));
+            } else {
+                m_CompressFail->setFailStrDetail(tr("Damaged file"));
+            }
+        }
+        m_pageid = PAGE_ZIP_FAIL;
+        refreshPage();
+        return;
+    }
 
+    createCompressFile_.clear();
+    m_pageid = PAGE_ZIP_SUCCESS;
+    refreshPage();
+
+    if (m_createJob) {
+        m_createJob->deleteLater();
+        m_createJob = nullptr;
+    }
+}
 void MainWindow::slotJobFinished(KJob *job)
 {
     qDebug() << "job finished" << job->error();
@@ -2773,7 +2768,6 @@ void MainWindow::addToArchive(const QStringList &files, const QString &archive)
 void MainWindow::onCancelCompressPressed(int compressType)
 {
     slotResetPercentAndTime();
-
     if (m_encryptionjob) {
         //append the spiner animation to the eventloop, so can play the spinner animation
         if (pEventloop == nullptr) {

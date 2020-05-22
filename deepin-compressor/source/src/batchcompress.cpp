@@ -265,5 +265,3 @@ void BatchCompress::SlotCreateJobFinished(KJob *job)
         job = nullptr;
     }
 }
-
-

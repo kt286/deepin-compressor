@@ -47,7 +47,7 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
     }
 
     const QMimeType mimeType = fixedMimeType.isEmpty() ? determineMimeType(fileName) : QMimeDatabase().mimeTypeForName(fixedMimeType);
-    QString nnn = mimeType.name();
+
     const QVector<Plugin *> offers = pluginManager.preferredPluginsFor(mimeType);
     if (offers.isEmpty()) {
         qDebug() << "Could not find a plugin to handle" << fileName;

@@ -137,24 +137,9 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/compresssetting.cpp" line="406"/>
+        <location filename="../source/src/compresssetting.cpp" line="393"/>
         <source>Files that begin with &apos;@&apos; cannot be compressed</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../source/src/compresssetting.cpp" line="711"/>
-        <source>The file name under this path already exists, replace it?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../source/src/compresssetting.cpp" line="713"/>
-        <source>Cancel</source>
-        <translation type="unfinished">إلغاء</translation>
-    </message>
-    <message>
-        <location filename="../source/src/compresssetting.cpp" line="714"/>
-        <source>Replace</source>
-        <translation type="unfinished">استبدال</translation>
     </message>
     <message>
         <location filename="../source/src/compresssetting.cpp" line="279"/>
@@ -170,9 +155,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/compresssetting.cpp" line="678"/>
-=======
         <location filename="../source/src/compresssetting.cpp" line="663"/>
         <source>You cannot add the archive to yourself</source>
         <translation type="unfinished"></translation>
@@ -184,7 +166,6 @@
     </message>
     <message>
         <location filename="../source/src/compresssetting.cpp" line="912"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>OK</source>
         <translation>موافق</translation>
     </message>
@@ -352,157 +333,90 @@
 <context>
     <name>MainWindow</name>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="313"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="311"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Close</source>
         <translation>إغلاق</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="317"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="315"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Help</source>
         <translation>المساعدة</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="321"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="319"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Select the file</source>
         <translation>فتح</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="325"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="323"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Delete</source>
         <translation>حذف</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="345"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="343"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Shortcuts</source>
         <translation>اختصارات</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="411"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="421"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Open file</source>
         <translation>فتح ملف</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="441"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="451"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Settings</source>
         <translation>اﻹعدادات</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="595"/>
-        <location filename="../source/src/mainwindow.cpp" line="605"/>
-        <location filename="../source/src/mainwindow.cpp" line="1518"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="698"/>
         <location filename="../source/src/mainwindow.cpp" line="708"/>
         <location filename="../source/src/mainwindow.cpp" line="1682"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Create New Archive</source>
         <translation>إنشاء أرشيف جديد</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="638"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="744"/>
         <source>Deleteing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../source/src/mainwindow.cpp" line="751"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Compression successful</source>
         <translation>تم الضغط بنجاح</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="1343"/>
-        <location filename="../source/src/mainwindow.cpp" line="1372"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="1496"/>
         <location filename="../source/src/mainwindow.cpp" line="1537"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Skip all files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="1359"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="1521"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Choose default programma</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="1374"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="1539"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extraction successful</source>
         <translation>تم الاستخراج بنجاح</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="233"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="236"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>%1 was changed on the disk, please import it again.</source>
         <translation>%1 تم تغييره على القرص ، يرجى استيراده مرة أخرى</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="804"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="939"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Do you want to add the archive to the list or open it in new window?</source>
         <translation>هل تريد إضافة الأرشيف إلى القائمة أم فتحه في نافذة جديدة؟</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="333"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="331"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Display shortcuts</source>
         <translation>عرض الاختصارات</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="805"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="940"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Cancel</source>
         <translation>إلغاء</translation>
     </message>
@@ -512,135 +426,75 @@
         <translation>مدير اﻷرشيفات</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="239"/>
-        <location filename="../source/src/mainwindow.cpp" line="1114"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="242"/>
         <location filename="../source/src/mainwindow.cpp" line="1256"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>OK</source>
         <translation>موافق</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="621"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="724"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Compressing</source>
         <translation>يتم الضغط</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="631"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="734"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extracting</source>
         <translation>يتم الاستخراج</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="647"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="760"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Compression failed</source>
         <translation>تعذر الضغط</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="680"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="793"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extraction failed</source>
         <translation>فشل الاستخراج</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="806"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="941"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Add</source>
         <translation>إضافة</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="807"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="942"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Open in new window</source>
         <translation>فتح في نافذة جديدة</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="924"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="1062"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Find directory</source>
         <translation>بحث عن دليل</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="1268"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="1410"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Wrong password</source>
         <translation>كلمة سر خاطىة</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="998"/>
-        <location filename="../source/src/mainwindow.cpp" line="1018"/>
-        <location filename="../source/src/mainwindow.cpp" line="1054"/>
-        <location filename="../source/src/mainwindow.cpp" line="1298"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="1138"/>
         <location filename="../source/src/mainwindow.cpp" line="1159"/>
         <location filename="../source/src/mainwindow.cpp" line="1196"/>
         <location filename="../source/src/mainwindow.cpp" line="1442"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Damaged file, unable to extract</source>
         <translation>ملف تالف ، تعذر استخراجه</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="1113"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="1255"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>The archive was changed on the disk, please import it again.</source>
         <translation>تم تغيير الأرشيف على القرص ، يرجى استيراده مرة أخرى.</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="1294"/>
-        <location filename="../source/src/mainwindow.cpp" line="1296"/>
-        <location filename="../source/src/mainwindow.cpp" line="1921"/>
-        <location filename="../source/src/mainwindow.cpp" line="1927"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="1438"/>
         <location filename="../source/src/mainwindow.cpp" line="1440"/>
         <location filename="../source/src/mainwindow.cpp" line="2398"/>
         <location filename="../source/src/mainwindow.cpp" line="2404"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Insufficient space, please clear and retry</source>
         <translation>المساحة غير كافية، يرجى المسح وإعادة المحاولة</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/mainwindow.cpp" line="1923"/>
-        <location filename="../source/src/mainwindow.cpp" line="1929"/>
-=======
         <location filename="../source/src/mainwindow.cpp" line="2400"/>
         <location filename="../source/src/mainwindow.cpp" line="2406"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Damaged file</source>
         <translation>ملف معطوب</translation>
     </message>
@@ -772,38 +626,22 @@
 <context>
     <name>Progress</name>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="84"/>
-        <location filename="../source/src/progress.cpp" line="283"/>
-=======
         <location filename="../source/src/progress.cpp" line="83"/>
         <location filename="../source/src/progress.cpp" line="286"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Cancel</source>
         <translation>إلغاء</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="80"/>
-        <location filename="../source/src/progress.cpp" line="136"/>
-        <location filename="../source/src/progress.cpp" line="138"/>
-        <location filename="../source/src/progress.cpp" line="140"/>
-        <location filename="../source/src/progress.cpp" line="310"/>
-=======
         <location filename="../source/src/progress.cpp" line="79"/>
         <location filename="../source/src/progress.cpp" line="135"/>
         <location filename="../source/src/progress.cpp" line="137"/>
         <location filename="../source/src/progress.cpp" line="139"/>
         <location filename="../source/src/progress.cpp" line="141"/>
         <location filename="../source/src/progress.cpp" line="312"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Calculating...</source>
         <translation>يتم الحساب ...</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="277"/>
-=======
         <location filename="../source/src/progress.cpp" line="139"/>
         <location filename="../source/src/progress.cpp" line="212"/>
         <source>Speed</source>
@@ -812,86 +650,50 @@
     </message>
     <message>
         <location filename="../source/src/progress.cpp" line="280"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Are you sure you want to stop the compression?</source>
         <translation>هل أنت متأكد من أنك تريد إيقاف الضغط ؟</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="284"/>
-=======
         <location filename="../source/src/progress.cpp" line="287"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Confirm</source>
         <translation>التأكيد</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="280"/>
-=======
         <location filename="../source/src/progress.cpp" line="283"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Are you sure you want to stop the extraction?</source>
         <translation>هل أنت متأكد من أنك تريد إيقاف الاستخراج؟</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="136"/>
-        <location filename="../source/src/progress.cpp" line="204"/>
-        <location filename="../source/src/progress.cpp" line="206"/>
-        <location filename="../source/src/progress.cpp" line="208"/>
-=======
         <location filename="../source/src/progress.cpp" line="135"/>
         <location filename="../source/src/progress.cpp" line="205"/>
         <location filename="../source/src/progress.cpp" line="207"/>
         <location filename="../source/src/progress.cpp" line="209"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Speed</source>
         <comment>compress</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="140"/>
-        <location filename="../source/src/progress.cpp" line="219"/>
-=======
         <location filename="../source/src/progress.cpp" line="141"/>
         <location filename="../source/src/progress.cpp" line="222"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Time left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="138"/>
-        <location filename="../source/src/progress.cpp" line="212"/>
-        <location filename="../source/src/progress.cpp" line="214"/>
-        <location filename="../source/src/progress.cpp" line="216"/>
-=======
         <location filename="../source/src/progress.cpp" line="137"/>
         <location filename="../source/src/progress.cpp" line="215"/>
         <location filename="../source/src/progress.cpp" line="217"/>
         <location filename="../source/src/progress.cpp" line="219"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Speed</source>
         <comment>uncompress</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="245"/>
-=======
         <location filename="../source/src/progress.cpp" line="248"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Compressing</source>
         <translation>يتم الضغط</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progress.cpp" line="248"/>
-=======
         <location filename="../source/src/progress.cpp" line="251"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extracting</source>
         <translation>يتم الاستخراج</translation>
     </message>
@@ -899,142 +701,78 @@
 <context>
     <name>ProgressDialog</name>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progressdialog.cpp" line="48"/>
-=======
         <location filename="../source/src/progressdialog.cpp" line="46"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>%1 task(s) in progress</source>
         <translation>%1 من المهام قيد المعالجة</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progressdialog.cpp" line="60"/>
-        <location filename="../source/src/progressdialog.cpp" line="114"/>
-=======
         <location filename="../source/src/progressdialog.cpp" line="58"/>
         <location filename="../source/src/progressdialog.cpp" line="111"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Task</source>
         <translation>مهمة</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progressdialog.cpp" line="61"/>
-        <location filename="../source/src/progressdialog.cpp" line="120"/>
-=======
         <location filename="../source/src/progressdialog.cpp" line="59"/>
         <location filename="../source/src/progressdialog.cpp" line="117"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extracting</source>
         <translation>يتم الاستخراج</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progressdialog.cpp" line="135"/>
-=======
         <location filename="../source/src/progressdialog.cpp" line="133"/>
         <location filename="../source/src/progressdialog.cpp" line="137"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extraction successful</source>
         <translation>تم الاستخراج بنجاح</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/progressdialog.cpp" line="135"/>
-=======
         <location filename="../source/src/progressdialog.cpp" line="133"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extract to</source>
         <translation>استخراج إلى</translation>
-    </message>
-    <message>
-        <location filename="../source/src/progressdialog.cpp" line="139"/>
-        <source>Extraction successful</source>
-        <comment>progressdialog</comment>
-        <translation type="unfinished">تم الاستخراج بنجاح</translation>
     </message>
 </context>
 <context>
     <name>QInstaller</name>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="153"/>
-=======
         <location filename="../source/src/utils.cpp" line="165"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>B</source>
         <translation>بايت</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="154"/>
-=======
         <location filename="../source/src/utils.cpp" line="166"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>KB</source>
         <translation>ك.ب</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="155"/>
-=======
         <location filename="../source/src/utils.cpp" line="167"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>MB</source>
         <translation>م.ب</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="156"/>
-=======
         <location filename="../source/src/utils.cpp" line="168"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>GB</source>
         <translation>غ.ب</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="157"/>
-=======
         <location filename="../source/src/utils.cpp" line="169"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>TB</source>
         <translation>تيرا بايت</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="158"/>
-=======
         <location filename="../source/src/utils.cpp" line="170"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>PB</source>
         <translation>بيتا بايت</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="159"/>
-=======
         <location filename="../source/src/utils.cpp" line="171"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>EB</source>
         <translation>إكسابايت</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="160"/>
-=======
         <location filename="../source/src/utils.cpp" line="172"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>ZB</source>
         <translation>زيتا بايت</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/utils.cpp" line="161"/>
-=======
         <location filename="../source/src/utils.cpp" line="173"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>YB</source>
         <translation>يوتا بايت</translation>
     </message>
@@ -1092,38 +830,22 @@
         <translation type="vanished">التأكيد</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="426"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="450"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Name</source>
         <translation>الاسم</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="429"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="453"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Time modified</source>
         <translation>وقت التعديل</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="432"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="456"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Type</source>
         <translation>النوع</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="435"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="459"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Size</source>
         <translation>الحجم</translation>
     </message>
@@ -1241,11 +963,7 @@
         <translation>بحث عن دليل</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/uncompresspage.cpp" line="146"/>
-=======
         <location filename="../source/src/uncompresspage.cpp" line="160"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>OK</source>
         <translation type="unfinished">موافق</translation>
     </message>
@@ -1253,37 +971,21 @@
 <context>
     <name>fileViewer</name>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="1046"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="1294"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extract</source>
         <translation>استخراج</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="394"/>
-        <location filename="../source/src/fileViewer.cpp" line="1059"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="417"/>
         <location filename="../source/src/fileViewer.cpp" line="1312"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Delete</source>
         <translation>حذف</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="381"/>
-        <location filename="../source/src/fileViewer.cpp" line="396"/>
-        <location filename="../source/src/fileViewer.cpp" line="1052"/>
-        <location filename="../source/src/fileViewer.cpp" line="1056"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="400"/>
         <location filename="../source/src/fileViewer.cpp" line="419"/>
         <location filename="../source/src/fileViewer.cpp" line="1300"/>
         <location filename="../source/src/fileViewer.cpp" line="1309"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1301,39 +1003,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="459"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="483"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>item(s)</source>
         <translation>العنصر(عناصر)</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="475"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="499"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>yyyy/MM/dd hh:mm:ss</source>
         <translation>yyyy/MM/dd hh:mm:ss</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="511"/>
-        <location filename="../source/src/fileViewer.cpp" line="1071"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="535"/>
         <location filename="../source/src/fileViewer.cpp" line="1323"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Choose default programma</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="379"/>
-        <location filename="../source/src/fileViewer.cpp" line="1046"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="737"/>
         <location filename="../source/src/fileViewer.cpp" line="1132"/>
         <source>cancel</source>
@@ -1374,19 +1059,13 @@
     <message>
         <location filename="../source/src/fileViewer.cpp" line="398"/>
         <location filename="../source/src/fileViewer.cpp" line="1294"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extract</source>
         <comment>slotDecompressRowDoubleClicked</comment>
         <translation>استخراج</translation>
     </message>
     <message>
-<<<<<<< HEAD
-        <location filename="../source/src/fileViewer.cpp" line="380"/>
-        <location filename="../source/src/fileViewer.cpp" line="1048"/>
-=======
         <location filename="../source/src/fileViewer.cpp" line="399"/>
         <location filename="../source/src/fileViewer.cpp" line="1296"/>
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
         <source>Extract to current directory</source>
         <translation>استخراج إلى الدليل الحالي</translation>
     </message>

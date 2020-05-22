@@ -92,6 +92,7 @@ enum WorkState {
     WorkProcess,
 };
 
+class QStackedLayout;
 enum JobState {
     JOB_NULL,
     JOB_ADD,
@@ -234,6 +235,7 @@ private slots:
     void SlotProgressFile(KJob *job, const QString &filename);
     void SlotNeedPassword();
     void SlotExtractPassword(QString password);
+    void slotCompressFinished(KJob *job);
     void slotJobFinished(KJob *job);
     void slotExtractSimpleFiles(QVector<Archive::Entry *> fileList, QString path, EXTRACT_TYPE type);
     void slotExtractSimpleFilesOpen(const QVector<Archive::Entry *> &fileList, const QString &programma);
@@ -277,13 +279,8 @@ signals:
     void deleteJobComplete();
 
 private:
-<<<<<<< HEAD
-    Archive *m_archive_manager;
-    ArchiveModel *m_model = nullptr;
-=======
     Archive *m_archive_manager = nullptr;
-    ArchiveModel         *m_model = nullptr;
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
+    ArchiveModel *m_model = nullptr;
     ArchiveSortFilterModel *m_filterModel;
     QString m_decompressfilename;
     QString m_decompressfilepath;
@@ -296,14 +293,13 @@ private:
 
     QStringList CheckAllFiles(QString path);
     void deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/);
-<<<<<<< HEAD
     void deleteDecompressFile(QString destDirName = "");
-=======
-    void deleteDecompressFile();
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
 private:
+    DLabel *m_logo;
     QPixmap m_logoicon;
+    QFrame *m_titleFrame;
+    DLabel *m_titlelabel;
     DWidget *m_mainWidget;
     QStackedLayout *m_mainLayout;
     HomePage *m_homePage;
@@ -352,11 +348,8 @@ private:
     int openTempFileLink = 0;
     QEventLoop *pEventloop = nullptr;
     DSpinner *m_spinner = nullptr;
-<<<<<<< HEAD
-=======
 
     bool IsAddArchive = false;
->>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
     GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
     MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
