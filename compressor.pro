@@ -5,3 +5,4 @@ SUBDIRS += \
     plugin
 
 deepin-compressor.depends = plugin
+

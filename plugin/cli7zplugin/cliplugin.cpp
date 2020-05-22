@@ -225,7 +225,6 @@ bool CliPlugin::readListLine(const QString &line)
 
         } else if (line.startsWith(QLatin1String("Size = "))) {
             m_currentArchiveEntry->setProperty("size", line.mid(7).trimmed());
-
         } else if (line.startsWith(QLatin1String("Packed Size = "))) {
             // #236696: 7z files only show a single Packed Size value
             //          corresponding to the whole archive.

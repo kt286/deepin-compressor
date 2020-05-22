@@ -34,6 +34,7 @@ DWIDGET_USE_NAMESPACE
 enum COMPRESS_TYPE {
     COMPRESSING,
     DECOMPRESSING,
+    DELETEING
 };
 
 class Progress: public DWidget
@@ -55,6 +56,7 @@ public:
 
     void setSpeedAndTime(double speed, qint64 timeLeft);
     void displaySpeedAndTime(double speed, qint64 timeLeft);
+
     void setSpeedAndTimeText(COMPRESS_TYPE type);
 
     void setTempProgress();

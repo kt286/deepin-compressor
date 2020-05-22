@@ -36,7 +36,11 @@
 #include <QTemporaryFile>
 #include <QUrl>
 #include "analysepsdtool.h"
+<<<<<<< HEAD
 #include "filewatcher.h"
+=======
+#include "archiverunnable.h"
+>>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
 CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWriteArchiveInterface(parent, args)
 {
@@ -47,12 +51,13 @@ CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWrit
         qRegisterMetaType< QProcess::ExitStatus >("QProcess::ExitStatus");
     }
     m_cliProps = new CliProperties(this, m_metaData, mimetype());
+
+    //m_threadPool.setMaxThreadCount(10);
 }
 
 CliInterface::~CliInterface()
 {
 //    Q_ASSERT(!m_process);
-
     if (m_process != nullptr) {
         m_process->kill();
         m_process->waitForFinished(1);
@@ -136,7 +141,7 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
         this->extractPsdStatus = Checked;
         emit sigExtractPwdCheckDown();
     }
-    qDebug() << "####destpath：" << destPath;
+    m_extractDestDir = destinationDirectory;
     m_extractDestDir = destPath;
 //    qDebug() << m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
@@ -230,11 +235,14 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
             // The entries may have parent. We have to save and apply it to our new entry in order to prevent memory
             // leaks.
             if (preservedParent == nullptr) {
-                preservedParent = file->parent();
+                preservedParent = file->getParent();
             }
 
-            const QString filePath = QDir::currentPath() + QLatin1Char('/') + file->fullPath(NoTrailingSlash);
-            const QString newFilePath = absoluteDestinationPath + file->fullPath(NoTrailingSlash);
+//            const QString filePath = QDir::currentPath() + QLatin1Char('/') + file->fullPath(NoTrailingSlash);
+//            const QString filePath = QDir::currentPath() + QLatin1Char('/') + file->name();
+            const QString filePath = file->fullPath();
+//            const QString newFilePath = absoluteDestinationPath + file->fullPath(NoTrailingSlash);
+            const QString newFilePath = absoluteDestinationPath + file->name();
             if (QFile::link(filePath, newFilePath)) {
                 qDebug() << "Symlink's created:" << filePath << newFilePath;
             } else {
@@ -280,6 +288,7 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
 bool CliInterface::moveFiles(const QVector< Archive::Entry * > &files, Archive::Entry *destination,
                              const CompressionOptions &options)
 {
+
     Q_UNUSED(options);
 
     m_operationMode = Move;
@@ -984,6 +993,21 @@ void CliInterface::readStdout(bool handleAll)
             }
         }
     }
+
+//    if(m_listEmptyLines && m_operationMode == Extract){
+//        if(m_threadPool.waitForDone()){
+//            return;
+//        }
+//    }
+}
+
+void CliInterface::handleLineSlot(const QString &line)
+{
+    m_RWLock.lockForWrite();
+    if (!handleLine(line)) {
+        killProcess();
+    }
+    m_RWLock.unlock();
 }
 
 bool CliInterface::setAddedFiles()
@@ -1019,12 +1043,15 @@ bool CliInterface::handleLine(const QString &line)
     // TODO: This should be implemented by each plugin; the way progress is
     //       shown by each CLI application is subject to a lot of variation.
 
+<<<<<<< HEAD
 //    qDebug() << "#####" << line;
 //    if (line == QString("没有那个文件或目录") || line == QString("No such file or directory")) {
 //        emit cancelled();
 //        emit finished(false);
 //        return false;
 //    }
+=======
+>>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
     if (pAnalyseHelp != nullptr) {
         pAnalyseHelp->analyseLine(line);
@@ -1033,6 +1060,7 @@ bool CliInterface::handleLine(const QString &line)
             return false;
         }
     }
+
 
     if (pAnalyseHelp != nullptr) {
         if (pAnalyseHelp->isRightPsd() == 1) {

@@ -18,7 +18,11 @@ DEFINES += QT_MESSAGELOGCONTEXT
 #DEFINES += __aarch64__
 
 INCLUDEPATH +=  $$PWD/source/inc/ \
-                $$PWD/interface/
+                $$PWD/interface/ \
+                $$PWD/../plugin/libLogPlugin
+
+LIBS += -L/data/home/hushiwei/workHS/jared-workNew3/build-compressor-unknown-Debug/plugin/libLogPlugin -llibLogPlugin
+
 
 # Input
 HEADERS +=  \
@@ -81,8 +85,24 @@ HEADERS +=  \
     source/inc/openwithdialog/openwithdialog.h \
     source/inc/openwithdialog/properties.h \
     source/inc/openwithdialog/singleton.h \
+<<<<<<< HEAD
     interface/filewatcher.h
 
+=======
+    source/inc/monitorAdaptor.h \
+    source/inc/monitorInterface.h \
+    source/inc/logwidget.h \
+    source/inc/logwidgetappender.h \
+    logfwidget_p.h \
+    interface/TSMutex.h \
+    interface/TSSingleton.h \
+    interface/globalarchivemanager.h \
+    interface/tsconstval.h \
+    interface/tscommontypes.h \
+    interface/tstypes.h \
+    interface/globalarchivemanager_p.h \
+    interface/archiverunnable.h
+>>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
 
 
@@ -141,7 +161,18 @@ SOURCES +=  \
     source/src/openwithdialog/mimesappsmanager.cpp \
     source/src/openwithdialog/openwithdialog.cpp \
     source/src/openwithdialog/properties.cpp \
+<<<<<<< HEAD
     interface/filewatcher.cpp
+=======
+    source/src/monitorAdaptor.cpp \
+    source/src/monitorInterface.cpp \
+    source/src/logwidget.cpp \
+    source/src/logwidgetappender.cpp \
+    interface/TSMutex.cpp \
+    interface/globalarchivemanager.cpp \
+    interface/archiverunnable.cpp
+
+>>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
 
 RESOURCES += deepin-compressor.qrc

@@ -68,6 +68,8 @@ public:
     void removeEntryAt(int index);
     Entry *getParent() const;
     void setParent(Entry *parent);
+    qint64 getSize();
+    void setSize(qint64 size);
     void setFullPath(const QString &fullPath);
     QString fullPath(PathFormat format = WithTrailingSlash) const;
     QString name() const;
@@ -77,13 +79,15 @@ public:
     Entry *find(const QString &name) const;
     Entry *findByPath(const QStringList &pieces, int index = 0) const;
     void countChildren(uint &dirs, uint &files) const;
-
+    QVector<Archive::Entry *> *getAllLeavesNode();
+    void getFilesCount(Archive::Entry *pEntry, int &count);
     bool operator==(const Archive::Entry &right) const;
 
 public:
     QString rootNode;
     bool compressedSizeIsSet;
-
+private:
+    void *checkLeavesNode(Archive::Entry *pE, QVector<Archive::Entry *> *pV);
 private:
     QVector<Entry *> m_entries;
     QMap<QString, int> m_mapIndex;
@@ -95,7 +99,7 @@ private:
     QString m_permissions;
     QString m_owner;
     QString m_group;
-    qulonglong m_size;
+    qint64 m_size;
     qulonglong m_compressedSize;
     QString m_link;
     QString m_ratio;

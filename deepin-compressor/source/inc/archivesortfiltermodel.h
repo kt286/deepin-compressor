@@ -33,6 +33,8 @@ public:
     explicit ArchiveSortFilterModel(QObject *parent = nullptr);
 
     bool lessThan(const QModelIndex &leftIndex, const QModelIndex &rightIndex) const override;
+    bool removeRows(int row, int count, const QModelIndex &)override;
+    void refreshNow();
 };
 
 #endif // ARCHIVESORTFILTERMODEL_H

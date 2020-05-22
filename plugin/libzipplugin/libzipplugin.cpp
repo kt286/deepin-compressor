@@ -5,7 +5,7 @@
 //#include <KIO/Global>
 //#include <KLocalizedString>
 
-
+#include <QElapsedTimer>
 #include <QDataStream>
 #include <QDateTime>
 #include <QDir>
@@ -586,49 +586,145 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
     zip_error_t err;
 
     // Open archive.
-    zip_t *archive = zip_open(QFile::encodeName(filename()).constData(), 0, &errcode);
+    char *fileName = QFile::encodeName(filename()).data();
+    zip_t *archive = zip_open(fileName, 0, &errcode);
+    if (errcode != ZIP_ER_OK) {
+        emit error(tr("Failed to open archive: %1"));
+        return false;
+    }
+
     zip_error_init_with_code(&err, errcode);
     if (archive == nullptr) {
         emit error(tr("Failed to open archive: %1"));
         return false;
     }
+    QElapsedTimer timer;
+    timer.start();
 
-    qulonglong i = 0;
-    for (const Archive::Entry *e : files) {
+//    for (int i = 1; i < 110; i++) {
+//        qDebug() << i << ":>>>" << zip_get_name(archive, i, ZIP_FL_ENC_GUESS);
+//    }
 
-        if (QThread::currentThread()->isInterruptionRequested()) {
-            if (zip_close(archive)) {
-                emit error(tr("Failed to write archive."));
-                return false;
-            }
-            break;
-        }
 
-        const qlonglong index = zip_name_locate(archive, e->fullPath().toUtf8().constData(), ZIP_FL_ENC_GUESS);
-        if (index == -1) {
-            emit error(tr("Failed to delete entry: %1"));
-            if (zip_close(archive)) {
-                emit error(tr("Failed to write archive."));
-                return false;
-            }
-            return false;
+    for (Archive::Entry *pCurEntry : files) {
+        int i = 0;
+        int count = 0;
+        pCurEntry->getFilesCount(pCurEntry, count);
+
+        bool status = this->deleteEntry(pCurEntry, archive, i, count); //delete from archive
+        if (status == true) {
+            emit entryRemoved(pCurEntry->fullPath());       //delete from model
+//            emit progress(float(++i) / files.size());
         }
-        if (zip_delete(archive, index) == -1) {
-            emit error(tr("Failed to delete entry: %1"));
-            if (zip_close(archive)) {
-                emit error(tr("Failed to write archive."));
-                return false;
-            }
-            return false;
-        }
-        emit entryRemoved(e->fullPath());
-        emit progress(float(++i) / files.size());
     }
 
+    qDebug() << "==============" << timer.elapsed() << "milliseconds";
     if (zip_close(archive)) {
         emit error(tr("Failed to write archive."));
         return false;
     }
+    return true;
+}
+
+//bool LibzipPlugin::delEntry(Archive::Entry *pEntry, zip_t *archive)
+//{
+//    if (pEntry == nullptr) {
+//        return false;
+//    }
+
+//    QString fullpath = pEntry->fullPath();
+//    char *path = fullpath.toUtf8().data();
+//    char *filenameDel = (char *)malloc((strlen(path) + 1) * sizeof(char));
+//    strcpy(filenameDel, path);
+//    zip_int64_t index = zip_name_locate(archive, filenameDel, ZIP_FL_ENC_GUESS);
+//    free(filenameDel);
+//    if (index == -1) {
+//        return false;
+//    }
+//    zip_uint64_t indexDel = (zip_uint64_t)index;
+//    int statusDel = zip_delete(archive, indexDel);
+//    if (statusDel == -1) {
+//        return false;
+//    }
+//    if (pEntry->getParent() != nullptr) {
+//        return this->delEntry(pEntry->getParent(), archive);
+//    }
+
+//    return true;
+//}
+
+bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive, int &curNo, int count)
+{
+    if (pCurEntry->isDir() == true) {
+        for (int i = 0; i < pCurEntry->entries().length(); i++) {
+            this->deleteEntry(pCurEntry->entries().at(i), archive, curNo, count);
+        }
+    }
+    if (QThread::currentThread()->isInterruptionRequested()) {
+        if (zip_close(archive)) {
+            emit error(tr("Failed to write archive."));
+            return false;
+        }
+        return false;
+    }
+    QString fullpath = pCurEntry->fullPath();
+//    char *path = fullpath.toUtf8().data();
+//    char *filenameDel = (char *)malloc((strlen(path) + 1) * sizeof(char));
+//    strcpy(filenameDel, path);
+//    char *fileNameDel = fullpath.toUtf8().data();
+
+//    QString str = "beifen/0000 装机常用软件/workPush/compressor/deepin-compressor/source/inc/openwithdialog/durl.h";
+    char *fileNameDel = nullptr;
+//    int llen = fullpath.length();
+    char *path = fullpath.toUtf8().data();
+    int lllen = strlen(fullpath.toUtf8().data());
+    fileNameDel = (char *)malloc((lllen + 1) * sizeof(char));
+    strcpy(fileNameDel, fullpath.toUtf8().data());
+//    qDebug() << fileNameDel;
+//    const char *nn1 = zip_get_name(archive, 0, ZIP_FL_ENC_GUESsS);
+
+
+    zip_int64_t index = zip_name_locate(archive, fileNameDel, ZIP_FL_ENC_GUESS);
+    int len = strlen(fileNameDel);
+
+    if (index == -1) {
+//        qDebug() << "------deleteError------" << fileNameDel;
+        free(fileNameDel);
+//        emit error(tr("Failed to delete entry: %1"));
+//        if (zip_close(archive)) {
+//            emit error(tr("Failed to write archive."));
+//            return false;
+//        }
+        return false;
+    } else {
+//        qDebug() << "------deleteOk------" << fileNameDel;
+        free(fileNameDel);
+        zip_uint64_t indexDel = index;
+        int statusDel = zip_delete(archive, indexDel);
+        if (statusDel == -1) {
+            emit error(tr("Failed to delete entry: %1"));
+            if (zip_close(archive)) {
+                emit error(tr("Failed to write archive."));
+                return false;
+            }
+            return false;
+        } else {
+            if (curNo >= 0) {
+                qDebug() << ">>>>>>" << float(++curNo) / count;
+                emit progress(float(++curNo) / count);
+            }
+        }
+    }
+//    zip_uint64_t indexDel = index;
+//    int statusDel = zip_delete(archive, indexDel);
+//    if (statusDel == -1) {
+//        emit error(tr("Failed to delete entry: %1"));
+//        if (zip_close(archive)) {
+//            emit error(tr("Failed to write archive."));
+//            return false;
+//        }
+//        return false;
+//    }
     return true;
 }
 
@@ -754,7 +850,6 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
         if (extractAll) {
             entry = QDir::fromNativeSeparators(trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW)));
         } else {
-            trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW));
             entry = files.at(i)->fullPath();
         }
         const bool isDirectory = entry.endsWith(QDir::separator());
@@ -810,10 +905,10 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
                 setPassword(QString());
                 zip_set_default_password(archive, passwordUnicode(password()));
                 return false;
-            } /*else {
+            } else {
                 emit error(tr("Failed to open '%1':<nl/>%2"));
                 return false;
-            }*/
+            }
 
         }
     }
@@ -891,7 +986,7 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
             emit progress_filename(e->name());
 
             if (nofEntries < 5) {
-                pi.fileName = trans2uft8(zip_get_name(archive, e->row(), ZIP_FL_ENC_RAW));
+                pi.fileName = trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW));
                 pi.fileProgressProportion = float(1.0) / float(nofEntries);
                 pi.fileProgressStart = pi.fileProgressProportion * float(i);
             }
@@ -1094,7 +1189,7 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         }
 
         QFile file(destination);
-        if (file.open(QIODevice::WriteOnly) == false) {
+        if (!file.open(QIODevice::WriteOnly)) {
             emit error(tr("Failed to open file for writing: %1"));
             return false;
         }
@@ -1164,9 +1259,6 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         }
 
         file.close();
-        if (isExists == true) {
-            file.setPermissions(pOldPermission);//reset old permission
-        }
         //extract = true;
         bAnyFileExtracted = true;
     }
@@ -1571,7 +1663,6 @@ void LibzipPlugin::watchFileList(QStringList *strList)
 {
 
 }
-
 
 
 //#include "libzipplugin.moc"

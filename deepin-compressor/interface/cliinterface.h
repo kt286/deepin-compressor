@@ -28,7 +28,8 @@
 //#include "filewatcher.h"
 #include <QProcess>
 #include <QRegularExpression>
-
+#include <QThreadPool>
+#include <QReadWriteLock>
 
 class KProcess;
 
@@ -154,6 +155,12 @@ protected:
 
     bool m_abortingOperation = false;
 
+<<<<<<< HEAD
+=======
+protected Q_SLOTS:
+    virtual void readStdout(bool handleAll = false);
+    void handleLineSlot(const QString &line);
+>>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 private:
     void init();
     bool handleFileExistsMessage(const QString &filename);
@@ -230,8 +237,18 @@ private:
     int m_allfilenumber = 0;
     QString extractDst7z_;
 
+<<<<<<< HEAD
     AnalyseHelp *pAnalyseHelp = nullptr;
     FileWatcher *pFileWatcherdd = nullptr;
+=======
+    AnalyseHelp* pAnalyseHelp = nullptr;
+
+    QThreadPool m_threadPool;
+    QReadWriteLock m_RWLock;
+
+protected Q_SLOTS:
+    virtual void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
+>>>>>>> bd265816df0047a40a1157fb4f113ba8cf2981df
 
 private Q_SLOTS:
     void extractProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);

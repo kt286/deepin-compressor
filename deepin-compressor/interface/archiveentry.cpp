@@ -115,6 +115,16 @@ void Archive::Entry::setParent(Archive::Entry *parent)
     m_parent = parent;
 }
 
+qint64 Archive::Entry::getSize()
+{
+    return m_size;
+}
+
+void Archive::Entry::setSize(qint64 size)
+{
+    m_size = size;
+}
+
 void Archive::Entry::setFullPath(const QString &fullPath)
 {
     m_fullPath = fullPath;
@@ -198,6 +208,50 @@ void Archive::Entry::countChildren(uint &dirs, uint &files) const
             dirs++;
         } else {
             files++;
+        }
+    }
+}
+
+QVector<Archive::Entry *> *Archive::Entry::getAllLeavesNode()
+{
+    QVector<Archive::Entry *> *pV = new QVector<Archive::Entry *>();
+    const auto archiveEntries = entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            this->checkLeavesNode(entry, pV);
+        } else {
+            pV->append(entry);
+        }
+    }
+    return pV;
+}
+
+/**
+ * @brief Archive::Entry::getFilesCount,include file,exclude dir
+ * @param pEntry
+ * @param count
+ */
+void Archive::Entry::getFilesCount(Archive::Entry *pEntry, int &count)
+{
+    if (pEntry->isDir() == false) {
+        count ++;
+        return;
+    }
+
+    const auto archiveEntries = pEntry->entries();
+    for (auto entry : archiveEntries) {
+        this->getFilesCount(entry, count);
+    }
+}
+
+void *Archive::Entry::checkLeavesNode(Entry *pE, QVector<Archive::Entry *> *pV)
+{
+    const auto archiveEntries = pE->entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            this->checkLeavesNode(entry, pV);
+        } else {
+            pV->append(entry);
         }
     }
 }
