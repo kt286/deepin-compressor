@@ -741,13 +741,13 @@ void AddJob::doWork()
 
         const QString &fullPath = entry->fullPath();
         fileListWathed->append(fullPath);
-        QString relativePath = workDir.relativeFilePath(fullPath);
+//        QString relativePath = workDir.relativeFilePath(fullPath);
 
-        if (fullPath.endsWith(QLatin1Char('/'))) {
-            relativePath += QLatin1Char('/');
-        }
+//        if (fullPath.endsWith(QLatin1Char('/'))) {
+//            relativePath += QLatin1Char('/');
+//        }
 
-        entry->setFullPath(relativePath);
+//        entry->setFullPath(relativePath);
     }
 
     connectToArchiveInterfaceSignals();

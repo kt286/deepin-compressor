@@ -138,6 +138,8 @@ void Progress::setSpeedAndTimeText(COMPRESS_TYPE type)
         m_speedLabel->setText(tr("Speed", "uncompress") + ": " + tr("Calculating..."));
     } else if (type == DELETEING) {
         m_speedLabel->setText(tr("Speed", "delete") + ": " + tr("Calculating..."));
+    } else if (type == COMPRESSDRAGADD) {
+        m_speedLabel->setText(tr("Speed", "delete") + ": " + tr("Calculating..."));
     }
     m_restTimeLabel->setText(tr("Time left") + ": " + tr("Calculating..."));
 }

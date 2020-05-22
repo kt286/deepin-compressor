@@ -1064,6 +1064,15 @@ void fileViewer::clickedSlot(int index, const QString &text)
     }
 }
 
+QString getShortName(QString &destFileName)
+{
+    int limitCounts = 8;
+    int left = 4, right = 4;
+    QString displayName = "";
+    displayName = destFileName.length() > limitCounts ? destFileName.left(left) + "..." + destFileName.right(right) : destFileName;
+    return displayName;
+}
+
 void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
 {
     qDebug() << "更新消息通知接受处理，弹窗提问" << urls;
@@ -1073,13 +1082,15 @@ void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
         }
         QString destFile = urls[0];
         QStringList list = destFile.split(QDir::separator());
-        QString destName = list.last();
-
+        QString destPath = list.last();
+        QStringList destPathList = destPath.split(QDir::separator());
+        QString destFileName = destPathList.last();
         QString sourceArchive = m_decompressmodel->archive()->fileName();
+        QStringList sourceArchiveList = sourceArchive.split(QDir::separator());
+        QString sourceFileName = sourceArchiveList.last();
 
-        QString warningStr = QString(tr("update file '%1' from package '%2'?")).arg(destName).arg(sourceArchive)
-                             + "\n" +
-                             QString(tr("one file has been modified by other application.if you update package file ,\n your modifications will lose."));
+        QString warningStr0 = QString(tr("update file '%1' from package '%2'?")).arg(getShortName(destFileName)).arg(getShortName(sourceFileName));
+        QString warningStr1 = QString(tr("one file has been modified by other application.if you update package file ,\n your modifications will lose."));
         m_ActionInfo.mode = (SUBACTION_MODE)mode;
         m_ActionInfo.archive = sourceArchive;
         m_ActionInfo.packageFile = destFile;
@@ -1088,20 +1099,36 @@ void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
         DDialog dialog(this);
         QPixmap pixmap = Utils::renderSVG(":/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(32, 32));
         dialog.setIcon(pixmap);
-        dialog.addSpacing(32);
-        dialog.getButton(dialog.addButton(tr("cancel")))->setShortcut(Qt::Key_C);
-        dialog.getButton(dialog.addButton(tr("update")))->setShortcut(Qt::Key_U);
+        dialog.addSpacing(12);
+        dialog.getButton(dialog.addButton(tr("Cancel")))->setShortcut(Qt::Key_C);
+        dialog.getButton(dialog.addButton(tr("Update")))->setShortcut(Qt::Key_U);
 
-        dialog.setFixedSize(480, 140);
-        DLabel *pContent = new DLabel(warningStr, &dialog);
-        pContent->setAlignment(Qt::AlignmentFlag::AlignHCenter);
+        dialog.setFixedSize(480, 190);
+        DLabel *pContent0 = new DLabel(warningStr1, &dialog);
+        pContent0->setFixedWidth(400);
+        pContent0->setAlignment(Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignTop);
         DPalette pa;
-        pa = DApplicationHelper::instance()->palette(pContent);
+        pa = DApplicationHelper::instance()->palette(pContent0);
         pa.setBrush(DPalette::Text, pa.color(DPalette::ButtonText));
-        DFontSizeManager::instance()->bind(pContent, DFontSizeManager::T6, QFont::Medium);
-        pContent->setMinimumWidth(this->width());
-        pContent->setMinimumHeight(50);
-        pContent->move(dialog.width() / 2 - pContent->width() / 2, dialog.height() / 2 - pContent->height() / 2 - 10);
+        DFontSizeManager::instance()->bind(pContent0, DFontSizeManager::T6, QFont::Medium);
+        QFont font = DFontSizeManager::instance()->get(DFontSizeManager::T6);
+        pContent0->setMinimumHeight(font.pixelSize() * 2 + 12);
+        pContent0->setWordWrap(true);
+        pContent0->move(dialog.width() / 2 - 400 / 2, 84 - 20);
+
+
+
+        DLabel *pContent1 = new DLabel(warningStr0, &dialog);
+        pContent1->setFixedWidth(400);
+        pContent1->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        pContent1->setWordWrap(true);
+        pa = DApplicationHelper::instance()->palette(pContent1);
+        pa.setBrush(DPalette::Text, pa.color(DPalette::ButtonText));
+        DFontSizeManager::instance()->bind(pContent1, DFontSizeManager::T5, QFont::Bold);
+        font = DFontSizeManager::instance()->get(DFontSizeManager::T5);
+        pContent1->setMinimumHeight(font.pixelSize()  + 12);
+        pContent1->move(dialog.width() / 2 - 400 / 2, 48 - 20);
+
         connect(&dialog, &DDialog::buttonClicked, this, &fileViewer::clickedSlot);
         dialog.exec();
     }

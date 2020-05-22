@@ -743,7 +743,12 @@ void MainWindow::refreshPage()
             killTimer(m_watchTimer);
             m_watchTimer = 0;
         }
-        m_Progess->setSpeedAndTimeText(COMPRESSING);
+        if (this->m_encryptiontype == EncryptionType::Encryption_Load) {
+            m_Progess->setSpeedAndTimeText(COMPRESSDRAGADD);
+        } else {
+            m_Progess->setSpeedAndTimeText(COMPRESSING);
+        }
+
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);

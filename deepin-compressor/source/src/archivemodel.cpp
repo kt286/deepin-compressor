@@ -162,7 +162,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation, int role) const
                      << " and section = " << section;
             return QVariant();
         }
-
+        if (section < 0) {
+            return QVariant();
+        }
         int columnId = m_showColumns.at(section);
 
         switch (columnId) {

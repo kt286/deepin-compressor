@@ -139,7 +139,7 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
         this->extractPsdStatus = Checked;
         emit sigExtractPwdCheckDown();
     }
-    qDebug() << "####destpath：" << destPath;
+    m_extractDestDir = destinationDirectory;
     m_extractDestDir = destPath;
 //    qDebug() << m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
@@ -275,7 +275,7 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
                                                 options.compressionMethod(),
                                                 options.encryptionMethod(),
                                                 options.volumeSize());
-    arguments.removeOne("-l");//beaucse -l will failed if files contains softLink which links parent folder.
+//    arguments.removeOne("-l");//beaucse -l will failed if files contains softLink which links parent folder.
     bool ret = runProcess(m_cliProps->property("addProgram").toString(), arguments);
     if (ret == true) {
         this->watchDestFilesBegin();
