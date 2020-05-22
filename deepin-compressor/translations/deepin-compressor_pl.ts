@@ -385,33 +385,38 @@
     <message>
         <location filename="../source/src/mainwindow.cpp" line="724"/>
         <location filename="../source/src/mainwindow.cpp" line="734"/>
-        <location filename="../source/src/mainwindow.cpp" line="1703"/>
+        <location filename="../source/src/mainwindow.cpp" line="1715"/>
         <source>Create New Archive</source>
         <translation>Utwórz nowe archiwum</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="770"/>
+        <location filename="../source/src/mainwindow.cpp" line="752"/>
+        <source>adding files to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../source/src/mainwindow.cpp" line="782"/>
         <source>Deleteing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="777"/>
+        <location filename="../source/src/mainwindow.cpp" line="789"/>
         <source>Compression successful</source>
         <translation>Kompresja powiodła się</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1528"/>
-        <location filename="../source/src/mainwindow.cpp" line="1557"/>
+        <location filename="../source/src/mainwindow.cpp" line="1540"/>
+        <location filename="../source/src/mainwindow.cpp" line="1569"/>
         <source>Skip all files</source>
         <translation>Pomiń wszystkie pliki</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1544"/>
+        <location filename="../source/src/mainwindow.cpp" line="1556"/>
         <source>Choose default programma</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1559"/>
+        <location filename="../source/src/mainwindow.cpp" line="1571"/>
         <source>Extraction successful</source>
         <translation>Wypakowanie udane</translation>
     </message>
@@ -421,7 +426,7 @@
         <translation>%1 został zmieniony na dysku, zaimportuj go ponownie.</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="964"/>
+        <location filename="../source/src/mainwindow.cpp" line="976"/>
         <source>Do you want to add the archive to the list or open it in new window?</source>
         <translation>Czy chcesz dodać archiwum do listy czy otworzyć je w nowym oknie?</translation>
     </message>
@@ -431,7 +436,7 @@
         <translation>Wyświetl skróty</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="965"/>
+        <location filename="../source/src/mainwindow.cpp" line="977"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
@@ -442,78 +447,78 @@
     </message>
     <message>
         <location filename="../source/src/mainwindow.cpp" line="259"/>
-        <location filename="../source/src/mainwindow.cpp" line="1281"/>
+        <location filename="../source/src/mainwindow.cpp" line="1293"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="750"/>
+        <location filename="../source/src/mainwindow.cpp" line="755"/>
         <source>Compressing</source>
         <translation>Kompresowanie</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="760"/>
+        <location filename="../source/src/mainwindow.cpp" line="772"/>
         <source>Extracting</source>
         <translation>Wypakowywanie</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="786"/>
+        <location filename="../source/src/mainwindow.cpp" line="798"/>
         <source>Compression failed</source>
         <translation>Kompresja nie powiodła się</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="819"/>
+        <location filename="../source/src/mainwindow.cpp" line="831"/>
         <source>Extraction failed</source>
         <translation>Wypakowanie nie powiodła się</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="966"/>
+        <location filename="../source/src/mainwindow.cpp" line="978"/>
         <source>Add</source>
         <translation>Dodaj</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="967"/>
+        <location filename="../source/src/mainwindow.cpp" line="979"/>
         <source>Open in new window</source>
         <translation>Otwórz w nowym oknie</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1087"/>
+        <location filename="../source/src/mainwindow.cpp" line="1099"/>
         <source>Find directory</source>
         <translation>Znajdź katalog</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1435"/>
+        <location filename="../source/src/mainwindow.cpp" line="1447"/>
         <source>Wrong password</source>
         <translation>Złe hasło</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1163"/>
-        <location filename="../source/src/mainwindow.cpp" line="1184"/>
-        <location filename="../source/src/mainwindow.cpp" line="1221"/>
-        <location filename="../source/src/mainwindow.cpp" line="1467"/>
+        <location filename="../source/src/mainwindow.cpp" line="1175"/>
+        <location filename="../source/src/mainwindow.cpp" line="1196"/>
+        <location filename="../source/src/mainwindow.cpp" line="1233"/>
+        <location filename="../source/src/mainwindow.cpp" line="1479"/>
         <source>Damaged file, unable to extract</source>
         <translation>Uszkodzony plik, nie można wypakować</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1280"/>
+        <location filename="../source/src/mainwindow.cpp" line="1292"/>
         <source>The archive was changed on the disk, please import it again.</source>
         <translation>Archiwum zostało zmienione na dysku, zaimportuj je ponownie.</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="1463"/>
-        <location filename="../source/src/mainwindow.cpp" line="1465"/>
-        <location filename="../source/src/mainwindow.cpp" line="2425"/>
-        <location filename="../source/src/mainwindow.cpp" line="2431"/>
-        <location filename="../source/src/mainwindow.cpp" line="2457"/>
-        <location filename="../source/src/mainwindow.cpp" line="2463"/>
+        <location filename="../source/src/mainwindow.cpp" line="1475"/>
+        <location filename="../source/src/mainwindow.cpp" line="1477"/>
+        <location filename="../source/src/mainwindow.cpp" line="2437"/>
+        <location filename="../source/src/mainwindow.cpp" line="2443"/>
+        <location filename="../source/src/mainwindow.cpp" line="2469"/>
+        <location filename="../source/src/mainwindow.cpp" line="2475"/>
         <source>Insufficient space, please clear and retry</source>
         <translation>Za mało miejsca na dysku, prosimy przeczyścić i spróbować raz jeszcze</translation>
     </message>
     <message>
-        <location filename="../source/src/mainwindow.cpp" line="2427"/>
-        <location filename="../source/src/mainwindow.cpp" line="2433"/>
-        <location filename="../source/src/mainwindow.cpp" line="2459"/>
-        <location filename="../source/src/mainwindow.cpp" line="2465"/>
+        <location filename="../source/src/mainwindow.cpp" line="2439"/>
+        <location filename="../source/src/mainwindow.cpp" line="2445"/>
+        <location filename="../source/src/mainwindow.cpp" line="2471"/>
+        <location filename="../source/src/mainwindow.cpp" line="2477"/>
         <source>Damaged file</source>
         <translation>Plik jest uszkodzony</translation>
     </message>
@@ -646,7 +651,7 @@
     <name>Progress</name>
     <message>
         <location filename="../source/src/progress.cpp" line="84"/>
-        <location filename="../source/src/progress.cpp" line="287"/>
+        <location filename="../source/src/progress.cpp" line="291"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
@@ -656,63 +661,67 @@
         <location filename="../source/src/progress.cpp" line="138"/>
         <location filename="../source/src/progress.cpp" line="140"/>
         <location filename="../source/src/progress.cpp" line="142"/>
-        <location filename="../source/src/progress.cpp" line="314"/>
+        <location filename="../source/src/progress.cpp" line="144"/>
+        <location filename="../source/src/progress.cpp" line="217"/>
+        <location filename="../source/src/progress.cpp" line="318"/>
         <source>Calculating...</source>
         <translation>Obliczenie...</translation>
     </message>
     <message>
         <location filename="../source/src/progress.cpp" line="140"/>
-        <location filename="../source/src/progress.cpp" line="213"/>
+        <location filename="../source/src/progress.cpp" line="215"/>
         <source>Speed</source>
         <comment>delete</comment>
         <translation type="unfinished">Prędkość</translation>
     </message>
     <message>
-        <location filename="../source/src/progress.cpp" line="281"/>
+        <location filename="../source/src/progress.cpp" line="285"/>
         <source>Are you sure you want to stop the compression?</source>
         <translation>Czy na pewno chcesz zatrzymać kompresję?</translation>
     </message>
     <message>
-        <location filename="../source/src/progress.cpp" line="288"/>
+        <location filename="../source/src/progress.cpp" line="292"/>
         <source>Confirm</source>
         <translation>Potwierdź</translation>
     </message>
     <message>
-        <location filename="../source/src/progress.cpp" line="284"/>
+        <location filename="../source/src/progress.cpp" line="288"/>
         <source>Are you sure you want to stop the extraction?</source>
         <translation>Czy na pewno chcesz zatrzymać wypakowywanie?</translation>
     </message>
     <message>
         <location filename="../source/src/progress.cpp" line="136"/>
-        <location filename="../source/src/progress.cpp" line="206"/>
+        <location filename="../source/src/progress.cpp" line="142"/>
         <location filename="../source/src/progress.cpp" line="208"/>
         <location filename="../source/src/progress.cpp" line="210"/>
+        <location filename="../source/src/progress.cpp" line="212"/>
+        <location filename="../source/src/progress.cpp" line="217"/>
         <source>Speed</source>
         <comment>compress</comment>
         <translation>Prędkość</translation>
     </message>
     <message>
-        <location filename="../source/src/progress.cpp" line="142"/>
-        <location filename="../source/src/progress.cpp" line="223"/>
+        <location filename="../source/src/progress.cpp" line="144"/>
+        <location filename="../source/src/progress.cpp" line="227"/>
         <source>Time left</source>
         <translation>Pozostały czas</translation>
     </message>
     <message>
         <location filename="../source/src/progress.cpp" line="138"/>
-        <location filename="../source/src/progress.cpp" line="216"/>
-        <location filename="../source/src/progress.cpp" line="218"/>
         <location filename="../source/src/progress.cpp" line="220"/>
+        <location filename="../source/src/progress.cpp" line="222"/>
+        <location filename="../source/src/progress.cpp" line="224"/>
         <source>Speed</source>
         <comment>uncompress</comment>
         <translation>Prędkość</translation>
     </message>
     <message>
-        <location filename="../source/src/progress.cpp" line="249"/>
+        <location filename="../source/src/progress.cpp" line="253"/>
         <source>Compressing</source>
         <translation>Kompresowanie</translation>
     </message>
     <message>
-        <location filename="../source/src/progress.cpp" line="252"/>
+        <location filename="../source/src/progress.cpp" line="256"/>
         <source>Extracting</source>
         <translation>Rozpakowywanie</translation>
     </message>
@@ -995,27 +1004,27 @@
 <context>
     <name>fileViewer</name>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1266"/>
+        <location filename="../source/src/fileViewer.cpp" line="1281"/>
         <source>Extract</source>
         <translation>Wypakuj</translation>
     </message>
     <message>
         <location filename="../source/src/fileViewer.cpp" line="417"/>
-        <location filename="../source/src/fileViewer.cpp" line="1284"/>
+        <location filename="../source/src/fileViewer.cpp" line="1299"/>
         <source>Delete</source>
         <translation>Usuń</translation>
     </message>
     <message>
         <location filename="../source/src/fileViewer.cpp" line="400"/>
         <location filename="../source/src/fileViewer.cpp" line="419"/>
-        <location filename="../source/src/fileViewer.cpp" line="1272"/>
-        <location filename="../source/src/fileViewer.cpp" line="1281"/>
+        <location filename="../source/src/fileViewer.cpp" line="1287"/>
+        <location filename="../source/src/fileViewer.cpp" line="1296"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../source/src/fileViewer.cpp" line="401"/>
-        <location filename="../source/src/fileViewer.cpp" line="1274"/>
+        <location filename="../source/src/fileViewer.cpp" line="1289"/>
         <source>DELETE</source>
         <comment>slotDecompressRowDelete</comment>
         <translation type="unfinished"></translation>
@@ -1038,7 +1047,7 @@
     </message>
     <message>
         <location filename="../source/src/fileViewer.cpp" line="534"/>
-        <location filename="../source/src/fileViewer.cpp" line="1301"/>
+        <location filename="../source/src/fileViewer.cpp" line="1316"/>
         <source>Choose default programma</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1058,46 +1067,46 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1082"/>
+        <location filename="../source/src/fileViewer.cpp" line="1092"/>
         <source>update file &apos;%1&apos; from package &apos;%2&apos;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1083"/>
+        <location filename="../source/src/fileViewer.cpp" line="1093"/>
         <source>one file has been modified by other application.if you update package file ,
  your modifications will lose.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1093"/>
+        <location filename="../source/src/fileViewer.cpp" line="1103"/>
         <source>Cancel</source>
         <translation type="unfinished">Anuluj</translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1094"/>
+        <location filename="../source/src/fileViewer.cpp" line="1104"/>
         <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1274"/>
+        <location filename="../source/src/fileViewer.cpp" line="1289"/>
         <source>DELETE</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../source/src/fileViewer.cpp" line="1276"/>
+        <location filename="../source/src/fileViewer.cpp" line="1291"/>
         <source>Do you want to detele the selected file?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../source/src/fileViewer.cpp" line="398"/>
-        <location filename="../source/src/fileViewer.cpp" line="1266"/>
+        <location filename="../source/src/fileViewer.cpp" line="1281"/>
         <source>Extract</source>
         <comment>slotDecompressRowDoubleClicked</comment>
         <translation>Wypakuj</translation>
     </message>
     <message>
         <location filename="../source/src/fileViewer.cpp" line="399"/>
-        <location filename="../source/src/fileViewer.cpp" line="1268"/>
+        <location filename="../source/src/fileViewer.cpp" line="1283"/>
         <source>Extract to current directory</source>
         <translation>Wypakuj do bieżącego katalogu</translation>
     </message>

@@ -744,15 +744,22 @@ void MainWindow::refreshPage()
             m_watchTimer = 0;
         }
         if (this->m_encryptiontype == EncryptionType::Encryption_Load) {
-            m_Progess->setSpeedAndTimeText(COMPRESSDRAGADD);
+//            m_Progess->setSpeedAndTimeText(COMPRESSDRAGADD);
+            int limitCounts = 10;
+            int left = 5, right = 5;
+            QString displayName = "";
+            displayName = m_decompressfilename.length() > limitCounts ? m_decompressfilename.left(left) + "..." + m_decompressfilename.right(right) : m_decompressfilename;
+            QString strTitle = tr("adding files to %1").arg(m_decompressfilename);
+            titlebar()->setTitle(strTitle);
         } else {
-            m_Progess->setSpeedAndTimeText(COMPRESSING);
+            titlebar()->setTitle(tr("Compressing"));
         }
+        m_Progess->setSpeedAndTimeText(COMPRESSING);
 
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
-        titlebar()->setTitle(tr("Compressing"));
+
         m_Progess->setFilename(m_decompressfilename);
         m_mainLayout->setCurrentIndex(4);
         m_timer.start();
@@ -1933,8 +1940,8 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     connect(m_addJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
 
     m_pageid = PAGE_ZIPPROGRESS;
-    m_Progess->settype(COMPRESSING);
-
+//    m_Progess->settype(COMPRESSING);
+    m_Progess->settype(COMPRESSDRAGADD);
     m_jobState = JOB_ADD;
     refreshPage();
     //m_pathstore = Args[QStringLiteral("localFilePath")];
