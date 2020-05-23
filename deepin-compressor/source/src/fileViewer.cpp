@@ -1514,15 +1514,18 @@ void MyTableView::dropEvent(QDropEvent *event)
 //            } else {
 //                FilterAddFileList.push_back(fileUrl);
 //            }
-            if (pModel->isExists(fileUrl) == true) {//need to check more attributes
-                continue;
-            } else {
-                FilterAddFileList.push_back(fileUrl);
-            }
+//            if (pModel->isExists(fileUrl) == true) {//need to check more attributes
+//                existFiles << fileUrl;
+//                continue;
+//            } else {
+//                FilterAddFileList.push_back(fileUrl);
+//            }
+
+            FilterAddFileList.push_back(fileUrl);
         }
 
-        if (FilterAddFileList.size()) {
-            emit signalDrop(FilterAddFileList);
-        }
+        //if (FilterAddFileList.size()) {
+        emit signalDrop(FilterAddFileList/*, existFiles*/);
+        //}
     }
 }

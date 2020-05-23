@@ -91,7 +91,7 @@ public:
      * @param fullPath
      * @return
      */
-    bool isExists(QString fullPath);
+    Archive::Entry *isExists(QString fullPath);
     void setTableView(QTableView *tableview);
     QModelIndex createNoncolumnIndex(const QModelIndex &index) const;
 

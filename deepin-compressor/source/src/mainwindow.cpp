@@ -124,6 +124,15 @@ qint64 MainWindow::getMediaFreeSpace()
 
 bool MainWindow::applicationQuit()
 {
+    if (m_compressType == COMPRESSDRAGADD) {
+        if (m_addJob) {
+            m_addJob->kill();
+            m_addJob = nullptr;
+        }
+
+        return true;
+    }
+
     if (PAGE_ZIPPROGRESS == m_mainLayout->currentIndex()) {
         if (1 != m_Progess->showConfirmDialog()) {
             return false;
@@ -191,6 +200,16 @@ qint64 MainWindow::getDiskFreeSpace()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     qDebug() << "子窗口开始关闭";
+
+    if (m_compressType == COMPRESSDRAGADD) {
+        if (m_addJob) {
+            m_addJob->kill();
+            m_addJob = nullptr;
+        }
+
+        return;
+    }
+
     if (PAGE_ZIPPROGRESS == m_mainLayout->currentIndex()) {
         if (1 != m_Progess->showConfirmDialog()) {
             event->ignore();
@@ -405,7 +424,7 @@ void MainWindow::InitConnection()
     connect(m_UnCompressPage, &UnCompressPage::sigDeleteArchiveFiles, this, &MainWindow::deleteFromArchive);
     connect(m_UnCompressPage, &UnCompressPage::sigAddArchiveFiles, this, &MainWindow::addToArchive);
     connect(m_CompressSetting, &CompressSetting::sigMoveFilesToArchive, this, &MainWindow::moveToArchive);
-    connect(this, &MainWindow::deleteJobComplete, m_UnCompressPage, &UnCompressPage::sigDeleteJobFinished);
+    connect(this, &MainWindow::deleteJobComplete, m_UnCompressPage, &UnCompressPage::slotDeleteJobFinished);
     connect(this, &MainWindow::sigUpdateTableView, m_UnCompressPage, &UnCompressPage::sigUpdateUnCompreeTableView);
     connect(m_progressdialog, &ProgressDialog::stopExtract, this, &MainWindow::slotKillExtractJob);
     connect(m_progressdialog, &ProgressDialog::sigResetPercentAndTime, this, &MainWindow::slotResetPercentAndTime);
@@ -715,7 +734,8 @@ void MainWindow::refreshPage()
         m_Progess->resetProgress();
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
-        m_titlebutton->setVisible(false);
+        m_titlebutton->setIcon(DStyle::StandardPixmap::SP_IncreaseElement);
+        m_titlebutton->setVisible(true);
         titlebar()->setTitle(m_decompressfilename);
         m_mainLayout->setCurrentIndex(1);
         break;
@@ -925,6 +945,7 @@ qint64 MainWindow::calFileSize(const QString &path)
 
 void MainWindow::calSpeedAndTime(unsigned long compressPercent)
 {
+    qDebug() << "compressPercent" << compressPercent;
     qDebug() << "size" << selectedTotalFileSize;
     compressTime += m_timer.elapsed();
     qDebug() << "compresstime" << compressTime;
@@ -950,6 +971,7 @@ void MainWindow::onSelected(const QStringList &files)
     calSelectedTotalFileSize(files);
 
     if (files.count() == 1 && Utils::isCompressed_file(files.at(0))) {
+        m_compressType = DECOMPRESSING;
         if (0 == m_CompressPage->getCompressFilelist().count()) {
             QString filename;
             filename = files.at(0);
@@ -1011,6 +1033,7 @@ void MainWindow::onSelected(const QStringList &files)
             }
         }
     } else {
+        m_compressType = COMPRESSING;
         m_pageid = PAGE_ZIP;
         emit sigZipSelectedFiles(files);
         refreshPage();
@@ -1776,6 +1799,7 @@ void MainWindow::onCompressPressed(QMap< QString, QString > &Args)
 
 void MainWindow::onUncompressStateAutoCompress(QMap<QString, QString> &Args)
 {
+    m_compressType = COMPRESSDRAGADD;
     m_progressdialog->setProcess(0);
     m_Progess->setprogress(0);
     IsAddArchive = true;
@@ -2268,6 +2292,10 @@ bool clearTempFiles(const QString &temp_path)
 
 void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/)
 {
+    if (m_compressType == COMPRESSDRAGADD) {
+        return;
+    }
+
     QFile fi(createCompressFile_);  // 没有判断 7z分卷压缩的 文件名
     if (fi.exists()) {
         fi.remove();
@@ -2541,7 +2569,7 @@ void MainWindow::slotJobFinished(KJob *job)
         m_filterModel->setSourceModel(m_model);
         //refresh valid end
         qDebug() << "自动删除完成信号" << ArchivePath;
-        emit deleteJobComplete();//要不要把这句注释掉？
+        emit deleteJobComplete();//要不要把这句注释掉？不注释，有用到
     }
     break;
     case JOB_DELETE_MANUAL: {
@@ -2775,6 +2803,8 @@ void MainWindow::addToArchive(const QStringList &files, const QString &archive)
 
 void MainWindow::onCancelCompressPressed(int compressType)
 {
+    m_compressType = compressType;
+
     slotResetPercentAndTime();
     if (m_encryptionjob) {
         //append the spiner animation to the eventloop, so can play the spinner animation
@@ -2804,8 +2834,11 @@ void MainWindow::onCancelCompressPressed(int compressType)
         }
     }
 
+
     deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
     deleteDecompressFile();
+
+
 
     if (compressType == COMPRESSING) {
         if (m_createJob) {
@@ -2820,6 +2853,13 @@ void MainWindow::onCancelCompressPressed(int compressType)
         }
         m_pageid = PAGE_ZIP;
     } else if (compressType == DECOMPRESSING) {
+        m_pageid = PAGE_UNZIP;
+    } else if (compressType == COMPRESSDRAGADD) {
+        if (m_addJob) {
+//            m_createJob->deleteLater();
+            m_addJob->kill();
+            m_addJob = nullptr;
+        }
         m_pageid = PAGE_UNZIP;
     }
     refreshPage();

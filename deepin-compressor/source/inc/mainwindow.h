@@ -353,6 +353,9 @@ private:
 
     GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
     MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
+
+    int m_compressType;
+
 private:
     void calSelectedTotalFileSize(const QStringList &files);
     void calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel);

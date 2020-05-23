@@ -31,6 +31,7 @@
 #include <DMessageManager>
 #include <DDialog>
 #include <QFontMetrics>
+#include "queries.h"
 
 DCORE_USE_NAMESPACE
 DWIDGET_USE_NAMESPACE
@@ -199,8 +200,39 @@ void UnCompressPage::slotCompressedAddFile()
     if (mode != QDialog::Accepted) {
         return;
     }
+    QVector<Archive::Entry *> vectorEntry;
+    m_inputlist.clear();
+    ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
 
-    emit sigAutoCompress(m_info.filePath(), dialog.selectedFiles());
+    foreach (QString strPath, dialog.selectedFiles()) {
+
+        Archive::Entry *entry = pModel->isExists(strPath);
+
+        if (entry != nullptr) {
+            int mode = showReplaceDialog(strPath);
+            if (1 == mode) {
+                vectorEntry.push_back(entry);
+                m_inputlist.push_back(strPath);
+            }
+        } else {
+            m_inputlist.push_back(strPath);
+        }
+    }
+
+
+    m_model->refreshNow();
+    if (vectorEntry.count() > 0) {
+        emit onRefreshEntryList(vectorEntry, false);
+    } else {
+        if (m_inputlist.count() > 0)
+            //emit onAutoCompress(m_inputlist);
+            emit sigAutoCompress(m_info.filePath(), m_inputlist);
+        m_inputlist.clear();
+    }
+
+
+
+    //emit sigAutoCompress(m_info.filePath(), dialog.selectedFiles());
 }
 
 fileViewer *UnCompressPage::getFileViewer()
@@ -287,10 +319,53 @@ void UnCompressPage::onextractfilesOpenSlot(const QVector<Archive::Entry *> &fil
 
 void UnCompressPage::onAutoCompress(const QStringList &path)
 {
-    emit sigAutoCompress(m_info.filePath(), path);
+    QVector<Archive::Entry *> vectorEntry;
+    m_inputlist.clear();
+    ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
+
+    foreach (QString strPath, path) {
+
+        Archive::Entry *entry = pModel->isExists(strPath);
+
+        if (entry != nullptr) {
+            int mode = showReplaceDialog(strPath);
+            if (1 == mode) {
+                vectorEntry.push_back(entry);
+                m_inputlist.push_back(strPath);
+            }
+        } else {
+            m_inputlist.push_back(strPath);
+        }
+    }
+
+
+    m_model->refreshNow();
+    if (vectorEntry.count() > 0) {
+        emit onRefreshEntryList(vectorEntry, false);
+    } else {
+        if (m_inputlist.count() > 0)
+            //emit onAutoCompress(m_inputlist);
+            emit sigAutoCompress(m_info.filePath(), m_inputlist);
+        m_inputlist.clear();
+    }
 }
 
 void UnCompressPage::slotSubWindowTipsPopSig(int mode, const QStringList &args)
 {
     emit subWindowTipsPopSig(mode, args);
+}
+
+void UnCompressPage::slotDeleteJobFinished()
+{
+    if (m_inputlist.count() > 0)
+        emit sigAutoCompress(m_info.filePath(), m_inputlist);
+
+    //m_fileviewer->addFiles();
+}
+
+int UnCompressPage::showReplaceDialog(QString name)
+{
+    OverwriteQuery query(name);
+    query.execute();
+    return query.getExecuteReturn();
 }

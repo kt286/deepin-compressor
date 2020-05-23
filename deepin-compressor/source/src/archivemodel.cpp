@@ -240,13 +240,16 @@ Archive::Entry *ArchiveModel::getRootEntry()
     return this->m_rootEntry.data();
 }
 
-bool ArchiveModel::isExists(QString fullPath)
+Archive::Entry *ArchiveModel::isExists(QString fullPath)
 {
     QFileInfo fileInfo(fullPath);
     Archive::Entry *parent = this->getParentEntry();
     qint64 size = fileInfo.size();
     if (parent == nullptr) {
-        return false;
+        parent = this->getRootEntry();
+        if (parent == nullptr) {
+            return nullptr;
+        }
     }
 
     QVector<Archive::Entry *> vector =  parent->entries();
@@ -254,12 +257,12 @@ bool ArchiveModel::isExists(QString fullPath)
     while (it != vector.end()) {
         Archive::Entry *entry = *it;
         qint64 sizeOri = entry->property("size").toLongLong();
-        if (entry->name() == fileInfo.fileName() && size == sizeOri) {
-            return true;
+        if (entry->name() == fileInfo.fileName() /*&& size == sizeOri*/) {
+            return entry;
         }
         it++;
     }
-    return false;
+    return nullptr;
 }
 
 void ArchiveModel::setTableView(QTableView *tableview)

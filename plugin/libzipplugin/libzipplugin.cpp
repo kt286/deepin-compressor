@@ -710,7 +710,7 @@ bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive, int &c
             return false;
         } else {
             if (curNo >= 0) {
-                qDebug() << ">>>>>>" << float(++curNo) / count;
+                //qDebug() << ">>>>>>" << float(++curNo) / count;
                 emit progress(float(++curNo) / count);
             }
         }

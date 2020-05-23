@@ -54,6 +54,7 @@ public:
     EXTRACT_TYPE getExtractType();
     void slotCompressedAddFile();
     fileViewer *getFileViewer();
+    int showReplaceDialog(QString name);
 
 signals:
     void sigDecompressPress(const QString &localPath);
@@ -92,6 +93,8 @@ public slots:
     void onextractfilesOpenSlot(const QVector<Archive::Entry *> &fileList, const QString &programma);
     void onAutoCompress(const QStringList &path);
     void slotSubWindowTipsPopSig(int, const QStringList &);
+
+    void slotDeleteJobFinished();
 private:
 
     fileViewer *m_fileviewer;
@@ -107,5 +110,6 @@ private:
     ArchiveSortFilterModel *m_model;
     EXTRACT_TYPE extractType;
 
+    QStringList m_inputlist;
 };
 #endif
