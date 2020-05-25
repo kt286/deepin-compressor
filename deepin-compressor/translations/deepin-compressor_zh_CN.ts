@@ -157,7 +157,7 @@
     <message>
         <location filename="../source/src/compresssetting.cpp" line="676"/>
         <source>You cannot add the archive to yourself</source>
-        <translation type="unfinished"></translation>
+        <translation>不能添加压缩包本身</translation>
     </message>
     <message>
         <location filename="../source/src/compresssetting.cpp" line="805"/>
