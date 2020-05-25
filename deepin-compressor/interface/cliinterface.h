@@ -28,7 +28,8 @@
 //#include "filewatcher.h"
 #include <QProcess>
 #include <QRegularExpression>
-
+#include <QThreadPool>
+#include <QReadWriteLock>
 
 class KProcess;
 
@@ -136,7 +137,7 @@ protected:
 protected Q_SLOTS:
     virtual void readStdout(bool handleAll = false);
     virtual void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
-
+    void handleLineSlot(const QString &line);
 protected:
     CliProperties *m_cliProps = nullptr;
     QString m_oldWorkingDirExtraction; // Used ONLY by extraction jobs.
@@ -232,6 +233,8 @@ private:
 
     AnalyseHelp *pAnalyseHelp = nullptr;
     FileWatcher *pFileWatcherdd = nullptr;
+    QThreadPool m_threadPool;
+    QReadWriteLock m_RWLock;
 
 private Q_SLOTS:
     void extractProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);

@@ -23,12 +23,14 @@
 #include "archivesortfiltermodel.h"
 #include "archiveentry.h"
 #include "archivemodel.h"
-
+#include "mimetypes.h"
+#include "source/inc/mimetypedisplaymanager.h"
 
 
 ArchiveSortFilterModel::ArchiveSortFilterModel(QObject *parent)
     : QSortFilterProxyModel(parent)
 {
+    m_mimetype = new MimeTypeDisplayManager(this);
 }
 
 bool ArchiveSortFilterModel::lessThan(const QModelIndex &leftIndex,
@@ -47,33 +49,61 @@ bool ArchiveSortFilterModel::lessThan(const QModelIndex &leftIndex,
         return false;
     } else {
         switch (col) {
-            {
-            case Size:
-                uint dirs;
-                uint files;
-                left->countChildren(dirs, files);
-                uint files_l = dirs + files;
-                right->countChildren(dirs, files);
-                uint files_r = dirs + files;
-                qDebug() << QString::number(dirs + files);
-                if (left->isDir() && right->isDir()) {
-                    return files_l < files_r;
-                } else if (left->isDir()) {
-                    return true;
-                } else if (right->isDir()) {
-                    return false;
-                }
 
-                if (left->property(property.constData()).toULongLong() < right->property(property.constData()).toULongLong()) {
-                    return true;
-                }
-                break;
-            }
-        default:
-            if (left->property(property.constData()).toString() < right->property(property.constData()).toString()) {
+        case Timestamp: {
+            const QDateTime leftTime = left->property("timestamp").toDateTime();
+            const QDateTime rightTime = right->property("timestamp").toDateTime();
+
+            if (leftTime < rightTime) {
                 return true;
             }
         }
+        break;
+        case Size: {
+            uint dirs;
+            uint files;
+            left->countChildren(dirs, files);
+            uint files_l = dirs + files;
+            right->countChildren(dirs, files);
+            uint files_r = dirs + files;
+            qDebug() << QString::number(dirs + files);
+            if (left->isDir() && right->isDir()) {
+                return files_l < files_r;
+            } else if (left->isDir()) {
+                return true;
+            } else if (right->isDir()) {
+                return false;
+            }
+
+            if (left->property(property.constData()).toULongLong() < right->property(property.constData()).toULongLong()) {
+                return true;
+            }
+        }
+        break;
+        default: {
+            QMimeType mimeLeftType = determineMimeType(left->fullPath());
+            QMimeType mimeRightType = determineMimeType(right->fullPath());
+
+            if (m_mimetype->displayName(mimeLeftType.name()) > m_mimetype->displayName(mimeRightType.name())) {
+                return true;
+            }
+        }
+        break;
+        }
     }
     return false;
+}
+
+bool ArchiveSortFilterModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    beginInsertRows(parent, row, row + count - 1);
+
+    endInsertRows();
+
+    return true;
+}
+
+void ArchiveSortFilterModel::refreshNow()
+{
+    emit insertRows(0, 0, this->index(0, 0));
 }

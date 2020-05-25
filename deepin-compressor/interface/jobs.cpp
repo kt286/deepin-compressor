@@ -28,6 +28,7 @@
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QThread>
+#include "globalarchivemanager.h"
 #include <QTimer>
 
 
@@ -73,6 +74,7 @@ Job::Job(ReadOnlyArchiveInterface *interface)
 Job::~Job()
 {
     if (d->isRunning()) {
+        d->terminate();
         d->wait();
     }
 
@@ -83,6 +85,7 @@ ReadOnlyArchiveInterface *Job::archiveInterface()
 {
     // Use the archive interface.
     if (archive()) {
+
         return archive()->interface();
     }
 
@@ -149,7 +152,7 @@ void Job::connectToArchiveInterfaceSignals()
     connect(archiveInterface(), &ReadOnlyArchiveInterface::progress_filename, this, &Job::onProgressFilename, Qt::ConnectionType::UniqueConnection);
     connect(archiveInterface(), &ReadOnlyArchiveInterface::updateDestFileSignal, this, &Job::onUpdateDestFile, Qt::ConnectionType::UniqueConnection);
 
-    auto readWriteInterface = qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+    ReadWriteArchiveInterface *readWriteInterface = dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
     if (readWriteInterface) {
         connect(readWriteInterface, &ReadWriteArchiveInterface::entryRemoved, this, &Job::onEntryRemoved, Qt::ConnectionType::UniqueConnection);
     }
@@ -576,8 +579,7 @@ void ExtractJob::doWork()
     bool ret = archiveInterface()->extractFiles(m_entries, m_destinationDir, m_options);
 
     if (!archiveInterface()->waitForFinishedSignal() /*&& archiveInterface()->isUserCancel() == false*/) {
-//        onFinished(ret);
-        emit archiveInterface()->finished(ret);
+        onFinished(ret);
     }
 }
 
@@ -607,6 +609,16 @@ ExtractionOptions ExtractJob::extractionOptions() const
 {
     return m_options;
 }
+
+Archive::Entry *ExtractJob::getWorkEntry()
+{
+    if (this->m_entries.length() > 0) {
+        return m_entries[0];
+    } else {
+        return nullptr;
+    }
+}
+
 
 TempExtractJob::TempExtractJob(Archive::Entry *entry, bool passwordProtectedHint, ReadOnlyArchiveInterface *interface)
     : Job(interface)
@@ -708,16 +720,8 @@ void AddJob::doWork()
     uint totalCount = 0;
     QElapsedTimer timer;
     timer.start();
-    for (const Archive::Entry *entry : qAsConst(m_entries)) {
-        totalCount++;
-        if (QFileInfo(entry->fullPath()).isDir()) {
-            QDirIterator it(entry->fullPath(), QDir::AllEntries | QDir::Readable | QDir::Hidden | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-            while (it.hasNext()) {
-                it.next();
-                totalCount++;
-            }
-        }
-    }
+
+    totalCount = (uint)m_entries.length();
 
     qDebug() << "Going to add" << totalCount << "entries, counted in" << timer.elapsed() << "ms";
 
@@ -737,13 +741,13 @@ void AddJob::doWork()
 
         const QString &fullPath = entry->fullPath();
         fileListWathed->append(fullPath);
-        QString relativePath = workDir.relativeFilePath(fullPath);
+//        QString relativePath = workDir.relativeFilePath(fullPath);
 
-        if (fullPath.endsWith(QLatin1Char('/'))) {
-            relativePath += QLatin1Char('/');
-        }
+//        if (fullPath.endsWith(QLatin1Char('/'))) {
+//            relativePath += QLatin1Char('/');
+//        }
 
-        entry->setFullPath(relativePath);
+//        entry->setFullPath(relativePath);
     }
 
     connectToArchiveInterfaceSignals();
@@ -763,6 +767,18 @@ void AddJob::onFinished(bool result)
 {
     if (!m_oldWorkingDir.isEmpty()) {
         QDir::setCurrent(m_oldWorkingDir);
+    }
+
+    if (result) {
+        foreach (Archive::Entry *pEntry, m_entries) {
+            if (!pEntry) {
+                continue;
+            }
+            pEntry->setProperty("timestamp", QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss")));
+            //在这里改变fullpath属性
+//            onEntry(pEntry);
+            emit addEntry(pEntry);
+        }
     }
 
     Job::onFinished(result);
@@ -788,7 +804,7 @@ void MoveJob::doWork()
     emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
 
     ReadWriteArchiveInterface *m_writeInterface =
-        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
+        dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
 
     Q_ASSERT(m_writeInterface);
 
@@ -861,9 +877,8 @@ void DeleteJob::doWork()
     //emit description(this, desc, qMakePair(tr("Archive"), archiveInterface()->filename()));
     emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
 
-    ReadWriteArchiveInterface *m_writeInterface =
-        qobject_cast<ReadWriteArchiveInterface *>(archiveInterface());
-
+    ReadWriteArchiveInterface *m_writeInterface = dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
+    connect(m_writeInterface, &ReadOnlyArchiveInterface::progress, this, &DeleteJob::onProgress);
     Q_ASSERT(m_writeInterface);
 
     connectToArchiveInterfaceSignals();

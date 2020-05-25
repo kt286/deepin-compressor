@@ -83,6 +83,15 @@ public:
     Archive::Entry *entryForIndex(const QModelIndex &index);
     bool isentryDir(const QModelIndex &index);
     void setPathIndex(int *index);
+    void setParentEntry(const QModelIndex &index);
+    Archive::Entry *getParentEntry();
+    Archive::Entry *getRootEntry();
+    /**
+     * @brief check if exists archive with fullpath
+     * @param fullPath
+     * @return
+     */
+    Archive::Entry *isExists(QString fullPath);
     void setTableView(QTableView *tableview);
     QModelIndex createNoncolumnIndex(const QModelIndex &index) const;
 
@@ -94,10 +103,16 @@ public:
     OpenWithJob *openWith(Archive::Entry *file) const;
 
     AddJob *addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
+    AddJob *addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, ReadOnlyArchiveInterface *pIface = nullptr, const CompressionOptions &options = CompressionOptions());
     MoveJob *moveFiles(QVector<Archive::Entry *> &entries, Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     CopyJob *copyFiles(QVector<Archive::Entry *> &entries, Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     DeleteJob *deleteFiles(QVector<Archive::Entry *> entries);
 
+    /**
+     * @brief insertEntryIcons
+     * @param map
+     */
+    void appendEntryIcons(const QHash<QString, QIcon> &map);
     /**
      * @param password The password to encrypt the archive with.
      * @param encryptHeader Whether to encrypt also the list of files.
@@ -119,7 +134,9 @@ public:
 
     QMap<QString, Archive::Entry *> filesToMove;
     QMap<QString, Archive::Entry *> filesToCopy;
-
+    //store the map what key is path,value is entryChild. If open a new view to see the entryChild,you need to store it.
+    QMap<QString, Archive::Entry *> mapFilesUpdate;
+//    QList<Archive::Entry *> *getLeavesList();
 Q_SIGNALS:
     void loadingStarted();
     void loadingFinished(KJob *);
@@ -131,6 +148,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void slotNewEntry(Archive::Entry *entry);
+    void slotAddEntry(Archive::Entry *entry);
     void slotListEntry(Archive::Entry *entry);
     void slotLoadingFinished(KJob *job);
     void slotEntryRemoved(const QString &path);
@@ -185,5 +203,9 @@ private:
     int *m_ppathindex;
     QTableView *m_tableview;
     MimeTypeDisplayManager *m_mimetype;
+    Archive::Entry *m_parent = nullptr;
+//    Used to speed up the loading of large archives.
+    Archive::Entry *s_previousMatch = nullptr;
+    QStringList *s_previousPieces = new QStringList();
 };
 #endif // ARCHIVEMODEL_H

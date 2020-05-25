@@ -92,8 +92,9 @@ void Archive::Entry::removeEntryAt(int index)
 {
     Q_ASSERT(isDir());
     Q_ASSERT(index < m_entries.count());
-    m_entries.remove(index);
     m_mapIndex.remove(m_entries[index]->name());
+    m_entries.remove(index);
+
     m_iIndex--;
 
     QMap<QString, int>::iterator iter = m_mapIndex.begin();
@@ -113,6 +114,34 @@ Archive::Entry *Archive::Entry::getParent() const
 void Archive::Entry::setParent(Archive::Entry *parent)
 {
     m_parent = parent;
+}
+
+qint64 Archive::Entry::getSize()
+{
+    return m_size;
+}
+
+void Archive::Entry::calAllSize(qint64 &size)
+{
+    if (this->isDir() == false) {
+        size += getSize();
+        //size += 1;
+        return ;
+    }
+    const auto archiveEntries = this->entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            entry->calAllSize(size);
+        } else {
+            size += entry->getSize();
+            //size += 1;//如果计算真实的大小就用上面getSize，如果计算有效文件的个数，就+1
+        }
+    }
+}
+
+void Archive::Entry::setSize(qint64 size)
+{
+    m_size = size;
 }
 
 void Archive::Entry::setFullPath(const QString &fullPath)
@@ -198,6 +227,50 @@ void Archive::Entry::countChildren(uint &dirs, uint &files) const
             dirs++;
         } else {
             files++;
+        }
+    }
+}
+
+QVector<Archive::Entry *> *Archive::Entry::getAllLeavesNode()
+{
+    QVector<Archive::Entry *> *pV = new QVector<Archive::Entry *>();
+    const auto archiveEntries = entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            this->checkLeavesNode(entry, pV);
+        } else {
+            pV->append(entry);
+        }
+    }
+    return pV;
+}
+
+/**
+ * @brief Archive::Entry::getFilesCount,include file,exclude dir
+ * @param pEntry
+ * @param count
+ */
+void Archive::Entry::getFilesCount(Archive::Entry *pEntry, int &count)
+{
+    if (pEntry->isDir() == false) {
+        count ++;
+        return;
+    }
+
+    const auto archiveEntries = pEntry->entries();
+    for (auto entry : archiveEntries) {
+        this->getFilesCount(entry, count);
+    }
+}
+
+void *Archive::Entry::checkLeavesNode(Entry *pE, QVector<Archive::Entry *> *pV)
+{
+    const auto archiveEntries = pE->entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            this->checkLeavesNode(entry, pV);
+        } else {
+            pV->append(entry);
         }
     }
 }
