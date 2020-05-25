@@ -133,12 +133,46 @@ public:
         }
     }
 
+    void remove(const QString &strWinId)
+    {
+        if (this->mMapGlobal.contains(strWinId) == true) {
+            this->mMapGlobal.remove(strWinId);
+        }
+    }
+
     void clear()
     {
         this->mMapGlobal.clear();
     }
 
+    /**
+     * @brief mMapGlobal
+     * @ key: winId
+     * @ value: pointer of mainWindow
+     */
     QMap<QString, MainWindow *> mMapGlobal;
+};
+
+struct OpenInfo {
+    QString strWinId = "";//open view the winId
+    bool open = false;
+};
+
+struct MainWindow_AuxInfo {
+    /**
+     * @brief infomation
+     * @ key :strModexIndex
+     * @ value :the pointer of open info
+     */
+    QMap<QString, OpenInfo *> information;
+    /**
+     * @brief childAuxInfo
+     */
+//    MainWindow_AuxInfo *childAuxInfo = nullptr;
+    /**
+     * @brief parentAuxInfo
+     */
+    MainWindow_AuxInfo *parentAuxInfo = nullptr;
 };
 
 static QVector<qint64> m_tempProcessId;
@@ -199,7 +233,7 @@ public:
 private:
     void saveWindowState();
     void loadWindowState();
-
+    QString modelIndexToStr(const QModelIndex &modelIndex);//added by hsw 20200525
 protected:
     void dragEnterEvent(QDragEnterEvent *) override;
     void dragLeaveEvent(QDragLeaveEvent *) override;
@@ -353,7 +387,7 @@ private:
 
     GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
     MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
-
+    MainWindow_AuxInfo *pCurAuxInfo = nullptr;//added by hsw 20200525
     int m_compressType;
 
 private:

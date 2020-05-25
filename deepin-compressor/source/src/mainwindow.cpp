@@ -98,6 +98,9 @@ MainWindow::~MainWindow()
         if (this->pMapGlobalWnd != nullptr) {
             this->pMapGlobalWnd->mMapGlobal.clear();
         }
+        if (this->pCurAuxInfo != nullptr) {
+            this->pMapGlobalWnd->mMapGlobal.clear();
+        }
     }
     saveWindowState();
 }
@@ -200,7 +203,9 @@ qint64 MainWindow::getDiskFreeSpace()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     qDebug() << "子窗口开始关闭";
-
+    if (this->pMapGlobalWnd != nullptr) {
+        this->pMapGlobalWnd->remove(QString::number(this->winId()));
+    }
     if (m_compressType == COMPRESSDRAGADD) {
         if (m_addJob) {
             m_addJob->kill();
@@ -208,6 +213,38 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
         return;
+    }
+
+    if (this->pCurAuxInfo != nullptr) {
+//        MainWindow_AuxInfo *parentAuxInfo = this->pCurAuxInfo->parentAuxInfo;
+//        if (parentAuxInfo != nullptr) {
+//            QString winId = QString::number(this->winId());
+//            QMap<QString, OpenInfo *>::iterator it = parentAuxInfo->information.begin();
+//            while (it != parentAuxInfo->information.end()) {
+//                OpenInfo *pInfo = it.value();
+//                if (pInfo->strWinId == winId) {
+//                    parentAuxInfo->information.remove(it.key());
+//                    break;
+//                }
+//                it++;
+//            }
+//        }
+
+        MainWindow_AuxInfo *curAuxInfo = this->pCurAuxInfo;
+        QMap<QString, OpenInfo *>::iterator it = curAuxInfo->information.begin();
+        while (it != curAuxInfo->information.end()) {
+            OpenInfo *pInfo = it.value();
+            pInfo->strWinId;
+            MainWindow *p = this->pMapGlobalWnd->getOne(pInfo->strWinId);
+            if (p != nullptr) {
+                p->close();//close all children mainwindow
+            }
+            it++;
+        }
+        curAuxInfo->information.clear();
+        delete curAuxInfo;
+        curAuxInfo = nullptr;
+
     }
 
     if (PAGE_ZIPPROGRESS == m_mainLayout->currentIndex()) {
@@ -654,16 +691,35 @@ bool MainWindow::createSubWindow(const QStringList &urls)
             break;
         }
     }
-    MainWindow *pSrcWnd = nullptr;
+    MainWindow *pParentWnd = nullptr;
     if (this->pMapGlobalWnd != nullptr) {
-        pSrcWnd = this->pMapGlobalWnd->getOne(winid);
+        pParentWnd = this->pMapGlobalWnd->getOne(winid);
     }
     //create sub mainwindow
     if (inUrls.length() == 0) {
         return false;
     }
     MainWindow *subWindow = new MainWindow();
+
     subWindow->pMapGlobalWnd = this->pMapGlobalWnd;
+    subWindow->pCurAuxInfo = new MainWindow_AuxInfo();
+    if (pParentWnd != nullptr) {
+        subWindow->pCurAuxInfo->parentAuxInfo = pParentWnd->pCurAuxInfo;
+        //    pSrcWnd->pCurAuxInfo->childAuxInfo = subWindow->pCurAuxInfo;
+    }
+
+    if (inUrls.length() > 1) {
+        QString strModelIndex = inUrls[1];
+        inUrls.removeAt(1);
+
+        if (pParentWnd != nullptr && pParentWnd->pCurAuxInfo != nullptr &&
+                pParentWnd->pCurAuxInfo->information.contains(strModelIndex) == true) {
+            OpenInfo *pInfo = pParentWnd->pCurAuxInfo->information[strModelIndex];
+            pInfo->open = true;
+            pInfo->strWinId = QString::number(subWindow->winId());
+        }
+    }
+
     if (this->pMapGlobalWnd == nullptr) {
         this->pMapGlobalWnd = new GlobalMainWindowMap();
     }
@@ -671,9 +727,9 @@ bool MainWindow::createSubWindow(const QStringList &urls)
 
     subWindow->resize(100, 100);
     if (!inUrls.isEmpty()) {
-        if (pSrcWnd != nullptr) {
+        if (pParentWnd != nullptr) {
             qDebug() << "find the window success,winid:" << winid;
-            connect(subWindow, &MainWindow::sigTipsWindowPopUp, pSrcWnd->m_UnCompressPage, &UnCompressPage::slotSubWindowTipsPopSig);
+            connect(subWindow, &MainWindow::sigTipsWindowPopUp, pParentWnd->m_UnCompressPage, &UnCompressPage::slotSubWindowTipsPopSig);
         } else {
             qDebug() << "warn: can not find the window,winid:" << winid;
 //            connect(subWindow, &MainWindow::sigTipsWindowPopUp, this->m_UnCompressPage, &UnCompressPage::slotSubWindowTipsPopSig);
@@ -1542,13 +1598,17 @@ void MainWindow::slotExtractionDone(KJob *job)
                 this->m_model->mapFilesUpdate.insert(destPath, pExtractWorkEntry);
             }
 
-            arguments << destPath;
+            arguments << destPath;//the first arg
             if (isCompressedFile == true) {
                 if (pMapGlobalWnd == nullptr) {
                     pMapGlobalWnd = new GlobalMainWindowMap();
                 }
                 pMapGlobalWnd->insert(QString::number(this->winId()), this);
-                arguments << HEADBUS + QString::number(this->winId());
+                arguments << HEADBUS + QString::number(this->winId());//the second arg
+
+                QModelIndex index = this->m_model->indexForEntry(pExtractWorkEntry);
+                QString strIndex = modelIndexToStr(index);
+                arguments << strIndex;//the third arg
             }
         }
 //        }
@@ -2627,6 +2687,11 @@ void MainWindow::slotJobFinished(KJob *job)
     }
 }
 
+QString MainWindow::modelIndexToStr(const QModelIndex &index)
+{
+    return QString::number(index.row()) + QString::number(index.column()) + QString::number(index.internalId());
+}
+
 void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QString path, EXTRACT_TYPE type)
 {
     m_timer.start();
@@ -2642,6 +2707,28 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
 
     if (type == EXTRACT_TEMP) {
         m_encryptiontype = Encryption_TempExtract;
+
+        if (pCurAuxInfo == nullptr) {
+            pCurAuxInfo = new MainWindow_AuxInfo();
+        }
+
+        OpenInfo *pNewInfo = nullptr;
+        QModelIndex index = this->m_model->indexForEntry(fileList[0]);
+        QString key = modelIndexToStr(index);
+        if (pCurAuxInfo->information.contains(key) == false) {
+            pNewInfo = new OpenInfo;
+        } else {
+            if (this->pMapGlobalWnd->getOne(pCurAuxInfo->information[key]->strWinId) != nullptr) {
+                m_workstatus = WorkNone;
+                return;
+            }
+            delete pCurAuxInfo->information[key];
+            pCurAuxInfo->information.remove(key);
+
+            pNewInfo = new OpenInfo;
+        }
+        pCurAuxInfo->information.insert(key, pNewInfo);
+
     } else if (type == EXTRACT_TEMP_CHOOSE_OPEN) {
         m_encryptiontype =  Encryption_TempExtract_Open_Choose;
     } else if (type == EXTRACT_DRAG) {

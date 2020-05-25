@@ -137,6 +137,7 @@ public:
     //store the map what key is path,value is entryChild. If open a new view to see the entryChild,you need to store it.
     QMap<QString, Archive::Entry *> mapFilesUpdate;
 //    QList<Archive::Entry *> *getLeavesList();
+    QModelIndex indexForEntry(Archive::Entry *entry);
 Q_SIGNALS:
     void loadingStarted();
     void loadingFinished(KJob *);
@@ -171,7 +172,7 @@ private:
 
     enum InsertBehaviour { NotifyViews, DoNotNotifyViews };
     Archive::Entry *parentFor(const Archive::Entry *entry, InsertBehaviour behaviour = NotifyViews);
-    QModelIndex indexForEntry(Archive::Entry *entry);
+
     static bool compareAscending(const QModelIndex &a, const QModelIndex &b);
     static bool compareDescending(const QModelIndex &a, const QModelIndex &b);
     /**

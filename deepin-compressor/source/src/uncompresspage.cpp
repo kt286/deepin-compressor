@@ -327,9 +327,8 @@ void UnCompressPage::onAutoCompress(const QStringList &path)
         return;
     }
 
-    QVector<Archive::Entry *> vectorEntry;
     ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
-
+    QVector<Archive::Entry *> vectorEntry;
     foreach (QString strPath, path) {
 
         Archive::Entry *entry = pModel->isExists(strPath);
