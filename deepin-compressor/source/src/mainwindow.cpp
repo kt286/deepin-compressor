@@ -206,7 +206,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
             m_addJob->kill();
             m_addJob = nullptr;
         }
-
+        deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
         return;
     }
 
@@ -2295,6 +2295,10 @@ bool clearTempFiles(const QString &temp_path)
 void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/)
 {
     if (m_compressType == COMPRESSDRAGADD) {
+        QFile fi(createCompressFile_ + ".tmp");
+        if (fi.exists()) {
+            fi.remove();
+        }
         return;
     }
 
