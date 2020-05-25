@@ -96,7 +96,7 @@ public slots:
     void autoMoveToArchive(const QStringList &files, const QString &archive);
 
 private:
-    int showWarningDialog(const QString &msg, int index = 0);
+    int showWarningDialog(const QString &msg, int index = 0, const QString &strTitle = "");
     bool existSameFileName();
 
 private:

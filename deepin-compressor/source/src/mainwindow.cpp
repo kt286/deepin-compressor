@@ -785,6 +785,7 @@ void MainWindow::refreshPage()
         m_timer.start();
         break;
     case PAGE_UNZIPPROGRESS:
+        m_Progess->settype(DECOMPRESSING);
         m_Progess->setSpeedAndTimeText(DECOMPRESSING);
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
@@ -1972,6 +1973,7 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     m_pageid = PAGE_ZIPPROGRESS;
 //    m_Progess->settype(COMPRESSING);
     m_Progess->settype(COMPRESSDRAGADD);
+    m_Progess->setProgressFilename(QFileInfo(filesToAddStr).fileName());
     m_jobState = JOB_ADD;
     refreshPage();
     //m_pathstore = Args[QStringLiteral("localFilePath")];
@@ -2626,6 +2628,8 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     m_timer.start();
     QStringList m_tempFileList;
     m_tempFileList.insert(0, path);
+
+    resetMainwindow();
     calSelectedTotalFileSize(m_tempFileList);
     m_progressdialog->setProcess(0);
     m_Progess->setprogress(0);

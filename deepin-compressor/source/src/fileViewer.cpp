@@ -307,6 +307,7 @@ void MyTableView::slotDragpath(QUrl url)
 
 void fileViewer::onDropSlot(QStringList files)
 {
+    m_bDropAdd = true;
     emit sigFileAutoCompress(files);
 
 //    subWindowChangedMsg(ACTION_DRAG, files);
@@ -318,6 +319,9 @@ void fileViewer::slotDeletedFinshedAddStart()
 //                       + QDir::separator() + "tempfiles" + QDir::separator() + m_ActionInfo.packageFile;
     QString tempPath = m_ActionInfo.packageFile;
     qDebug() << "添加文件====：" << tempPath;
+
+
+    m_bDropAdd = false;
     emit sigFileAutoCompress(QStringList() << tempPath);
 }
 
@@ -676,9 +680,14 @@ void fileViewer::keyPressEvent(QKeyEvent *event)
 //    if (event->key() == Qt::Key_Delete) {
 //        deleteCompressFile();
 //    }
-    if (event->key() == Qt::Key_Delete && 0 == m_pathindex) {
-        deleteCompressFile();
+    if (event->key() == Qt::Key_Delete && pTableViewFile->selectionModel()->selectedRows().count() != 0/* && 0 != m_pathindex*/) {
+        //deleteCompressFile();
+        isPromptDelete = true;
+        if (DDialog::Accepted == popUpDialog(tr("Do you want to detele the selected file?"))) {
+            slotDecompressRowDelete();
+        }
     }
+
 }
 
 void fileViewer::openTempFile(QString path)
@@ -1399,6 +1408,11 @@ void fileViewer::setDecompressModel(ArchiveSortFilterModel *model)
 
     pTableViewFile->setModel(model);
     resizecolumn();
+}
+
+bool fileViewer::isDropAdd()
+{
+    return m_bDropAdd;
 }
 
 void fileViewer::startDrag(Qt::DropActions /*supportedActions*/)

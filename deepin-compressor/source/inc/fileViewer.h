@@ -164,6 +164,8 @@ public:
     int getDeFileCount();
     void setDecompressModel(ArchiveSortFilterModel *model);
 
+    bool isDropAdd();
+
     QVector<Archive::Entry *> filesAndRootNodesForIndexes(const QModelIndexList &list) const;
     QVector<Archive::Entry *> filesForIndexes(const QModelIndexList &list) const;
     QModelIndexList addChildren(const QModelIndexList &list) const;
@@ -265,6 +267,8 @@ private:
     bool isPromptDelete = false;
     SubActionInfo m_ActionInfo;
     int openFileTempLink = 0;
+
+    bool m_bDropAdd;
 };
 
 #endif // FILEVIWER_H

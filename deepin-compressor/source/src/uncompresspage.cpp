@@ -319,8 +319,15 @@ void UnCompressPage::onextractfilesOpenSlot(const QVector<Archive::Entry *> &fil
 
 void UnCompressPage::onAutoCompress(const QStringList &path)
 {
-    QVector<Archive::Entry *> vectorEntry;
     m_inputlist.clear();
+
+    if (!m_fileviewer->isDropAdd()) {
+        m_inputlist = path;
+        emit sigAutoCompress(m_info.filePath(), m_inputlist);
+        return;
+    }
+
+    QVector<Archive::Entry *> vectorEntry;
     ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
 
     foreach (QString strPath, path) {
@@ -360,7 +367,10 @@ void UnCompressPage::slotDeleteJobFinished()
     if (m_inputlist.count() > 0)
         emit sigAutoCompress(m_info.filePath(), m_inputlist);
 
-    //m_fileviewer->addFiles();
+
+    m_inputlist.clear();
+
+    emit sigDeleteJobFinished();
 }
 
 int UnCompressPage::showReplaceDialog(QString name)
