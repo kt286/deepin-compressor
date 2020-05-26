@@ -69,7 +69,7 @@ signals:
      */
     void sigRefreshEntryVector(QVector<Archive::Entry *> &vectorDel, bool isManual);
     void sigAutoCompress(const QString &, const QStringList &);
-
+    void sigAutoCompressEntry(const QString &, const QStringList &, Archive::Entry *pWorkEntry); //added by hsw 20200525
     void sigUpdateUnCompreeTableView(const QFileInfo &);
     void sigSelectedFiles(QStringList &files);
     void subWindowTipsPopSig(int, const QStringList &);
@@ -77,7 +77,7 @@ signals:
     void sigDeleteArchiveFiles(const QStringList &files, const QString &);
     void sigAddArchiveFiles(const QStringList &files, const QString &);
 
-    void sigDeleteJobFinished();
+    void sigDeleteJobFinished(Archive::Entry *pWorkEntry);
 
 public slots:
     void oneCompressPress();
@@ -91,10 +91,10 @@ public slots:
      */
     void onRefreshEntryList(QVector<Archive::Entry *> &vectorDel, bool isManual);
     void onextractfilesOpenSlot(const QVector<Archive::Entry *> &fileList, const QString &programma);
-    void onAutoCompress(const QStringList &path);
+    void onAutoCompress(const QStringList &path, Archive::Entry *pWorkEntry);
     void slotSubWindowTipsPopSig(int, const QStringList &);
 
-    void slotDeleteJobFinished();
+    void slotDeleteJobFinished(Archive::Entry *pWorkEntry);
 private:
 
     fileViewer *m_fileviewer;

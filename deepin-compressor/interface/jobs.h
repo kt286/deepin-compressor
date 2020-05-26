@@ -342,7 +342,7 @@ public:
 
 public Q_SLOTS:
     void doWork() override;
-
+    Archive::Entry *getWorkEntry();
 private:
     QVector<Archive::Entry *> m_entries;
 };

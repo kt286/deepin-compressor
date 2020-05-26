@@ -889,6 +889,14 @@ void DeleteJob::doWork()
     }
 }
 
+Archive::Entry *DeleteJob::getWorkEntry()
+{
+    if (this->m_entries.length() == 0) {
+        return nullptr;
+    }
+    return this->m_entries[0];
+}
+
 CommentJob::CommentJob(const QString &comment, ReadWriteArchiveInterface *interface)
     : Job(interface)
     , m_comment(comment)

@@ -317,13 +317,13 @@ void UnCompressPage::onextractfilesOpenSlot(const QVector<Archive::Entry *> &fil
     emit sigOpenExtractFile(fileList, programma);
 }
 
-void UnCompressPage::onAutoCompress(const QStringList &path)
+void UnCompressPage::onAutoCompress(const QStringList &path, Archive::Entry *pWorkEntry)
 {
     m_inputlist.clear();
 
     if (!m_fileviewer->isDropAdd()) {
-        m_inputlist = path;
-        emit sigAutoCompress(m_info.filePath(), m_inputlist);
+        //m_inputlist = path;
+        emit sigAutoCompressEntry(m_info.filePath(), path, pWorkEntry);
         return;
     }
 
@@ -361,15 +361,18 @@ void UnCompressPage::slotSubWindowTipsPopSig(int mode, const QStringList &args)
     emit subWindowTipsPopSig(mode, args);
 }
 
-void UnCompressPage::slotDeleteJobFinished()
+void UnCompressPage::slotDeleteJobFinished(Archive::Entry *pWorkEntry)
 {
-    if (m_inputlist.count() > 0)
+    if (m_inputlist.count() > 0) {
+//        emit sigAutoCompressEntry(m_info.filePath(), m_inputlist, pWorkEntry);
         emit sigAutoCompress(m_info.filePath(), m_inputlist);
+    }
+//    emit sigAutoCompress(m_info.filePath(), m_inputlist);
 
 
     m_inputlist.clear();
 
-    emit sigDeleteJobFinished();
+    emit sigDeleteJobFinished(pWorkEntry);//在此处需要传送pWorkEntry,明天搞
 }
 
 int UnCompressPage::showReplaceDialog(QString name)

@@ -313,16 +313,13 @@ void fileViewer::onDropSlot(QStringList files)
 //    subWindowChangedMsg(ACTION_DRAG, files);
 }
 
-void fileViewer::slotDeletedFinshedAddStart()
+void fileViewer::slotDeletedFinshedAddStart(Archive::Entry *pWorkEntry)
 {
-//    QString tempPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation)
-//                       + QDir::separator() + "tempfiles" + QDir::separator() + m_ActionInfo.packageFile;
     QString tempPath = m_ActionInfo.packageFile;
     qDebug() << "添加文件====：" << tempPath;
 
-
     m_bDropAdd = false;
-    emit sigFileAutoCompress(QStringList() << tempPath);
+    emit sigFileAutoCompress(QStringList() << tempPath, pWorkEntry);
 }
 
 fileViewer::fileViewer(QWidget *parent, PAGE_TYPE type)
@@ -813,13 +810,11 @@ void fileViewer::upDateArchive(const SubActionInfo &dragInfo)
     //delete file from dest
     qDebug() << "删除文件：" << dragInfo.packageFile;
     QString fullPath = dragInfo.ActionFiles[0];
-//    emit sigFileRemoved(QStringList() <<  dragInfo.packageFile);
     if (this->m_decompressmodel->mapFilesUpdate.contains(fullPath)) {
         Archive::Entry *pEntry = this->m_decompressmodel->mapFilesUpdate[fullPath];
         QVector<Archive::Entry *> pV;
         pV.append(pEntry);
         if (UnCompressPage *pPage = qobject_cast<UnCompressPage *>(parentWidget())) {
-//            disconnect(pPage, &UnCompressPage::sigDeleteJobFinished, this, &fileViewer::slotDeletedFinshedAddStart);
             auto type = static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::QueuedConnection);
             connect(pPage, &UnCompressPage::sigDeleteJobFinished, this, &fileViewer::slotDeletedFinshedAddStart, type); //移除后，会发送添加的信号
         }

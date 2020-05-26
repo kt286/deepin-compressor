@@ -202,7 +202,7 @@ protected slots:
     void onRightMenuOpenWithClicked(QAction *action);
     void slotDragLeave(QString path);
     void onDropSlot(QStringList files);
-    void slotDeletedFinshedAddStart();
+    void slotDeletedFinshedAddStart(Archive::Entry *pWorkEntry);
 
 
 signals:
@@ -217,7 +217,7 @@ signals:
     void sigextractfiles(QVector<Archive::Entry *> fileList, EXTRACT_TYPE type, QString path = "");
     void sigpathindexChanged();
     void sigOpenWith(QVector<Archive::Entry *> fileList, const QString &programma);
-    void sigFileAutoCompress(const QStringList &);
+    void sigFileAutoCompress(const QStringList &, Archive::Entry *pWorkEntry = nullptr);
     void sigFileAutoCompressToArchive(const QStringList &, const QString &);
 private:
     void refreshTableview();

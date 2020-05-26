@@ -562,24 +562,6 @@ void ArchiveModel::slotAddEntry(Archive::Entry *receivedEntry)
     // If there are no columns registered, then populate columns from entry. If the first entry
     // is a directory we check again for the first file entry to ensure all relevent columms are shown.
     if (m_showColumns.isEmpty() || !m_fileEntryListed) {
-//        QList<int> toInsert;
-
-//        const auto size = receivedEntry->property("size").toULongLong();
-//        const auto compressedSize = receivedEntry->property("compressedSize").toULongLong();
-//        for (auto i = m_propertiesMap.begin(); i != m_propertiesMap.end(); ++i) {
-//            // Singlefile plugin doesn't report the uncompressed size.
-//            if (i.key() == Size && size == 0 && compressedSize > 0) {
-//                continue;
-//            }
-//            if (!receivedEntry->property(i.value().constData()).toString().isEmpty()) {
-//                if (i.key() != CompressedSize || receivedEntry->compressedSizeIsSet) {
-//                    if (!m_showColumns.contains(i.key())) {
-//                        toInsert << i.key();
-//                    }
-//                }
-//            }
-//        }
-
         m_showColumns = {0, 1, 2, 3};//<< toInsert;
         if (behaviour == NotifyViews) {
             beginInsertColumns(QModelIndex(), 0, m_showColumns.size() - 1);
@@ -622,12 +604,6 @@ void ArchiveModel::slotAddEntry(Archive::Entry *receivedEntry)
 
     // Find parent entry, creating missing directory Archive::Entry's in the process.
     Archive::Entry *parent = parentFor(receivedEntry, behaviour);
-    //added by hsw for get valid parent begin
-    if (m_parent != nullptr && parent != m_parent) {
-        parent = m_parent;
-    }
-    //added end;
-
     // Create an Archive::Entry.
     const QStringList path = entryFileName.split(QLatin1Char('/'), QString::SkipEmptyParts);
     Archive::Entry *entry = parent->find(path.last());

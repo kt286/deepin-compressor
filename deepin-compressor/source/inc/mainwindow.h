@@ -161,7 +161,7 @@ struct OpenInfo {
 struct MainWindow_AuxInfo {
     /**
      * @brief infomation
-     * @ key :strModexIndex
+     * @ key :strModexIndex,see as modelIndexToStr()
      * @ value :the pointer of open info
      */
     QMap<QString, OpenInfo *> information;
@@ -200,6 +200,7 @@ public:
     void creatArchive(QMap<QString, QString> &Args);
     void creatBatchArchive(QMap<QString, QString> &Args, QMap<QString, QStringList> &filetoadd);
     void addArchive(QMap<QString, QString> &Args);
+    void addArchiveEntry(QMap<QString, QString> &args, Archive::Entry *pWorkEntry);
 //    void removeFromArchive(const QStringList &removeFilePaths);
     /**
      * @brief removeEntryVector
@@ -257,6 +258,8 @@ private slots:
     void onCompressNext();
     void onCompressPressed(QMap<QString, QString> &Args);
     void onUncompressStateAutoCompress(QMap<QString, QString> &Args);
+    // added by hsw 20200525
+    void onUncompressStateAutoCompressEntry(QMap<QString, QString> &Args, Archive::Entry *pWorkEntry = nullptr);
     void onCancelCompressPressed(int compressType);
     void onTitleButtonPressed();
     void onCompressAddfileSlot(bool status);
@@ -311,6 +314,7 @@ signals:
     void sigTipsWindowPopUp(int, const QStringList &);
     void sigTipsUpdateEntry(int, QVector<Archive::Entry *> &vectorDel);
     void deleteJobComplete();
+    void deleteJobComplete1(Archive::Entry *pEntry);
 
 private:
     Archive *m_archive_manager = nullptr;
