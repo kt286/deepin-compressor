@@ -2879,7 +2879,9 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         if (pCurAuxInfo->information.contains(key) == false) {
             pNewInfo = new OpenInfo;
         } else {
-            if (this->pMapGlobalWnd->getOne(pCurAuxInfo->information[key]->strWinId) != nullptr) {
+            MainWindow *pChild = this->pMapGlobalWnd->getOne(pCurAuxInfo->information[key]->strWinId);
+            if (pChild != nullptr) {
+                QApplication::setActiveWindow(pChild);  // 置顶
                 m_workstatus = WorkNone;
                 return;
             }

@@ -88,7 +88,7 @@ bool ReadWriteLibarchivePlugin::addFiles(const QVector<Archive::Entry *> &files,
 
             while (!QThread::currentThread()->isInterruptionRequested() && it.hasNext()) {
                 QString path = it.next();
-
+                qDebug() << ">>>>>>" << path;
                 emit progress_filename(it.filePath());
 
                 if ((it.fileName() == QLatin1String("..")) ||
@@ -410,7 +410,7 @@ bool ReadWriteLibarchivePlugin::processOldEntries(uint &entriesCounter, Operatio
     while (!QThread::currentThread()->isInterruptionRequested() && archive_read_next_header(m_archiveReader.data(), &entry) == ARCHIVE_OK) {
 
         const QString file = QFile::decodeName(archive_entry_pathname(entry));
-
+        qDebug() << "<<<<<<<<<<<" << file;
         if (mode == Move || mode == Copy) {
             const QString newPathname = pathMap.value(file);
             if (!newPathname.isEmpty()) {
