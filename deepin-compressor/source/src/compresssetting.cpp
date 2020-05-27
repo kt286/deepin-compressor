@@ -772,8 +772,8 @@ void CompressSetting::autoCompressEntry(const QString &compresspath, const QStri
     m_openArgs[QStringLiteral("encryptHeader")] = QStringLiteral("false");
 
     m_openArgs[QStringLiteral("localFilePath")] = cFileInfo.path();
-    m_openArgs[QStringLiteral("filename")] =
-        cFileInfo.baseName() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+    m_openArgs[QStringLiteral("filename")] = cFileInfo.fileName();
+//        cFileInfo.baseName() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
 
     m_openArgs[QStringLiteral("sourceFilePath")] = compresspath;
     if (path.size()) {
@@ -901,8 +901,8 @@ void CompressSetting::autoCompress(const QString &compresspath, const QStringLis
     m_openArgs[QStringLiteral("encryptHeader")] = QStringLiteral("false");
 
     m_openArgs[QStringLiteral("localFilePath")] = cFileInfo.path();
-    m_openArgs[QStringLiteral("filename")] =
-        cFileInfo.baseName() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+    m_openArgs[QStringLiteral("filename")] = cFileInfo.fileName();
+//        cFileInfo.baseName() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
 
     m_openArgs[QStringLiteral("sourceFilePath")] = compresspath;
     if (path.size()) {
@@ -1022,8 +1022,8 @@ void CompressSetting::autoMoveToArchive(const QStringList &files, const QString 
     m_openArgs[QStringLiteral("encryptHeader")] = QStringLiteral("false");
 
     m_openArgs[QStringLiteral("localFilePath")] = cFileInfo.path();
-    m_openArgs[QStringLiteral("filename")] =
-        cFileInfo.baseName() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
+    m_openArgs[QStringLiteral("filename")] = cFileInfo.fileName();
+//        cFileInfo.baseName() + "." + QMimeDatabase().mimeTypeForName(fixedMimeType).preferredSuffix();
 
     m_openArgs[QStringLiteral("sourceFilePath")] = archive;
     if (files.size()) {
