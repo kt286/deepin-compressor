@@ -52,6 +52,7 @@ public:
     int getDeFileCount();
     int showWarningDialog(const QString &msg);
     EXTRACT_TYPE getExtractType();
+    void setRootPathIndex();
     void slotCompressedAddFile();
     fileViewer *getFileViewer();
     int showReplaceDialog(QString name);

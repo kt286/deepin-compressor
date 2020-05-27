@@ -324,6 +324,10 @@ void MainWindow::timerEvent(QTimerEvent *event)
                 m_CompressPage->onRefreshFilelist(filelist);
                 if (filelist.isEmpty()) {
                     m_pageid = PAGE_HOME;
+                    m_CompressPage->setRootPathIndex();
+                    refreshPage();
+                } else {
+                    m_CompressPage->setRootPathIndex();
                     refreshPage();
                 }
                 delete dialog;
@@ -1320,6 +1324,11 @@ void MainWindow::slotLoadingFinished(KJob *job)
     }
 }
 
+bool MainWindow::isWorkProcess()
+{
+    return m_workstatus == WorkProcess;
+}
+
 void MainWindow::loadArchive(const QString &files)
 {
     QString transFile = files;
@@ -1342,7 +1351,7 @@ void MainWindow::loadArchive(const QString &files)
     connect(m_loadjob, &LoadJob::sigWrongPassword, this, &MainWindow::SlotNeedPassword);
 
     m_loadjob->start();
-    m_homePage->spinnerStart();
+    m_homePage->spinnerStart(this, &MainWindow::isWorkProcess);
 }
 
 void MainWindow::WatcherFile(const QString &files)
@@ -1375,6 +1384,7 @@ void MainWindow::WatcherFile(const QString &files)
         m_fileManager = nullptr;
 
         m_pageid = PAGE_HOME;
+        m_UnCompressPage->setRootPathIndex();
         this->refreshPage();
     });
 }
@@ -1619,6 +1629,7 @@ void MainWindow::slotExtractionDone(KJob *job)
 
         m_pageid = PAGE_UNZIP;
         refreshPage();
+
         if (m_encryptiontype != Encryption_DRAG) {
             QString fullpath = m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString();
             QFileInfo fileinfo(fullpath);

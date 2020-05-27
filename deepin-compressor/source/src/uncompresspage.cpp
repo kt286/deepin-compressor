@@ -187,6 +187,11 @@ EXTRACT_TYPE UnCompressPage::getExtractType()
     return extractType;
 }
 
+void UnCompressPage::setRootPathIndex()
+{
+    m_fileviewer->setRootPathIndex();
+}
+
 void UnCompressPage::slotCompressedAddFile()
 {
     DFileDialog dialog(this);

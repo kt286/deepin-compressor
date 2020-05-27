@@ -223,7 +223,7 @@ public:
 
     bool applicationQuit();
     QString getAddFile();
-
+    bool isWorkProcess();
 
     //log
     void initalizeLog(QWidget *widget);

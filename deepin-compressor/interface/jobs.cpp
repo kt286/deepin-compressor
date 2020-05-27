@@ -579,7 +579,8 @@ void ExtractJob::doWork()
     bool ret = archiveInterface()->extractFiles(m_entries, m_destinationDir, m_options);
 
     if (!archiveInterface()->waitForFinishedSignal() /*&& archiveInterface()->isUserCancel() == false*/) {
-        onFinished(ret);
+//        onFinished(ret);
+        emit archiveInterface()->finished(ret);
     }
 }
 

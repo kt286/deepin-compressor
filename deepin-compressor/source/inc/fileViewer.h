@@ -158,6 +158,7 @@ public:
     void InitConnection();
 
     int getPathIndex();
+    void setRootPathIndex();
     void setFileList(const QStringList &files);
     void setSelectFiles(const QStringList &files);
     int getFileCount();
