@@ -2574,16 +2574,17 @@ void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles
 void MainWindow::deleteDecompressFile(QString destDirName)
 {
 //    qDebug() << "deleteDecompressFile" << m_decompressfilepath << m_decompressfilename << m_UnCompressPage->getDeFileCount() << m_model->archive()->isSingleFile() << m_model->archive()->isSingleFolder();
+    bool bAutoCreatDir = m_settingsDialog->isAutoCreatDir();
 
     if (!m_decompressfilepath.isEmpty()) {
         if (m_UnCompressPage->getDeFileCount() > 1) {
             QDir fi(m_decompressfilepath);  //若m_decompressfilepath为空字符串，则使用（"."）构造目录
 //            qDebug() << fi.exists();
-            if (fi.exists()) {
+            if (fi.exists() && bAutoCreatDir) {
                 fi.removeRecursively();
             }
         } else if (m_UnCompressPage->getDeFileCount() == 1) {
-            if (!m_model->archive()->isSingleFile()) { //单个文件还是多个
+            if (!m_model->archive()->isSingleFile()) { //单个文件还是单个文件夹
                 QDir fi(m_decompressfilepath + QDir::separator() + m_model->archive()->subfolderName());
 //                qDebug() << fi.dirName() << fi.exists();
                 if (fi.exists()) {
