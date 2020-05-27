@@ -30,7 +30,6 @@
 #include <QMessageBox>
 #include "monitorAdaptor.h"
 #include "monitorInterface.h"
-#include "logwidget.h"
 #include "openwithdialog/openwithdialog.h"
 
 int main(int argc, char *argv[])

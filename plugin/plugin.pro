@@ -7,5 +7,4 @@ SUBDIRS += \
     clizipplugin \
     libarchive \
     libsinglefileplugin \
-    libzipplugin \
-    libLogPlugin
+    libzipplugin

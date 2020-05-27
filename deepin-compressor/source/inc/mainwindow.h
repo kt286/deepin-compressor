@@ -29,7 +29,6 @@
 #include <DFileWatcher>
 #include <QElapsedTimer>
 #include <DIconButton>
-#include <log4qt/logger.h>
 
 #include "homepage.h"
 #include "uncompresspage.h"
@@ -93,6 +92,7 @@ enum WorkState {
 };
 
 class QStackedLayout;
+class TimerWatcher;
 enum JobState {
     JOB_NULL,
     JOB_ADD,
@@ -176,7 +176,6 @@ struct MainWindow_AuxInfo {
 };
 
 static QVector<qint64> m_tempProcessId;
-static Log4Qt::Logger *m_logger = nullptr;
 class QStackedLayout;
 static int m_windowcount = 1;
 class MonitorAdaptor;
@@ -226,8 +225,8 @@ public:
     bool isWorkProcess();
 
     //log
-    void initalizeLog(QWidget *widget);
-    void logShutDown();
+//    void initalizeLog(QWidget *widget);
+//    void logShutDown();
     void bindAdapter();
 //    static Log4Qt::Logger *getLogger();
 
@@ -299,6 +298,7 @@ private slots:
     void slotResetPercentAndTime();
     void slotFileUnreadable(QStringList &pathList, int fileIndex);//compress file is unreadable or file is a link
     void slotStopSpinner();
+    void slotWorkTimeOut();
 
     void deleteFromArchive(const QStringList &files, const QString &archive);
     void addToArchive(const QStringList &files, const QString &archive);
@@ -387,6 +387,8 @@ private:
     QEventLoop *pEventloop = nullptr;
     DSpinner *m_spinner = nullptr;
 
+    TimerWatcher *m_pWatcher = nullptr;
+    bool m_openType = false; //false解压 true打开
     bool IsAddArchive = false;
 
     GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521

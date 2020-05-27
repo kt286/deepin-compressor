@@ -45,15 +45,12 @@
 #include "monitorInterface.h"
 #include <DApplication>
 #include <monitorAdaptor.h>
-#include <log4qt/basicconfigurator.h>
-#include "logwidgetappender.h"
-#include <log4qt/ttcclayout.h>
-#include <log4qt/logmanager.h>
 #include <DWidgetUtil>
 #include "jobs.h"
 #include "kprocess.h"
 #include <DStandardPaths>
 #include <QStackedLayout>
+#include "filewatcher.h"
 #include <QUuid>
 #include "unistd.h"
 #include "compressorapplication.h"
@@ -1351,7 +1348,7 @@ void MainWindow::loadArchive(const QString &files)
     connect(m_loadjob, &LoadJob::sigWrongPassword, this, &MainWindow::SlotNeedPassword);
 
     m_loadjob->start();
-    m_homePage->spinnerStart(this, &MainWindow::isWorkProcess);
+    m_homePage->spinnerStart(this, static_cast<pMember_callback>(&MainWindow::isWorkProcess));
 }
 
 void MainWindow::WatcherFile(const QString &files)
@@ -1420,6 +1417,7 @@ void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
     m_pathstore = userDestination;
     //m_compressDirFiles = CheckAllFiles(m_pathstore);
 
+    options.setAutoCreatDir(m_settingsDialog->isAutoCreatDir());
     if (m_settingsDialog->isAutoCreatDir()) {
         const QString detectedSubfolder = m_model->archive()->subfolderName();
         qDebug() << "Detected subfolder" << detectedSubfolder;
@@ -1538,6 +1536,12 @@ void MainWindow::slotExtractionDone(KJob *job)
         pExtractWorkEntry = this->m_encryptionjob->getWorkEntry();
         m_encryptionjob->deleteLater();
         m_encryptionjob = nullptr;
+        if (this->m_pWatcher != nullptr) {
+            this->m_pWatcher->finishWork();
+            disconnect(this->m_pWatcher, &TimerWatcher::sigBindFuncDone, m_encryptionjob, &ExtractJob::slotWorkTimeOut);
+            delete this->m_pWatcher;
+            this->m_pWatcher = nullptr;
+        }
     }
 
     int errorCode = job->error();
@@ -2680,6 +2684,7 @@ void MainWindow::creatArchive(QMap< QString, QString > &Args)
     m_createJob->start();
     m_workstatus = WorkProcess;
 }
+
 void MainWindow::slotCompressFinished(KJob *job)
 {
     qDebug() << "job finished" << job->error();
@@ -2862,7 +2867,8 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
 
     if (type == EXTRACT_TEMP) {
         m_encryptiontype = Encryption_TempExtract;
-
+        m_openType = true;
+        m_Progess->setopentype(m_openType);
         if (pCurAuxInfo == nullptr) {
             pCurAuxInfo = new MainWindow_AuxInfo();
         }
@@ -2886,6 +2892,8 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
 
     } else if (type == EXTRACT_TEMP_CHOOSE_OPEN) {
         m_encryptiontype =  Encryption_TempExtract_Open_Choose;
+        m_openType = true;
+        m_Progess->setopentype(m_openType);
     } else if (type == EXTRACT_DRAG) {
         m_encryptiontype =  Encryption_DRAG;
     } else {
@@ -2908,6 +2916,14 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     //m_compressDirFiles = CheckAllFiles(path);
 
     m_encryptionjob = m_model->extractFiles(fileList, destinationDirectory, options);
+
+    if (this->m_pWatcher == nullptr) {
+        this->m_pWatcher = new TimerWatcher();
+        connect(this->m_pWatcher, &TimerWatcher::sigBindFuncDone, m_encryptionjob, &ExtractJob::slotWorkTimeOut);
+    }
+    this->m_encryptionjob->resetTimeOut();
+    this->m_pWatcher->bindFunction(this, static_cast<pMember_callback>(&MainWindow::isWorkProcess));
+    this->m_pWatcher->beginWork(100);
 
     connect(m_encryptionjob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)));
     connect(m_encryptionjob, &KJob::result, this, &MainWindow::slotExtractionDone);
@@ -2943,6 +2959,7 @@ void MainWindow::slotExtractSimpleFilesOpen(const QVector<Archive::Entry *> &fil
 
 void MainWindow::slotKillExtractJob()
 {
+//    m_openType = false;
     m_workstatus = WorkNone;
     if (m_encryptionjob) {
         m_encryptionjob->Killjob();
@@ -2976,6 +2993,11 @@ void MainWindow::slotStopSpinner()
         m_spinner->hide();
     }
     disconnect(m_encryptionjob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
+}
+
+void MainWindow::slotWorkTimeOut()
+{
+    qDebug() << "slotWorkTimeOut";
 }
 
 void MainWindow::deleteFromArchive(const QStringList &files, const QString &archive)
@@ -3054,8 +3076,8 @@ void MainWindow::addToArchive(const QStringList &files, const QString &archive)
 void MainWindow::onCancelCompressPressed(int compressType)
 {
     m_compressType = compressType;
-
     slotResetPercentAndTime();
+    m_encryptiontype = Encryption_NULL;
     if (m_encryptionjob) {
         //append the spiner animation to the eventloop, so can play the spinner animation
         if (pEventloop == nullptr) {
@@ -3211,6 +3233,8 @@ void MainWindow::slotBackButtonClicked()
 
 void MainWindow::slotResetPercentAndTime()
 {
+    m_openType = false;
+    m_Progess->setopentype(m_openType);
     lastPercent = 0;
     compressTime = 0;
     m_timer.elapsed();
@@ -3283,26 +3307,26 @@ void MainWindow::onCompressAddfileSlot(bool status)
     }
 }
 
-void MainWindow::initalizeLog(QWidget *widget)
-{
-//    Log4Qt::BasicConfigurator::configure();
-//    Log4Qt::LogManager::setHandleQtMessages(true);
-//    m_logger = Log4Qt::Logger::rootLogger();
-//    m_logger->removeAllAppenders();
-//    Log4Qt::LogWidgetAppender *appender = new Log4Qt::LogWidgetAppender();
-//    appender->setName("WidgetAppender");
-//    Log4Qt::TTCCLayout *layout = new Log4Qt::TTCCLayout(Log4Qt::TTCCLayout::ISO8601);
-//    layout->setThreadPrinting(true);
-//    appender->setLayout(layout);
-//    appender->activateOptions();
-//    appender->setLogWidget(widget);
-//    m_logger->addAppender(appender);
-}
+//void MainWindow::initalizeLog(QWidget *widget)
+//{
+////    Log4Qt::BasicConfigurator::configure();
+////    Log4Qt::LogManager::setHandleQtMessages(true);
+////    m_logger = Log4Qt::Logger::rootLogger();
+////    m_logger->removeAllAppenders();
+////    Log4Qt::LogWidgetAppender *appender = new Log4Qt::LogWidgetAppender();
+////    appender->setName("WidgetAppender");
+////    Log4Qt::TTCCLayout *layout = new Log4Qt::TTCCLayout(Log4Qt::TTCCLayout::ISO8601);
+////    layout->setThreadPrinting(true);
+////    appender->setLayout(layout);
+////    appender->activateOptions();
+////    appender->setLogWidget(widget);
+////    m_logger->addAppender(appender);
+//}
 
-void MainWindow::logShutDown()
-{
-    m_logger->removeAllAppenders();
-}
+//void MainWindow::logShutDown()
+//{
+//    m_logger->removeAllAppenders();
+//}
 
 //Log4Qt::Logger *MainWindow::getLogger()
 //{

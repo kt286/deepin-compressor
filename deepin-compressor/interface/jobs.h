@@ -202,6 +202,10 @@ public:
 public Q_SLOTS:
     void doWork() override;
     void onFinished(bool result)override;
+    void slotWorkTimeOut(bool isWorkProcess);
+    void slotExtractJobPwdCheckDown();
+    void onProgress(double progress)override;
+    void onProgressFilename(const QString &filename)override;
 public:
     bool Killjob();
     /**
@@ -210,6 +214,7 @@ public:
      * @return
      */
     Archive::Entry *getWorkEntry();
+    void resetTimeOut();
 signals:
     void sigExtractJobPassword();
     void sigExtractJobFinished();
@@ -222,6 +227,12 @@ private:
     QVector<Archive::Entry *> m_entries;
     QString m_destinationDir;
     ExtractionOptions m_options;
+    /**
+     * @brief m_bTimeout
+     * @see true:默认不执行 TimerWatcher 判断延时显示进度条; false:执行 TimerWatcher 延时显示进度条（为了不出现解压太快导致的进度条闪现效果）
+     * @see if work time out,if greater than 700ms,emit the progress info.
+     */
+    bool m_bTimeout = true;
 };
 
 

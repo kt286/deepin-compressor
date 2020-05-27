@@ -96,6 +96,9 @@ public slots:
     void slotSubWindowTipsPopSig(int, const QStringList &);
 
     void slotDeleteJobFinished(Archive::Entry *pWorkEntry);
+
+private:
+    QString getAndDisplayPath(QString path);
 private:
 
     fileViewer *m_fileviewer;
