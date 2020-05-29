@@ -82,7 +82,7 @@ void Progress::InitUI()
     m_cancelbutton = new DPushButton(this);
     m_cancelbutton->setMinimumSize(340, 36);
     m_cancelbutton->setText(tr("Cancel"));
-    m_cancelbutton->setFocusPolicy(Qt::NoFocus);
+    m_cancelbutton->setFocusPolicy(Qt::ClickFocus);
 
     //add speed and time label
     m_speedLabel = new DLabel(this);
@@ -292,6 +292,8 @@ int Progress::showConfirmDialog()
 //    DFontSizeManager::instance()->bind(strlabel, DFontSizeManager::T6, QFont::Medium);
 
     DLabel *strlabel2 = new DLabel(dialog);
+    strlabel2->setFixedHeight(18);
+    strlabel2->setForegroundRole(DPalette::ToolTipText);
 
     strlabel2->setAlignment(Qt::AlignmentFlag::AlignHCenter);
     DPalette pa;

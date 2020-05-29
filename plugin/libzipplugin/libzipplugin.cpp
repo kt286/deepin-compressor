@@ -620,7 +620,7 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
         }
     }
 
-    qDebug() << "==============" << timer.elapsed() << "milliseconds";
+    qDebug() << "" << timer.elapsed() << "milliseconds";
     if (zip_close(archive)) {
         emit error(tr("Failed to write archive."));
         return false;

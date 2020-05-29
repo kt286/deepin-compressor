@@ -544,16 +544,12 @@ ExtractJob::ExtractJob(const QVector<Archive::Entry *> &entries, const QString &
     connect(interface, &ReadOnlyArchiveInterface::progress, this, &ExtractJob::onProgress, Qt::ConnectionType::UniqueConnection);
     connect(interface, &ReadOnlyArchiveInterface::progress_filename, this, &ExtractJob::onProgressFilename, Qt::ConnectionType::UniqueConnection);
 
-<<<<<<< HEAD
-    // m_bTimeout = false;
-=======
 
 }
 
 void ExtractJob::resetTimeOut()
 {
     this->m_bTimeout = false;
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 }
 
 void ExtractJob::doWork()
@@ -623,14 +619,6 @@ bool ExtractJob::Killjob()
     return kill();
 }
 
-<<<<<<< HEAD
-void ExtractJob::resetTimeOut()
-{
-    m_bTimeout = false;
-}
-
-=======
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 void ExtractJob::onProgress(double value)
 {
     if (this->m_bTimeout) {

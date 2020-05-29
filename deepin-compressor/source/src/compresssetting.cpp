@@ -24,7 +24,7 @@
 #include "DApplicationHelper"
 #include "DFontSizeManager"
 #include "utils.h"
-#include <DDialog>
+
 #include <DFileDialog>
 #include <DStyle>
 #include <QDebug>
@@ -673,7 +673,9 @@ void CompressSetting::autoCompressEntry(const QString &compresspath, const QStri
     qDebug() << "开始执行添加操作！" << ";compresspath:" << compresspath << ";path:" << path;
     for (int i = 0; i < path.count(); i++) {
         if (compresspath == path.at(i)) {
-            showWarningDialog(tr("You cannot add the archive to yourself"), 0, tr("An error occurred while adding the file to the archive"));
+            DDialog *pDialog = new DDialog(this);
+            pDialog->getButton(pDialog->addButton(tr("Close")))->setShortcut(Qt::Key_C);
+            showWarningDialog(tr("You cannot add the archive to yourself"), 0, tr("An error occurred while adding the file to the archive"), pDialog);
             return;
         }
     }
@@ -802,7 +804,9 @@ void CompressSetting::autoCompress(const QString &compresspath, const QStringLis
     qDebug() << "开始执行添加操作！" << ";compresspath:" << compresspath << ";path:" << path;
     for (int i = 0; i < path.count(); i++) {
         if (compresspath == path.at(i)) {
-            showWarningDialog(tr("You cannot add the archive to yourself"), 0, tr("An error occurred while adding the file to the archive"));
+            DDialog *pDialog = new DDialog(this);
+            pDialog->getButton(pDialog->addButton(tr("Close(C)")))->setShortcut(Qt::Key_C);
+            showWarningDialog(tr("You cannot add the archive to yourself"), 0, tr("An error occurred while adding the file to the archive"), pDialog);
             return;
         }
     }
@@ -1047,15 +1051,20 @@ void CompressSetting::autoMoveToArchive(const QStringList &files, const QString 
     m_openArgs.remove(QStringLiteral("ToCompressFilePath"));
 }
 
-int CompressSetting::showWarningDialog(const QString &msg, int index, const QString &strTitle)
+int CompressSetting::showWarningDialog(const QString &msg, int index, const QString &strTitle, DDialog *pDialogShow)
 {
-    DDialog *dialog = new DDialog(this);
+    DDialog *dialog = pDialogShow;
+    if (dialog == nullptr) {
+        dialog = new DDialog(this);
+    }
     QPixmap pixmap = Utils::renderSVG(":/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(32, 32));
     dialog->setIcon(pixmap);
     // dialog->addSpacing(32);
     int wMin = 380;
     dialog->setMinimumSize(wMin, 140);
-    dialog->addButton(tr("OK"), true, DDialog::ButtonNormal);
+    if (pDialogShow == nullptr) {
+        dialog->addButton(tr("OK"), true, DDialog::ButtonNormal);
+    }
     DPalette pa;
 
     DWidget *pWidget = new DWidget(dialog);

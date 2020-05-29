@@ -23,6 +23,7 @@
 #define COMPRESSSETTING_H
 
 #include <DWidget>
+#include <DDialog>
 #include <DPushButton>
 #include <DLabel>
 #include <DLineEdit>
@@ -100,7 +101,7 @@ public slots:
     void autoMoveToArchive(const QStringList &files, const QString &archive);
 
 private:
-    int showWarningDialog(const QString &msg, int index = 0, const QString &strTitle = "");
+    int showWarningDialog(const QString &msg, int index = 0, const QString &strTitle = "", DDialog *pDialogShow = nullptr);
     bool existSameFileName();
 
 private:

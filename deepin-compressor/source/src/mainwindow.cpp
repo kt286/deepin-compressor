@@ -51,14 +51,11 @@
 #include <DStandardPaths>
 #include <QStackedLayout>
 #include "filewatcher.h"
-<<<<<<< HEAD
-=======
 #include <QUuid>
 #include "unistd.h"
 #include "compressorapplication.h"
 
 DWIDGET_USE_NAMESPACE
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 
 #define DEFAUTL_PATH DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"+ QDir::separator()
 
@@ -843,11 +840,7 @@ void MainWindow::refreshPage()
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
-        if (m_openType) {
-            titlebar()->setTitle(tr("Opening"));
-        } else {
-            titlebar()->setTitle(tr("Extracting"));
-        }
+        titlebar()->setTitle(tr("Extracting"));
         m_Progess->setFilename(m_decompressfilename);
         m_mainLayout->setCurrentIndex(4);
         m_timer.start();
@@ -1116,9 +1109,9 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         m_UnCompressPage->SetDefaultFile(fileinfo);
         m_UnCompressPage->setdefaultpath(fileinfo.path());
         loadArchive(files.at(0));
-//        m_pageid = PAGE_UNZIPPROGRESS;
-//        m_Progess->settype(DECOMPRESSING);
-//        refreshPage();
+        m_pageid = PAGE_UNZIPPROGRESS;
+        m_Progess->settype(DECOMPRESSING);
+        refreshPage();
     } else if (files.last() == QStringLiteral("extract_here_multi")) {
         QStringList pathlist = files;
         pathlist.removeLast();
@@ -1127,9 +1120,9 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         m_UnCompressPage->SetDefaultFile(fileinfo);
         m_UnCompressPage->setdefaultpath(fileinfo.path());
         m_decompressfilepath = fileinfo.path();
-//        m_pageid = PAGE_UNZIPPROGRESS;
-//        m_Progess->settype(DECOMPRESSING);
-//        refreshPage();
+        m_pageid = PAGE_UNZIPPROGRESS;
+        m_Progess->settype(DECOMPRESSING);
+        refreshPage();
 
         BatchExtract *batchJob = new BatchExtract();
         batchJob->setAutoSubfolder(true);
@@ -1200,9 +1193,9 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         m_decompressfilename = fileinfo.fileName();
         m_UnCompressPage->setdefaultpath(curpath);
         m_decompressfilepath = curpath;
-//        m_pageid = PAGE_UNZIPPROGRESS;
-//        m_Progess->settype(DECOMPRESSING);
-//        refreshPage();
+        m_pageid = PAGE_UNZIPPROGRESS;
+        m_Progess->settype(DECOMPRESSING);
+        refreshPage();
 
         BatchExtract *batchJob = new BatchExtract();
         batchJob->setAutoSubfolder(true);
@@ -1252,9 +1245,9 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
                 m_UnCompressPage->SetDefaultFile(fileinfo);
                 m_UnCompressPage->setdefaultpath(fileinfo.path());
                 loadArchive(filepath);
-//                m_pageid = PAGE_UNZIPPROGRESS;
-//                m_Progess->settype(DECOMPRESSING);
-//                refreshPage();
+                m_pageid = PAGE_UNZIPPROGRESS;
+                m_Progess->settype(DECOMPRESSING);
+                refreshPage();
             } else {
                 m_CompressFail->setFailStrDetail(tr("Damaged file, unable to extract"));
                 m_pageid = PAGE_UNZIP_FAIL;
@@ -1485,7 +1478,8 @@ void MainWindow::SlotProgress(KJob * /*job*/, unsigned long percent)
         calSpeedAndTime(percent);
         lastPercent = percent;
     }
-    qDebug()  << "percent" << percent << lastPercent;
+
+    qDebug() << "percent" << percent;
     if (Encryption_SingleExtract == m_encryptiontype || Encryption_DRAG == m_encryptiontype) {
         if (percent < 100 && WorkProcess == m_workstatus) {
             if (!m_progressdialog->isshown()) {
@@ -1497,15 +1491,8 @@ void MainWindow::SlotProgress(KJob * /*job*/, unsigned long percent)
             }
             m_progressdialog->setProcess(percent);
         }
-<<<<<<< HEAD
-    } else if (PAGE_ZIPPROGRESS == m_pageid || PAGE_UNZIPPROGRESS == m_pageid) {
-        if (percent >= lastPercent) {
-            m_Progess->setprogress(percent);
-        }
-=======
     } else if (PAGE_ZIPPROGRESS == m_pageid || PAGE_UNZIPPROGRESS == m_pageid || PAGE_DELETEPROGRESS == m_pageid) {
         m_Progess->setprogress(percent);
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
     } else if ((PAGE_UNZIP == m_pageid || PAGE_ENCRYPTION == m_pageid) && (percent < 100) && m_encryptionjob) {
         /*if (!m_progressTransFlag) {
             if (0 == m_timerId) {
@@ -1702,7 +1689,6 @@ void MainWindow::SlotNeedPassword()
 
 void MainWindow::SlotExtractPassword(QString password)
 {
-    m_progressdialog->clearprocess();
     // m_progressTransFlag = false;
     if (Encryption_Load == m_encryptiontype) {
         LoadPassword(password);
@@ -2599,8 +2585,6 @@ void MainWindow::deleteDecompressFile(QString destDirName)
 //    qDebug() << "deleteDecompressFile" << m_decompressfilepath << m_decompressfilename << m_UnCompressPage->getDeFileCount() << m_model->archive()->isSingleFile() << m_model->archive()->isSingleFolder();
     bool bAutoCreatDir = m_settingsDialog->isAutoCreatDir();
 
-    bool bAutoCreatDir = m_settingsDialog->isAutoCreatDir();
-
     if (!m_decompressfilepath.isEmpty()) {
         if (m_UnCompressPage->getDeFileCount() > 1) {
             QDir fi(m_decompressfilepath);  //若m_decompressfilepath为空字符串，则使用（"."）构造目录
@@ -2893,8 +2877,6 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         m_encryptiontype = Encryption_TempExtract;
         m_openType = true;
         m_Progess->setopentype(m_openType);
-<<<<<<< HEAD
-=======
         if (pCurAuxInfo == nullptr) {
             pCurAuxInfo = new MainWindow_AuxInfo();
         }
@@ -2920,7 +2902,6 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         }
         pCurAuxInfo->information.insert(key, pNewInfo);
 
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
     } else if (type == EXTRACT_TEMP_CHOOSE_OPEN) {
         m_encryptiontype =  Encryption_TempExtract_Open_Choose;
         m_openType = true;
@@ -3032,8 +3013,6 @@ void MainWindow::slotWorkTimeOut()
     qDebug() << "slotWorkTimeOut";
 }
 
-<<<<<<< HEAD
-=======
 void MainWindow::deleteFromArchive(const QStringList &files, const QString &archive)
 {
     if (!m_UnCompressPage) {
@@ -3107,7 +3086,6 @@ void MainWindow::addToArchive(const QStringList &files, const QString &archive)
 
 }
 
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 void MainWindow::onCancelCompressPressed(int compressType)
 {
     m_compressType = compressType;

@@ -126,38 +126,24 @@ void UnCompressPage::onPathButoonClicked()
     QList<QUrl> pathlist = dialog.selectedUrls();
 
     QString str = pathlist.at(0).toLocalFile();
-<<<<<<< HEAD
-    m_pathstr = str;
-
-    str = getAndDisplayPath(str);
-    m_extractpath->setText(tr("Extract to:") + str);
-=======
     str = getAndDisplayPath(str);
 
     m_extractpath->setText(tr("Extract to:") + str);
     m_pathstr = str;
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 }
 
 void UnCompressPage::setdefaultpath(QString path)
 {
     m_pathstr = path;
-<<<<<<< HEAD
-
-=======
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
     QString str = path;
     str = getAndDisplayPath(str);
 
     m_extractpath->setText(tr("Extract to:") + str);
-<<<<<<< HEAD
-=======
 }
 
 void UnCompressPage::SetDefaultFile(QFileInfo info)
 {
     m_info = info;
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 }
 
 int UnCompressPage::getFileCount()
@@ -221,8 +207,6 @@ QString UnCompressPage::getAndDisplayPath(QString path)
     return pathStr;
 }
 
-<<<<<<< HEAD
-=======
 void UnCompressPage::slotCompressedAddFile()
 {
     DFileDialog dialog(this);
@@ -276,7 +260,6 @@ fileViewer *UnCompressPage::getFileViewer()
     return m_fileviewer;
 }
 
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 QString UnCompressPage::getDecompressPath()
 {
     return m_pathstr;

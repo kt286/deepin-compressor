@@ -93,8 +93,6 @@ enum WorkState {
 
 class QStackedLayout;
 class TimerWatcher;
-<<<<<<< HEAD
-=======
 enum JobState {
     JOB_NULL,
     JOB_ADD,
@@ -159,7 +157,6 @@ struct OpenInfo {
     QString strWinId = "";//open view the winId
     bool open = false;
 };
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 
 struct MainWindow_AuxInfo {
     /**
@@ -224,9 +221,6 @@ public:
     qint64 getMediaFreeSpace();
 
     bool applicationQuit();
-<<<<<<< HEAD
-    bool isWorkProcess();
-=======
     QString getAddFile();
     bool isWorkProcess();
 
@@ -236,7 +230,6 @@ public:
     void bindAdapter();
 //    static Log4Qt::Logger *getLogger();
 
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 private:
     void saveWindowState();
     void loadWindowState();
@@ -306,13 +299,10 @@ private slots:
     void slotFileUnreadable(QStringList &pathList, int fileIndex);//compress file is unreadable or file is a link
     void slotStopSpinner();
     void slotWorkTimeOut();
-<<<<<<< HEAD
-=======
 
     void deleteFromArchive(const QStringList &files, const QString &archive);
     void addToArchive(const QStringList &files, const QString &archive);//废弃，added by hsw 20200528
 
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 signals:
     void sigquitApp();
     void sigZipAddFile();
@@ -399,15 +389,12 @@ private:
 
     TimerWatcher *m_pWatcher = nullptr;
     bool m_openType = false; //false解压 true打开
-<<<<<<< HEAD
-=======
     bool IsAddArchive = false;
 
     GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
     MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
     MainWindow_AuxInfo *pCurAuxInfo = nullptr;//added by hsw 20200525
     int m_compressType;
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 
 private:
     void calSelectedTotalFileSize(const QStringList &files);

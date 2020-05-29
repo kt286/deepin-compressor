@@ -54,15 +54,9 @@ public:
     EXTRACT_TYPE getExtractType();
     void setRootPathIndex();
     void getMainWindowWidth(int windowWidth);
-<<<<<<< HEAD
-
-private:
-    QString getAndDisplayPath(QString path);
-=======
     void slotCompressedAddFile();
     fileViewer *getFileViewer();
     int showReplaceDialog(QString name);
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 
 signals:
     void sigDecompressPress(const QString &localPath);
@@ -120,13 +114,7 @@ private:
 
     ArchiveSortFilterModel *m_model;
     EXTRACT_TYPE extractType;
-<<<<<<< HEAD
-
-    int m_width;
-
-=======
     int m_width;
     QStringList m_inputlist;
->>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 };
 #endif
