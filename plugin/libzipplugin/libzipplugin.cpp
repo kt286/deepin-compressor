@@ -1665,6 +1665,7 @@ QByteArray LibzipPlugin::detectEncode(const QByteArray &data, const QString &fil
 
 void LibzipPlugin::cleanIfCanceled()
 {
+    qDebug() << "cleanIfCanceled";
     if (this->ifReplaceTip == false) {
         if (this->extractPsdStatus == ReadOnlyArchiveInterface::Canceled) {
 //            qDebug()<<"可以删除解压文件夹";

@@ -22,13 +22,11 @@
 #include "jobs.h"
 #include "archiveentry.h"
 
-
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QThread>
-#include "globalarchivemanager.h"
 #include <QTimer>
 
 
@@ -85,7 +83,6 @@ ReadOnlyArchiveInterface *Job::archiveInterface()
 {
     // Use the archive interface.
     if (archive()) {
-
         return archive()->interface();
     }
 
@@ -777,13 +774,6 @@ void AddJob::doWork()
 
         const QString &fullPath = entry->fullPath();
         fileListWathed->append(fullPath);
-//        QString relativePath = workDir.relativeFilePath(fullPath);
-
-//        if (fullPath.endsWith(QLatin1Char('/'))) {
-//            relativePath += QLatin1Char('/');
-//        }
-
-//        entry->setFullPath(relativePath);
     }
 
     connectToArchiveInterfaceSignals();

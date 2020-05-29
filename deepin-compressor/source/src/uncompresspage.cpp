@@ -87,7 +87,7 @@ UnCompressPage::UnCompressPage(QWidget *parent)
 //    connect(this, &UnCompressPage::subWindowTipsUpdateEntry, m_fileviewer, &fileViewer::SubWindowDragUpdateEntry);
 
     connect(m_fileviewer, &fileViewer::sigFileRemovedFromArchive, this, &UnCompressPage::sigDeleteArchiveFiles);
-    connect(m_fileviewer, &fileViewer::sigFileAutoCompressToArchive, this, &UnCompressPage::sigAddArchiveFiles);
+//    connect(m_fileviewer, &fileViewer::sigFileAutoCompressToArchive, this, &UnCompressPage::sigAddArchiveFiles);
 }
 
 void UnCompressPage::oneCompressPress()
@@ -140,6 +140,7 @@ void UnCompressPage::setdefaultpath(QString path)
 
     m_extractpath->setText(tr("Extract to:") + str);
 }
+
 void UnCompressPage::SetDefaultFile(QFileInfo info)
 {
     m_info = info;
@@ -189,14 +190,19 @@ void UnCompressPage::setRootPathIndex()
     m_fileviewer->setRootPathIndex();
 }
 
+void UnCompressPage::getMainWindowWidth(int windowWidth)
+{
+    m_width = windowWidth;
+}
+
 QString UnCompressPage::getAndDisplayPath(QString path)
 {
     const QString curpath = path;
     QFontMetrics fontMetrics(this->font());
     int fontSize = fontMetrics.width(curpath);//获取之前设置的字符串的像素大小
     QString pathStr = curpath;
-    if (fontSize > parentWidget()->width()) {
-        pathStr = fontMetrics.elidedText(path, Qt::ElideMiddle, parentWidget()->width());//返回一个带有省略号的字符串
+    if (fontSize > m_width) {
+        pathStr = fontMetrics.elidedText(path, Qt::ElideMiddle, m_width);//返回一个带有省略号的字符串
     }
     return pathStr;
 }
@@ -386,7 +392,7 @@ void UnCompressPage::slotDeleteJobFinished(Archive::Entry *pWorkEntry)
 
     m_inputlist.clear();
 
-    emit sigDeleteJobFinished(pWorkEntry);//在此处需要传送pWorkEntry,明天搞
+    emit sigDeleteJobFinished(pWorkEntry);
 }
 
 int UnCompressPage::showReplaceDialog(QString name)

@@ -677,18 +677,10 @@ void ArchiveModel::newEntry(Archive::Entry *receivedEntry, InsertBehaviour behav
 //    char * strGb2312= ByteUtf8.data();
 //    qDebug()<<strGb2312;
 
-
     if (receivedEntry->fullPath().isEmpty()) {
         qDebug() << "Weird, received empty entry (no filename) - skipping";
         return;
     }
-
-//    QString parentPath = "";
-//    if (receivedEntry->getParent() != nullptr) {
-//        parentPath = receivedEntry->getParent()->fullPath();
-//    }
-
-//    receivedEntry->setFullPath(parentPath + receivedEntry->name());
 
     // If there are no columns registered, then populate columns from entry. If the first entry
     // is a directory we check again for the first file entry to ensure all relevent columms are shown.

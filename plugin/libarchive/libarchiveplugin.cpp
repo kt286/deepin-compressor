@@ -491,40 +491,85 @@ bool LibarchivePlugin::initializeReader()
     return true;
 }
 
-void LibarchivePlugin::emitEntryFromArchiveEntry(struct archive_entry *aentry)
+void LibarchivePlugin::createEntry(const QString &externalPath, archive_entry *aentry)
 {
-    auto e = new Archive::Entry();
+    Archive::Entry *pCurEntry = new Archive::Entry();
 //    QTextCodec *codec = QTextCodec::codecForName(detectEncode(archive_entry_pathname(aentry)));
 //    QTextCodec *codecutf8 = QTextCodec::codecForName("utf-8");
 //    QString nameunicode = codec->toUnicode(archive_entry_pathname(aentry));
     QString utf8path = trans2uft8(archive_entry_pathname(aentry));
 
-    e->setProperty("fullPath", QDir::fromNativeSeparators(utf8path));
+    pCurEntry->setProperty("fullPath", QDir::fromNativeSeparators(utf8path));
 
 
     const QString owner = QString::fromLatin1(archive_entry_uname(aentry));
     if (!owner.isEmpty()) {
-        e->setProperty("owner", owner);
+        pCurEntry->setProperty("owner", owner);
     }
 
     const QString group = QString::fromLatin1(archive_entry_gname(aentry));
     if (!group.isEmpty()) {
-        e->setProperty("group", group);
+        pCurEntry->setProperty("group", group);
     }
 
-    e->compressedSizeIsSet = false;
-    e->setProperty("size", (qlonglong)archive_entry_size(aentry));
-    e->setProperty("isDirectory", S_ISDIR(archive_entry_mode(aentry)));
+    pCurEntry->compressedSizeIsSet = false;
+    pCurEntry->setProperty("size", (qlonglong)archive_entry_size(aentry));
+    pCurEntry->setProperty("isDirectory", S_ISDIR(archive_entry_mode(aentry)));
 
     if (archive_entry_symlink(aentry)) {
-        e->setProperty("link", QLatin1String(archive_entry_symlink(aentry)));
+        pCurEntry->setProperty("link", QLatin1String(archive_entry_symlink(aentry)));
     }
 
     auto time = static_cast<uint>(archive_entry_mtime(aentry));
-    e->setProperty("timestamp", QDateTime::fromTime_t(time));
+    pCurEntry->setProperty("timestamp", QDateTime::fromTime_t(time));
 
-    emit entry(e);
-    m_emittedEntries << e;
+    if (pCurEntry->isDir()) {
+        pCurEntry->setIsDirectory(true);
+        QHash<QString, QIcon> *map = new QHash<QString, QIcon>();
+        Archive::CreateEntry(pCurEntry->fullPath(), pCurEntry, externalPath, map);
+//        m_model->appendEntryIcons(*map);
+        delete map;
+        map = nullptr;
+    }
+
+    emit entry(pCurEntry);
+    m_emittedEntries << pCurEntry;
+}
+
+void LibarchivePlugin::emitEntryFromArchiveEntry(struct archive_entry *aentry)
+{
+    Archive::Entry *pCurEntry = new Archive::Entry();
+//    QTextCodec *codec = QTextCodec::codecForName(detectEncode(archive_entry_pathname(aentry)));
+//    QTextCodec *codecutf8 = QTextCodec::codecForName("utf-8");
+//    QString nameunicode = codec->toUnicode(archive_entry_pathname(aentry));
+    QString utf8path = trans2uft8(archive_entry_pathname(aentry));
+
+    pCurEntry->setProperty("fullPath", QDir::fromNativeSeparators(utf8path));
+
+
+    const QString owner = QString::fromLatin1(archive_entry_uname(aentry));
+    if (!owner.isEmpty()) {
+        pCurEntry->setProperty("owner", owner);
+    }
+
+    const QString group = QString::fromLatin1(archive_entry_gname(aentry));
+    if (!group.isEmpty()) {
+        pCurEntry->setProperty("group", group);
+    }
+
+    pCurEntry->compressedSizeIsSet = false;
+    pCurEntry->setProperty("size", (qlonglong)archive_entry_size(aentry));
+    pCurEntry->setProperty("isDirectory", S_ISDIR(archive_entry_mode(aentry)));
+
+    if (archive_entry_symlink(aentry)) {
+        pCurEntry->setProperty("link", QLatin1String(archive_entry_symlink(aentry)));
+    }
+
+    auto time = static_cast<uint>(archive_entry_mtime(aentry));
+    pCurEntry->setProperty("timestamp", QDateTime::fromTime_t(time));
+
+    emit entry(pCurEntry);
+    m_emittedEntries << pCurEntry;
 }
 
 int LibarchivePlugin::extractionFlags() const

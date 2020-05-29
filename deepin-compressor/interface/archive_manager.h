@@ -125,7 +125,6 @@ public:
     static ReadOnlyArchiveInterface *createInterface(const QString &fileName, const QString &fixedMimeType);
     static Archive::Entry *CreateEntry(QString path, Archive::Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map);
 
-    Archive();
     ~Archive() override;
 
     ArchiveError error() const;

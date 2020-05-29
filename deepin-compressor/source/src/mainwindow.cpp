@@ -191,8 +191,10 @@ QString MainWindow::getLoadFile()
 
 qint64 MainWindow::getDiskFreeSpace()
 {
-    QStorageInfo storage = QStorageInfo::root();
+//    QStorageInfo storage = QStorageInfo::root();
+    QStorageInfo storage(m_pathstore);
     storage.refresh();
+//    qDebug() << storage.name() << storage.bytesTotal() / 1024 / 1024 << "MB";
     qDebug() << "availableSize:" << storage.bytesAvailable() / 1024 / 1024 << "MB";
     return storage.bytesAvailable() / 1024 / 1024;
 }
@@ -460,6 +462,9 @@ void MainWindow::InitConnection()
     connect(m_progressdialog, &ProgressDialog::extractSuccess, this, [ = ](QString msg) {
         QIcon icon = Utils::renderSVG(":/icons/deepin/builtin/icons/compress_success_30px.svg", QSize(30, 30));
         this->sendMessage(icon, msg);
+        if (m_settingsDialog->isAutoOpen()) {
+            DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
+        }
     });
 
     auto openkey = new QShortcut(QKeySequence(Qt::Key_Slash + Qt::CTRL + Qt::SHIFT), this);
@@ -714,7 +719,6 @@ bool MainWindow::createSubWindow(const QStringList &urls)
     }
     pMapGlobalWnd->insert(QString::number(subWindow->winId()), subWindow);
 
-    subWindow->resize(100, 100);
     if (!inUrls.isEmpty()) {
         if (pParentWnd != nullptr) {
             qDebug() << "find the window success,winid:" << winid;
@@ -731,8 +735,8 @@ bool MainWindow::createSubWindow(const QStringList &urls)
 //        subWindow->onSelected(inUrls);
     }
     ++m_windowcount;
-
     subWindow->show();
+
     return true;
 }
 
@@ -885,7 +889,7 @@ void MainWindow::refreshPage()
             slotquitApp();
             return;
         } else {
-            if (m_settingsDialog->isAutoOpen()) {
+            if (m_settingsDialog->isAutoOpen() && m_encryptiontype != Encryption_NULL) {
                 DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
             }
         }
@@ -992,7 +996,6 @@ qint64 MainWindow::calFileSize(const QString &path)
 
 void MainWindow::calSpeedAndTime(unsigned long compressPercent)
 {
-    qDebug() << "compressPercent" << compressPercent;
     qDebug() << "size" << selectedTotalFileSize;
     compressTime += m_timer.elapsed();
     qDebug() << "compresstime" << compressTime;
@@ -1015,6 +1018,7 @@ void MainWindow::calSpeedAndTime(unsigned long compressPercent)
 
 void MainWindow::onSelected(const QStringList &files)
 {
+    m_UnCompressPage->getMainWindowWidth(this->width());
     calSelectedTotalFileSize(files);
 
     if (files.count() == 1 && Utils::isCompressed_file(files.at(0))) {
@@ -1095,6 +1099,7 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         m_initflag = true;
     }
 
+    m_UnCompressPage->getMainWindowWidth(this->width());
     calSelectedTotalFileSize(files);
 
     if (files.last() == QStringLiteral("extract_here")) {
@@ -1638,7 +1643,7 @@ void MainWindow::slotExtractionDone(KJob *job)
             QString fullpath = m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString();
             QFileInfo fileinfo(fullpath);
             if (fileinfo.exists()) {
-                DDesktopServices::showFileItem(fullpath);
+                DDesktopServices::showFolder(fullpath);
             }
         }
     } else if (Encryption_TempExtract_Open_Choose == m_encryptiontype) {
@@ -2588,7 +2593,7 @@ void MainWindow::deleteDecompressFile(QString destDirName)
                 fi.removeRecursively();
             }
         } else if (m_UnCompressPage->getDeFileCount() == 1) {
-            if (!m_model->archive()->isSingleFile()) { //单个文件还是单个文件夹
+            if (!m_model->archive()->isSingleFile()) { //单个文件还是多个
                 QDir fi(m_decompressfilepath + QDir::separator() + m_model->archive()->subfolderName());
 //                qDebug() << fi.dirName() << fi.exists();
                 if (fi.exists()) {
@@ -2636,6 +2641,8 @@ void MainWindow::creatArchive(QMap< QString, QString > &Args)
     foreach (QString file, filesToAdd) {
         Archive::Entry *entry = new Archive::Entry(this);
         entry->setFullPath(file);
+
+
 
         QFileInfo fi(file);
         if (fi.isDir()) {
@@ -2864,6 +2871,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     m_Progess->setprogress(0);
     // m_progressTransFlag = false;
     m_workstatus = WorkProcess;
+    m_pathstore = path;
 
     if (type == EXTRACT_TEMP) {
         m_encryptiontype = Encryption_TempExtract;
@@ -2879,15 +2887,17 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         if (pCurAuxInfo->information.contains(key) == false) {
             pNewInfo = new OpenInfo;
         } else {
-            MainWindow *pChild = this->pMapGlobalWnd->getOne(pCurAuxInfo->information[key]->strWinId);
-            if (pChild != nullptr) {
-                QApplication::setActiveWindow(pChild);  // 置顶
-                m_workstatus = WorkNone;
-                return;
+            if (this->pMapGlobalWnd != nullptr) {
+                MainWindow *pChild = this->pMapGlobalWnd->getOne(pCurAuxInfo->information[key]->strWinId);
+                if (pChild != nullptr) {
+                    QApplication::setActiveWindow(pChild);  // 置顶
+                    m_workstatus = WorkNone;
+                    return;
+                }
             }
+
             delete pCurAuxInfo->information[key];
             pCurAuxInfo->information.remove(key);
-
             pNewInfo = new OpenInfo;
         }
         pCurAuxInfo->information.insert(key, pNewInfo);
@@ -2923,6 +2933,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         this->m_pWatcher = new TimerWatcher();
         connect(this->m_pWatcher, &TimerWatcher::sigBindFuncDone, m_encryptionjob, &ExtractJob::slotWorkTimeOut);
     }
+
     this->m_encryptionjob->resetTimeOut();
     this->m_pWatcher->bindFunction(this, static_cast<pMember_callback>(&MainWindow::isWorkProcess));
     this->m_pWatcher->beginWork(100);
@@ -3079,6 +3090,7 @@ void MainWindow::onCancelCompressPressed(int compressType)
 {
     m_compressType = compressType;
     slotResetPercentAndTime();
+    m_isrightmenu = false;
     m_encryptiontype = Encryption_NULL;
     if (m_encryptionjob) {
         //append the spiner animation to the eventloop, so can play the spinner animation

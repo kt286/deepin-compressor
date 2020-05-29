@@ -139,6 +139,25 @@ void Archive::Entry::calAllSize(qint64 &size)
     }
 }
 
+void Archive::Entry::calEntriesCount(qint64 &count)
+{
+    if (this->isDir() == false) {
+        count += 1;
+        return ;
+    } else {
+        count += 1;
+    }
+
+    const auto archiveEntries = this->entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true) {
+            entry->calEntriesCount(count);
+        } else {
+            count += 1;
+        }
+    }
+}
+
 void Archive::Entry::setSize(qint64 size)
 {
     m_size = size;
@@ -243,6 +262,21 @@ QVector<Archive::Entry *> *Archive::Entry::getAllLeavesNode()
         }
     }
     return pV;
+}
+
+void Archive::Entry::getAllNodesFullPath(QStringList &pList)
+{
+    pList.append(this->fullPath());
+    if (this->isDir() == false) {
+        return;
+    }
+    const auto archiveEntries = this->entries();
+    for (Archive::Entry *entry : archiveEntries) {
+        pList.append(entry->fullPath());
+        if (entry->isDir() == true) {
+            entry->getAllNodesFullPath(pList);
+        }
+    }
 }
 
 /**

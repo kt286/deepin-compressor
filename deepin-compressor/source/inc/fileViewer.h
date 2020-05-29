@@ -219,7 +219,7 @@ signals:
     void sigpathindexChanged();
     void sigOpenWith(QVector<Archive::Entry *> fileList, const QString &programma);
     void sigFileAutoCompress(const QStringList &, Archive::Entry *pWorkEntry = nullptr);
-    void sigFileAutoCompressToArchive(const QStringList &, const QString &);
+//    void sigFileAutoCompressToArchive(const QStringList &, const QString &);//废弃，added by hsw 20200528
 private:
     void refreshTableview();
 

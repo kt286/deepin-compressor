@@ -53,6 +53,7 @@ public:
     int showWarningDialog(const QString &msg);
     EXTRACT_TYPE getExtractType();
     void setRootPathIndex();
+    void getMainWindowWidth(int windowWidth);
     void slotCompressedAddFile();
     fileViewer *getFileViewer();
     int showReplaceDialog(QString name);
@@ -76,7 +77,7 @@ signals:
     void subWindowTipsPopSig(int, const QStringList &);
     void subWindowTipsUpdateEntry(int, QVector<Archive::Entry *> &vectorDel);
     void sigDeleteArchiveFiles(const QStringList &files, const QString &);
-    void sigAddArchiveFiles(const QStringList &files, const QString &);
+    void sigAddArchiveFiles(const QStringList &files, const QString &);//废弃，added by hsw 20200528
 
     void sigDeleteJobFinished(Archive::Entry *pWorkEntry);
 
@@ -113,7 +114,7 @@ private:
 
     ArchiveSortFilterModel *m_model;
     EXTRACT_TYPE extractType;
-
+    int m_width;
     QStringList m_inputlist;
 };
 #endif

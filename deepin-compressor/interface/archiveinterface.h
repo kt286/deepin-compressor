@@ -206,7 +206,6 @@ public:
     QString destDirName;        //取消解压，需要该变量
     bool ifReplaceTip = false;  //是否有替换提示
     ExtractPsdStatus extractPsdStatus = ReadOnlyArchiveInterface::Default;
-
 Q_SIGNALS:
 
     /**

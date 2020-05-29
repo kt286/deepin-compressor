@@ -29,7 +29,7 @@
 #include <QRegularExpression>
 #include "kpluginloader.h"
 #include "kpluginfactory.h"
-#include "globalarchivemanager.h"
+//#include "globalarchivemanager.h"
 
 Q_DECLARE_METATYPE(KPluginMetaData)
 
@@ -59,7 +59,6 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
         archive = create(fileName, plugin, parent);
         // Use the first valid plugin, according to the priority sorting.
         if (archive->isValid()) {
-            //GlobalArchiveManager::Instance()->setCurrentArchive(archive);
             return archive;
         }
     }
@@ -108,7 +107,6 @@ Archive *Archive::create(const QString &fileName, const QString &fixedMimeType, 
         archive = create(fileName, plugin, parent);
         // Use the first valid plugin, according to the priority sorting.
         if (archive->isValid()) {
-           //GlobalArchiveManager::Instance()->setCurrentArchive(archive);
             return archive;
         }
     }
@@ -183,7 +181,6 @@ ReadOnlyArchiveInterface *Archive::createInterface(const QString &fileName, Plug
 Archive *Archive::create(const QString &fileName, Plugin *plugin, QObject *parent)
 {
     Q_ASSERT(plugin);
-    QString dddd = plugin->metaData().fileName();
 
     KPluginFactory *factory = KPluginLoader(plugin->metaData().fileName()).factory();
     if (!factory) {
@@ -325,11 +322,6 @@ LoadJob *Archive::load(const QString &fileName, bool isbatch, QObject *parent)
     auto loadJob = new LoadJob(archive, isbatch);
 
     return loadJob;
-}
-
-Archive::Archive()
-{
-
 }
 
 Archive::Archive(ArchiveError errorCode, QObject *parent)

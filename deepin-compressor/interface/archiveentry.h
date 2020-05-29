@@ -74,6 +74,12 @@ public:
      * @param size
      */
     void calAllSize(qint64 &size);
+    /**
+     * @brief calEntriesCount
+     * @param count
+     * @see 计算entry树的所有节点数目,文件夹和文件都算1个
+     */
+    void calEntriesCount(qint64 &count);
     void setSize(qint64 size);
     void setFullPath(const QString &fullPath);
     QString fullPath(PathFormat format = WithTrailingSlash) const;
@@ -85,6 +91,13 @@ public:
     Entry *findByPath(const QStringList &pieces, int index = 0) const;
     void countChildren(uint &dirs, uint &files) const;
     QVector<Archive::Entry *> *getAllLeavesNode();
+    /**
+     * @brief getAllNodesFullPath
+     * @param pE
+     * @param pList
+     * @see 获取所有子节点的fullpath列表
+     */
+    void getAllNodesFullPath(QStringList &pList);
     void getFilesCount(Archive::Entry *pEntry, int &count);
     bool operator==(const Archive::Entry &right) const;
 

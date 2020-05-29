@@ -301,7 +301,7 @@ private slots:
     void slotWorkTimeOut();
 
     void deleteFromArchive(const QStringList &files, const QString &archive);
-    void addToArchive(const QStringList &files, const QString &archive);
+    void addToArchive(const QStringList &files, const QString &archive);//废弃，added by hsw 20200528
 
 signals:
     void sigquitApp();

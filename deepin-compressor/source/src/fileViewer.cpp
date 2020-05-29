@@ -1201,7 +1201,6 @@ void fileViewer::slotCompressRowDoubleClicked(const QModelIndex index)
             cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
             cmdprocess->setProgram(programPath, arguments);
             cmdprocess->start();
-
         }
 
         emit sigpathindexChanged();

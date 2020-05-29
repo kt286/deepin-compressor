@@ -37,7 +37,7 @@
 #include <QUrl>
 #include "analysepsdtool.h"
 #include "filewatcher.h"
-#include "archiverunnable.h"
+//#include "archiverunnable.h"
 
 CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWriteArchiveInterface(parent, args)
 {
@@ -48,8 +48,6 @@ CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWrit
         qRegisterMetaType< QProcess::ExitStatus >("QProcess::ExitStatus");
     }
     m_cliProps = new CliProperties(this, m_metaData, mimetype());
-
-    //m_threadPool.setMaxThreadCount(10);
 }
 
 CliInterface::~CliInterface()
@@ -139,7 +137,6 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
         this->extractPsdStatus = Checked;
         emit sigExtractPwdCheckDown();
     }
-    m_extractDestDir = destinationDirectory;
     m_extractDestDir = destPath;
 //    qDebug() << m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
@@ -996,15 +993,6 @@ void CliInterface::readStdout(bool handleAll)
 //            return;
 //        }
 //    }
-}
-
-void CliInterface::handleLineSlot(const QString &line)
-{
-    m_RWLock.lockForWrite();
-    if (!handleLine(line)) {
-        killProcess();
-    }
-    m_RWLock.unlock();
 }
 
 bool CliInterface::setAddedFiles()

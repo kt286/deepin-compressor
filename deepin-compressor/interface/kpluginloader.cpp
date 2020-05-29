@@ -184,7 +184,7 @@ bool KPluginLoader::load()
 
     if (!d->loader->load()) {
         QString error = d->loader->errorString();
-        qDebug() << d->loader->errorString();
+        qDebug() << error;
         return false;
     }
 

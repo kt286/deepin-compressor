@@ -49,16 +49,6 @@ bool ArchiveSortFilterModel::lessThan(const QModelIndex &leftIndex,
         return false;
     } else {
         switch (col) {
-
-        case Timestamp: {
-            const QDateTime leftTime = left->property("timestamp").toDateTime();
-            const QDateTime rightTime = right->property("timestamp").toDateTime();
-
-            if (leftTime < rightTime) {
-                return true;
-            }
-        }
-        break;
         case Size: {
             uint dirs;
             uint files;
@@ -74,21 +64,26 @@ bool ArchiveSortFilterModel::lessThan(const QModelIndex &leftIndex,
             } else if (right->isDir()) {
                 return false;
             }
+        }
+        break;
+        case Timestamp: {
+            const QDateTime leftTime = left->property("timestamp").toDateTime();
+            const QDateTime rightTime = right->property("timestamp").toDateTime();
 
-            if (left->property(property.constData()).toULongLong() < right->property(property.constData()).toULongLong()) {
+            if (leftTime < rightTime) {
                 return true;
             }
         }
         break;
-        default: {
+        default:
             QMimeType mimeLeftType = determineMimeType(left->fullPath());
             QMimeType mimeRightType = determineMimeType(right->fullPath());
 
             if (m_mimetype->displayName(mimeLeftType.name()) > m_mimetype->displayName(mimeRightType.name())) {
                 return true;
             }
-        }
-        break;
+
+            break;
         }
     }
     return false;
