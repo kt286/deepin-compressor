@@ -26,6 +26,10 @@
 #include <DMainWindow>
 #include <QSettings>
 #include <DTitlebar>
+#include <DFileWatcher>
+#include <QElapsedTimer>
+#include <DIconButton>
+
 #include "homepage.h"
 #include "uncompresspage.h"
 #include "compresspage.h"
@@ -46,9 +50,11 @@
 #include "batchcompress.h"
 #include <DFileWatcher>
 #include <QElapsedTimer>
+#include <QQueue>
 
 
 #define TITLE_FIXED_HEIGHT 50
+#define HEADBUS "/QtDusServer/registry"
 
 DWIDGET_USE_NAMESPACE
 
@@ -64,6 +70,7 @@ enum Page_ID {
     PAGE_UNZIP_SUCCESS,
     PAGE_UNZIP_FAIL,
     PAGE_ENCRYPTION,
+    PAGE_DELETEPROGRESS,
     PAGE_MAX
 };
 
@@ -86,13 +93,102 @@ enum WorkState {
 
 class QStackedLayout;
 class TimerWatcher;
+<<<<<<< HEAD
+=======
+enum JobState {
+    JOB_NULL,
+    JOB_ADD,
+    JOB_DELETE,
+    JOB_DELETE_MANUAL,//手动delete，而非消息通知的delete
+    JOB_CREATE,
+    JOB_LOAD,
+    JOB_COPY,
+    JOB_BATCHEXTRACT,
+    JOB_EXTRACT,
+    JOB_TEMPEXTRACT,
+    JOB_MOVE,
+    JOB_COMMENT,
+    JOB_BATCHCOMPRESS,
+};
 
+class MainWindow;
+
+/**
+ * this can help us to get the map of all mainwindow created.
+ * @brief The GlobalMainWindowMap struct
+ */
+struct GlobalMainWindowMap {
+public:
+    void insert(const QString &strWinId, MainWindow *wnd)
+    {
+        if (this->mMapGlobal.contains(strWinId) == false) {
+            this->mMapGlobal.insert(strWinId, wnd);
+        }
+    }
+
+    MainWindow *getOne(const QString &strWinId)
+    {
+        if (this->mMapGlobal.contains(strWinId) == false) {
+            return nullptr;
+        } else {
+            return this->mMapGlobal[strWinId];
+        }
+    }
+
+    void remove(const QString &strWinId)
+    {
+        if (this->mMapGlobal.contains(strWinId) == true) {
+            this->mMapGlobal.remove(strWinId);
+        }
+    }
+
+    void clear()
+    {
+        this->mMapGlobal.clear();
+    }
+
+    /**
+     * @brief mMapGlobal
+     * @ key: winId
+     * @ value: pointer of mainWindow
+     */
+    QMap<QString, MainWindow *> mMapGlobal;
+};
+
+struct OpenInfo {
+    QString strWinId = "";//open view the winId
+    bool open = false;
+};
+>>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
+
+struct MainWindow_AuxInfo {
+    /**
+     * @brief infomation
+     * @ key :strModexIndex,see as modelIndexToStr()
+     * @ value :the pointer of open info
+     */
+    QMap<QString, OpenInfo *> information;
+    /**
+     * @brief childAuxInfo
+     */
+//    MainWindow_AuxInfo *childAuxInfo = nullptr;
+    /**
+     * @brief parentAuxInfo
+     */
+    MainWindow_AuxInfo *parentAuxInfo = nullptr;
+};
+
+static QVector<qint64> m_tempProcessId;
+class QStackedLayout;
+static int m_windowcount = 1;
+class MonitorAdaptor;
 class MainWindow : public DMainWindow
 {
     Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "com.archive.mainwindow.monitor")
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
     void closeEvent(QCloseEvent *event) override;
@@ -105,6 +201,16 @@ public:
     void loadArchive(const QString &files);
     void creatArchive(QMap<QString, QString> &Args);
     void creatBatchArchive(QMap<QString, QString> &Args, QMap<QString, QStringList> &filetoadd);
+    void addArchive(QMap<QString, QString> &Args);
+    void addArchiveEntry(QMap<QString, QString> &args, Archive::Entry *pWorkEntry);
+//    void removeFromArchive(const QStringList &removeFilePaths);
+    /**
+     * @brief removeEntryVector
+     * @param vectorDel
+     * @param isManual,true:by action clicked; false: by message emited.
+     */
+    void removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool isManual);
+    void moveToArchive(QMap<QString, QString> &Args);
 
     void transSplitFileName(QString &fileName); // *.7z.003 -> *.7z.001
 
@@ -118,16 +224,36 @@ public:
     qint64 getMediaFreeSpace();
 
     bool applicationQuit();
+<<<<<<< HEAD
     bool isWorkProcess();
+=======
+    QString getAddFile();
+    bool isWorkProcess();
+
+    //log
+//    void initalizeLog(QWidget *widget);
+//    void logShutDown();
+    void bindAdapter();
+//    static Log4Qt::Logger *getLogger();
+
+>>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 private:
     void saveWindowState();
     void loadWindowState();
-
+    QString modelIndexToStr(const QModelIndex &modelIndex);//added by hsw 20200525
 protected:
-    void dragEnterEvent(QDragEnterEvent *) Q_DECL_OVERRIDE;
-    void dragLeaveEvent(QDragLeaveEvent *) Q_DECL_OVERRIDE;
-    void dropEvent(QDropEvent *) Q_DECL_OVERRIDE;
-    void dragMoveEvent(QDragMoveEvent *event) Q_DECL_OVERRIDE;
+    void dragEnterEvent(QDragEnterEvent *) override;
+    void dragLeaveEvent(QDragLeaveEvent *) override;
+    void dropEvent(QDropEvent *) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+
+public slots:
+    //accept subwindows drag files and return tips string
+    bool onSubWindowActionFinished(int mode, const qint64 &pid, const QStringList &urls);
+
+    bool popUpChangedDialog(const qint64 &pid);
+
+    bool createSubWindow(const QStringList &urls);
 
 private slots:
     void setEnable();
@@ -137,6 +263,9 @@ private slots:
     void onRightMenuSelected(const QStringList &);
     void onCompressNext();
     void onCompressPressed(QMap<QString, QString> &Args);
+    void onUncompressStateAutoCompress(QMap<QString, QString> &Args);
+    // added by hsw 20200525
+    void onUncompressStateAutoCompressEntry(QMap<QString, QString> &Args, Archive::Entry *pWorkEntry = nullptr);
     void onCancelCompressPressed(int compressType);
     void onTitleButtonPressed();
     void onCompressAddfileSlot(bool status);
@@ -150,6 +279,7 @@ private slots:
     void SlotNeedPassword();
     void SlotExtractPassword(QString password);
     void slotCompressFinished(KJob *job);
+    void slotJobFinished(KJob *job);
     void slotExtractSimpleFiles(QVector<Archive::Entry *> fileList, QString path, EXTRACT_TYPE type);
     void slotExtractSimpleFilesOpen(const QVector<Archive::Entry *> &fileList, const QString &programma);
     void slotKillExtractJob();
@@ -162,26 +292,48 @@ private slots:
     void onCompressPageFilelistIsEmpty();
 
     void slotCalDeleteRefreshTotalFileSize(const QStringList &files);
+//    void slotUncompressCalDeleteRefreshTotalFileSize(const QStringList &files);
+    /**
+     * @brief slotUncompressCalDeleteRefreshTotoalSize
+     * @param vectorDel
+     * @param isManual,true:by action clicked; false: by message emited.
+     */
+    void slotUncompressCalDeleteRefreshTotoalSize(QVector<Archive::Entry *> &vectorDel, bool isManual);
+
     void resetMainwindow();
     void slotBackButtonClicked();
     void slotResetPercentAndTime();
     void slotFileUnreadable(QStringList &pathList, int fileIndex);//compress file is unreadable or file is a link
     void slotStopSpinner();
     void slotWorkTimeOut();
+<<<<<<< HEAD
+=======
+
+    void deleteFromArchive(const QStringList &files, const QString &archive);
+    void addToArchive(const QStringList &files, const QString &archive);//废弃，added by hsw 20200528
+
+>>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 signals:
     void sigquitApp();
     void sigZipAddFile();
+    void sigCompressedAddFile();
     void sigZipReturn();
     void sigZipSelectedFiles(const QStringList &files);
     void loadingStarted();
+    void sigUpdateTableView(const QFileInfo &);
+    void sigTipsWindowPopUp(int, const QStringList &);
+    void sigTipsUpdateEntry(int, QVector<Archive::Entry *> &vectorDel);
+    void deleteJobComplete();
+    void deleteJobComplete1(Archive::Entry *pEntry);
 
 private:
-    Archive *m_archive_manager;
+    Archive *m_archive_manager = nullptr;
     ArchiveModel *m_model = nullptr;
     ArchiveSortFilterModel *m_filterModel;
     QString m_decompressfilename;
     QString m_decompressfilepath;
     static QString m_loadfile;
+    QString m_addFile;
 
     void setCompressDefaultPath();
     void setQLabelText(QLabel *label, const QString &text);
@@ -192,7 +344,10 @@ private:
     void deleteDecompressFile(QString destDirName = "");
 
 private:
+    DLabel *m_logo;
     QPixmap m_logoicon;
+    QFrame *m_titleFrame;
+    DLabel *m_titlelabel;
     DWidget *m_mainWidget;
     QStackedLayout *m_mainLayout;
     HomePage *m_homePage;
@@ -217,9 +372,13 @@ private:
     ExtractJob *m_encryptionjob = nullptr;
     LoadJob *m_loadjob = nullptr;
     CreateJob *m_createJob = nullptr;
+    AddJob *m_addJob = nullptr;
+    MoveJob *m_moveJob = nullptr;
+    DeleteJob *m_DeleteJob = nullptr;
     EncryptionType m_encryptiontype = Encryption_NULL;
     bool m_isrightmenu = false;
     WorkState m_workstatus = WorkNone;
+    JobState m_jobState = JOB_NULL;
 
     int m_timerId = 0;
     //bool m_progressTransFlag = false;
@@ -240,9 +399,19 @@ private:
 
     TimerWatcher *m_pWatcher = nullptr;
     bool m_openType = false; //false解压 true打开
+<<<<<<< HEAD
+=======
+    bool IsAddArchive = false;
+
+    GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
+    MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
+    MainWindow_AuxInfo *pCurAuxInfo = nullptr;//added by hsw 20200525
+    int m_compressType;
+>>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 
 private:
     void calSelectedTotalFileSize(const QStringList &files);
+    void calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel);
     qint64 calFileSize(const QString &path);
     void calSpeedAndTime(unsigned long compressPercent);
 
@@ -250,7 +419,11 @@ private:
     unsigned long lastPercent = 0;
     qint64 selectedTotalFileSize = 0;
     qint64 compressTime = 0;
+    QReadWriteLock m_lock;
     QString program;
+    QMap<qint64, QStringList> m_subWinDragFiles;
+    int m_mode = 0;
+    qint64 m_curOperChildPid = 0;
 
 #ifdef __aarch64__
     qint64 maxFileSize_ = 0;

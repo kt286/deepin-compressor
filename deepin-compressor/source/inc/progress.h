@@ -32,8 +32,10 @@
 DWIDGET_USE_NAMESPACE
 
 enum COMPRESS_TYPE {
-    COMPRESSING,
+    COMPRESSING,//正常压缩
+    COMPRESSDRAGADD,//拖拽添加压缩
     DECOMPRESSING,
+    DELETEING
 };
 
 class Progress: public DWidget

@@ -73,6 +73,7 @@ protected Q_SLOTS:
 Q_SIGNALS:
     void entryRemoved(const QString &entry);
     void newEntry(Archive::Entry *);
+    void addEntry(Archive::Entry *);
     void userQuery(Query *);
     void sigWrongPassword();
     void sigCancelled();
@@ -209,6 +210,18 @@ public Q_SLOTS:
     void slotExtractJobPwdCheckDown();
     void onProgress(double progress)override;
     void onProgressFilename(const QString &filename)override;
+<<<<<<< HEAD
+=======
+public:
+    bool Killjob();
+    /**
+     * get the work archiveEntry
+     * @brief getWorkEntry
+     * @return
+     */
+    Archive::Entry *getWorkEntry();
+    void resetTimeOut();
+>>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 signals:
     void sigExtractJobPassword();
     void sigExtractJobFinished();
@@ -220,7 +233,16 @@ private:
     QVector<Archive::Entry *> m_entries;
     QString m_destinationDir;
     ExtractionOptions m_options;
+<<<<<<< HEAD
     bool m_bTimeout = true;//if work time out,if greater than 700ms,emit the progress info.
+=======
+    /**
+     * @brief m_bTimeout
+     * @see true:默认不执行 TimerWatcher 判断延时显示进度条; false:执行 TimerWatcher 延时显示进度条（为了不出现解压太快导致的进度条闪现效果）
+     * @see if work time out,if greater than 700ms,emit the progress info.
+     */
+    bool m_bTimeout = true;
+>>>>>>> 4eb15b9e88c3938a71ea21a48ea6b9b033aa34a5
 };
 
 
@@ -341,7 +363,7 @@ public:
 
 public Q_SLOTS:
     void doWork() override;
-
+    Archive::Entry *getWorkEntry();
 private:
     QVector<Archive::Entry *> m_entries;
 };

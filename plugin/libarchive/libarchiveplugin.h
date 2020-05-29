@@ -58,6 +58,7 @@ protected:
     typedef QScopedPointer<struct archive, ArchiveWriteCustomDeleter> ArchiveWrite;
 
     bool initializeReader();
+    void createEntry(const QString &externalPath, struct archive_entry *entry);
     void emitEntryFromArchiveEntry(struct archive_entry *entry);
     void copyData(const QString &filename, struct archive *dest, const FileProgressInfo &info, bool partialprogress = true);
     void copyData(const QString &filename, struct archive *source, struct archive *dest,  bool partialprogress = true);

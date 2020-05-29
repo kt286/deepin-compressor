@@ -37,6 +37,7 @@
 #include <QUrl>
 #include "analysepsdtool.h"
 #include "filewatcher.h"
+//#include "archiverunnable.h"
 
 CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWriteArchiveInterface(parent, args)
 {
@@ -136,7 +137,6 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
         this->extractPsdStatus = Checked;
         emit sigExtractPwdCheckDown();
     }
-    qDebug() << "####destpath：" << destPath;
     m_extractDestDir = destPath;
 //    qDebug() << m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
@@ -230,11 +230,14 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
             // The entries may have parent. We have to save and apply it to our new entry in order to prevent memory
             // leaks.
             if (preservedParent == nullptr) {
-                preservedParent = file->parent();
+                preservedParent = file->getParent();
             }
 
-            const QString filePath = QDir::currentPath() + QLatin1Char('/') + file->fullPath(NoTrailingSlash);
-            const QString newFilePath = absoluteDestinationPath + file->fullPath(NoTrailingSlash);
+//            const QString filePath = QDir::currentPath() + QLatin1Char('/') + file->fullPath(NoTrailingSlash);
+//            const QString filePath = QDir::currentPath() + QLatin1Char('/') + file->name();
+            const QString filePath = file->fullPath();
+//            const QString newFilePath = absoluteDestinationPath + file->fullPath(NoTrailingSlash);
+            const QString newFilePath = absoluteDestinationPath + file->name();
             if (QFile::link(filePath, newFilePath)) {
                 qDebug() << "Symlink's created:" << filePath << newFilePath;
             } else {
@@ -269,7 +272,7 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
                                                 options.compressionMethod(),
                                                 options.encryptionMethod(),
                                                 options.volumeSize());
-    arguments.removeOne("-l");//beaucse -l will failed if files contains softLink which links parent folder.
+//    arguments.removeOne("-l");//beaucse -l will failed if files contains softLink which links parent folder.
     bool ret = runProcess(m_cliProps->property("addProgram").toString(), arguments);
     if (ret == true) {
         this->watchDestFilesBegin();
@@ -984,6 +987,12 @@ void CliInterface::readStdout(bool handleAll)
             }
         }
     }
+
+//    if(m_listEmptyLines && m_operationMode == Extract){
+//        if(m_threadPool.waitForDone()){
+//            return;
+//        }
+//    }
 }
 
 bool CliInterface::setAddedFiles()

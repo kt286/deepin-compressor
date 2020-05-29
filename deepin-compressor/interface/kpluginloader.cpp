@@ -183,7 +183,8 @@ bool KPluginLoader::load()
     Q_D(KPluginLoader);
 
     if (!d->loader->load()) {
-        qDebug() << d->loader->errorString();
+        QString error = d->loader->errorString();
+        qDebug() << error;
         return false;
     }
 
