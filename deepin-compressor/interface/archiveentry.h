@@ -72,6 +72,7 @@ public:
     /**
      * @brief calAllSize(include child entry's size)
      * @param size
+     * @see 计算当前entry节点及其子节点的文件总大小
      */
     void calAllSize(qint64 &size);
     /**
@@ -79,7 +80,7 @@ public:
      * @param count
      * @see 计算entry树的所有节点数目,文件夹和文件都算1个
      */
-    void calEntriesCount(qint64 &count);
+    void calEntriesCount(qint64 &count) const;
     void setSize(qint64 size);
     void setFullPath(const QString &fullPath);
     QString fullPath(PathFormat format = WithTrailingSlash) const;

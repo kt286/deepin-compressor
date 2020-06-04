@@ -233,8 +233,10 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString exter
     QFileInfoList list = dir.entryInfoList();
     int i = 0;
     bool is_dir;
-    do {
+    qDebug() << list.length();
+    while (i < list.size()) {
         QFileInfo file_info = list.at(i);
+
         if (file_info.fileName() == "." | file_info.fileName() == "..") {
             i++;
             continue;
@@ -251,6 +253,7 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString exter
 
         parent->appendEntry(entry);
         if (is_dir) {
+            qDebug() << "文件夹：" << file_info.path();
             entry->setIsDirectory(true);
 //            entry->setFullPath(parentPath + file_info.absoluteFilePath().remove(externalPath) + QDir::separator()); //remove external path
             entry->setFullPath(parentPath + file_info.fileName() + QDir::separator());
@@ -258,6 +261,7 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString exter
 
             CreateEntry(file_info.filePath(), entry, externalPath, map);    //recursive function
         } else {
+            qDebug() << "文件：" << file_info.path();
             qint64 size = file_info.size();
             entry->setProperty("size", size);
             entry->setSize(size);
@@ -274,8 +278,68 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString exter
         // set Icon end
         map->insert(entry->fullPath(NoTrailingSlash), icon);
         i++;
-    } while (i < list.size());
+    } ;
+    qDebug() << "SSSSS4";
+}
 
+void Archive::CreateEntryNew(QString path, Archive::Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map)
+{
+    QFileInfo file(path);
+    if (!file.exists()) {
+        return ;
+    }
+    if (file.isDir() == false) {
+        return ;
+    }
+    if (map == nullptr) {
+        map = new QHash<QString, QIcon>();
+    }
+    QDir dir(file.filePath());
+    dir.setFilter(QDir::Files | QDir::Dirs | QDir::Hidden);
+    dir.setSorting(QDir::DirsFirst);
+    QFileInfoList list = dir.entryInfoList();
+    QListIterator<QFileInfo> Iterator(list);
+
+    QMimeDatabase db;
+    QFileInfo Info;
+    while (Iterator.hasNext()) {
+        Info = Iterator.next();
+        if (Info.fileName() == "." | Info.fileName() == "..") {
+            continue;
+        }
+        Archive::Entry *entry = new Archive::Entry();
+        qDebug() << "===" << Info.filePath();
+        entry->setProperty("timestamp", QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss")));
+        QString parentPath = parent->fullPath();
+        if (parentPath.right(1) != QDir::separator()) {
+            parentPath += QDir::separator();
+        }
+
+        parent->appendEntry(entry);
+        if (Info.isDir()) {
+            qDebug() << Info.filePath();
+            entry->setIsDirectory(true);
+            entry->setFullPath(parentPath + Info.fileName() + QDir::separator());
+            entry->setParent(parent);
+            CreateEntryNew(Info.filePath(), entry, externalPath, map);    //recursive function
+        } else {
+            qDebug() << Info.filePath();
+            qint64 size = Info.size();
+            entry->setProperty("size", size);
+            entry->setSize(size);
+            entry->setFullPath(parentPath + Info.fileName().remove(externalPath));
+            entry->setParent(parent);
+        }
+
+        // set Icon begin
+
+        QIcon icon;
+        entry->isDir()
+        ? icon = QIcon::fromTheme(db.mimeTypeForName(QStringLiteral("inode/directory")).iconName()).pixmap(24, 24)
+                 : icon = QIcon::fromTheme(db.mimeTypeForFile(entry->fullPath()).iconName()).pixmap(24, 24);
+        // set Icon end
+        map->insert(entry->fullPath(NoTrailingSlash), icon);
+    }
 }
 
 AddJob *Archive::add(Archive *pArchive, const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
@@ -590,7 +654,15 @@ AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive:
     }
 
     Q_ASSERT(!pIface->isReadOnly());
-
+    if (pIface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_LIBZIP) {
+        qDebug() << "a";
+    } else if (pIface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_LIBARCHIVE) {
+        qDebug() << "b";
+    } else if (pIface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE) {
+        qDebug() << "c";
+    } else if (pIface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_READWRITE_LIBARCHIVE) {
+        qDebug() << "d";
+    }
     AddJob *newJob = new AddJob(files, destination, newOptions, static_cast<ReadWriteArchiveInterface *>(pIface));
     connect(newJob, &AddJob::result, this, &Archive::onAddFinished);
     return newJob;

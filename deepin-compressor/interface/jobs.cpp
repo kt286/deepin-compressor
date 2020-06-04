@@ -28,7 +28,7 @@
 #include <QRegularExpression>
 #include <QThread>
 #include <QTimer>
-
+#include "structs.h"
 
 class Job::Private : public QThread
 {
@@ -623,6 +623,8 @@ void ExtractJob::onProgress(double value)
 {
     if (this->m_bTimeout) {
         setPercent(static_cast<unsigned long>(100.0 * value));
+    } else {
+        this->archiveInterface()->m_pProgressInfo->restartTimer();
     }
 }
 
@@ -737,6 +739,24 @@ AddJob::AddJob(const QVector<Archive::Entry *> &entries, const Archive::Entry *d
 {
     qDebug() << "AddJob job instance";
 }
+quint64 getAllFileCount(const QString &fullPath)
+{
+    QFileInfo fileInfo(fullPath);
+    quint64 size = 1;
+    if (fileInfo.isDir()) {
+        QDirIterator it(fullPath,
+                        QDir::AllEntries | QDir::Readable |
+                        QDir::Hidden | QDir::NoDotAndDotDot,
+                        QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            size++;
+            it.next();
+        }
+        return size;
+    } else {
+        return size;
+    }
+}
 
 void AddJob::doWork()
 {
@@ -749,22 +769,7 @@ void AddJob::doWork()
         QDir::setCurrent(globalWorkDir);
     }
 
-    // Count total number of entries to be added.
-    uint totalCount = 0;
-    QElapsedTimer timer;
-    timer.start();
-
-    totalCount = (uint)m_entries.length();
-
-    qDebug() << "Going to add" << totalCount << "entries, counted in" << timer.elapsed() << "ms";
-
-    //const QString desc = tr("Compressing a file", "Compressing %1 files", totalCount);
-    const QString desc = QString("Compressing %1 files").arg(totalCount);
-    //emit description(this, desc, qMakePair(tr("Archive"), archiveInterface()->filename()));
-    emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
-
     ReadWriteArchiveInterface *m_writeInterface = dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
-
     Q_ASSERT(m_writeInterface);
 
     QStringList *fileListWathed = new QStringList();
@@ -775,6 +780,23 @@ void AddJob::doWork()
         const QString &fullPath = entry->fullPath();
         fileListWathed->append(fullPath);
     }
+
+    // Count total number of entries to be added.
+    QElapsedTimer timer;
+    timer.start();
+    uint totalCount = 0;
+
+    if (m_writeInterface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_READWRITE_LIBARCHIVE) {
+        const QString &firstFilePath = fileListWathed->at(0);
+        totalCount = (uint)getAllFileCount(firstFilePath);
+    } else {
+        totalCount = (uint)m_entries.length();
+    }
+    const QString desc = QString("Compressing %1 files").arg(totalCount);
+    //emit description(this, desc, qMakePair(tr("Archive"), archiveInterface()->filename()));
+    emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
+
+    qDebug() << "Going to add" << totalCount << "entries, counted in" << timer.elapsed() << "ms";
 
     connectToArchiveInterfaceSignals();
     m_writeInterface->watchFileList(fileListWathed);
@@ -894,6 +916,7 @@ DeleteJob::DeleteJob(const QVector<Archive::Entry *> &entries, ReadWriteArchiveI
     : Job(interface)
     , m_entries(entries)
 {
+    qDebug() << "deleteJob instance";
 }
 
 void DeleteJob::doWork()

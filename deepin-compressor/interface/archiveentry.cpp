@@ -139,7 +139,7 @@ void Archive::Entry::calAllSize(qint64 &size)
     }
 }
 
-void Archive::Entry::calEntriesCount(qint64 &count)
+void Archive::Entry::calEntriesCount(qint64 &count)const
 {
     if (this->isDir() == false) {
         count += 1;

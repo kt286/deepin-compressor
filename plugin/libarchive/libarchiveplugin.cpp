@@ -13,6 +13,7 @@
 #include <QRegularExpression>
 #include <archive_entry.h>
 #include "../common/common.h"
+#include "structs.h"
 
 static float codecConfidenceForData(const QTextCodec *codec, const QByteArray &data, const QLocale::Country &country)
 {
@@ -106,6 +107,7 @@ LibarchivePlugin::LibarchivePlugin(QObject *parent, const QVariantList &args)
     , m_emitNoEntries(false)
     , m_extractedFilesSize(0)
 {
+    mType = ENUM_PLUGINTYPE::PLUGIN_LIBARCHIVE;
     archive_read_disk_set_standard_lookup(m_archiveReadDisk.data());
 
     connect(this, &ReadOnlyArchiveInterface::error, this, &LibarchivePlugin::slotRestoreWorkingDir);
@@ -226,7 +228,7 @@ bool LibarchivePlugin::extractFiles(const QVector<Archive::Entry *> &files, cons
     archive_write_disk_set_options(writer.data(), extractionFlags());
 
     int totalEntriesCount = 0;
-    const bool extractAll = files.isEmpty();
+    const bool extractAll = files.isEmpty();//如果是双击解压，则为false;如果是按钮解压，则为true
     if (extractAll) {
         if (!m_cachedArchiveEntryCount) {
             emit progress(0);
@@ -239,6 +241,8 @@ bool LibarchivePlugin::extractFiles(const QVector<Archive::Entry *> &files, cons
         totalEntriesCount = m_cachedArchiveEntryCount;
     } else {
         totalEntriesCount = files.size();
+        this->m_pProgressInfo->resetProgress();
+        this->m_pProgressInfo->setTotalSize(files[0]->getSize());//双击解压，设置解压总大小
     }
 
     this->extractPsdStatus = ReadOnlyArchiveInterface::Default;
@@ -259,8 +263,8 @@ bool LibarchivePlugin::extractFiles(const QVector<Archive::Entry *> &files, cons
     QString fileBeingRenamed;
     // To avoid traversing the entire archive when extracting a limited set of
     // entries, we maintain a list of remaining entries and stop when it's empty.
-    const QStringList fullPaths = entryFullPaths(files);
-    QStringList remainingFiles = entryFullPaths(files);
+//    const QStringList fullPaths = entryFullPaths(files);
+    QStringList remainingFiles = entryFullPaths(files);//获取双击的文件名称
 
     QString extractDst;
 
@@ -325,7 +329,7 @@ bool LibarchivePlugin::extractFiles(const QVector<Archive::Entry *> &files, cons
 
             // Find the index of entry.
             if (entryName != fileBeingRenamed) {
-                index = fullPaths.indexOf(entryName);
+                index = remainingFiles.indexOf(entryName);
             }
             if (!extractAll && index == -1) {
                 // If entry is not found in files, skip entry.
@@ -412,7 +416,13 @@ bool LibarchivePlugin::extractFiles(const QVector<Archive::Entry *> &files, cons
             case ARCHIVE_OK:
                 // If the whole archive is extracted and the total filesize is
                 // available, we use partial progress.
-                copyData(entryName, m_archiveReader.data(), writer.data(), (extractAll && m_extractedFilesSize));
+//                copyDataFromSource(entryName, m_archiveReader.data(), writer.data(), (extractAll && m_extractedFilesSize));//这一句需要修改。
+                if (extractAll == false) {
+                    copyDataFromSource_ArchiveEntry(files[0], m_archiveReader.data(), writer.data(), (m_extractedFilesSize));
+                } else {
+                    copyDataFromSource(entryName, m_archiveReader.data(), writer.data(), (extractAll && m_extractedFilesSize));
+                }
+
                 break;
 
             case ARCHIVE_FAILED:
@@ -591,7 +601,7 @@ int LibarchivePlugin::extractionFlags() const
     return result;
 }
 
-void LibarchivePlugin::copyData(const QString &filename, struct archive *dest, const FileProgressInfo &info, bool partialprogress)
+void LibarchivePlugin::copyData(const QString &filename, struct archive *dest, const FileProgressInfo &info, bool bInternalDuty)
 {
     m_currentExtractedFilesSize = 0;
     char buff[10240];
@@ -605,7 +615,7 @@ void LibarchivePlugin::copyData(const QString &filename, struct archive *dest, c
 
     pastProgress = -1;
 
-    float fileSize = static_cast<float>(file.size());
+    float fileSize = static_cast<float>(file.size());//filesize in the disk
 
     auto readBytes = file.read(buff, sizeof(buff));
     while (readBytes > 0 && !QThread::currentThread()->isInterruptionRequested()) {
@@ -615,9 +625,9 @@ void LibarchivePlugin::copyData(const QString &filename, struct archive *dest, c
             return;
         }
 
-        if (partialprogress) {
+        if (bInternalDuty) {
             m_currentExtractedFilesSize += readBytes;
-            float currentProgress = (static_cast<float>(m_currentExtractedFilesSize) / fileSize) * info.fileProgressProportion + info.fileProgressStart;
+            float currentProgress = (static_cast<float>(m_currentExtractedFilesSize) / fileSize) * info.fileProgressProportion + info.fileProgressStart;//根据内容写入比例，加上上次的进度值
             if (static_cast<int>(100 * currentProgress) != pastProgress) {
                 emit progress(currentProgress);
                 pastProgress = static_cast<int>(100 * currentProgress);
@@ -631,10 +641,10 @@ void LibarchivePlugin::copyData(const QString &filename, struct archive *dest, c
     file.close();
 }
 
-void LibarchivePlugin::copyData(const QString &filename, struct archive *source, struct archive *dest, bool partialprogress)
+void LibarchivePlugin::copyDataFromSource(const QString &filename, struct archive *source, struct archive *dest,  bool partialprogress)
 {
     char buff[10240];
-
+    qlonglong size = 0;
     auto readBytes = archive_read_data(source, buff, sizeof(buff));
     while (readBytes > 0 && !QThread::currentThread()->isInterruptionRequested()) {
         archive_write_data(dest, buff, static_cast<size_t>(readBytes));
@@ -642,14 +652,66 @@ void LibarchivePlugin::copyData(const QString &filename, struct archive *source,
             return;
         }
 
-        /*if (partialprogress)*/ {
-            m_currentExtractedFilesSize += readBytes;
-            emit progress(float(m_currentExtractedFilesSize) / m_extractedFilesSize);
+        if (partialprogress) {
+            size += readBytes;
+            emit progress(float(size + m_currentExtractedFilesSize) / m_extractedFilesSize);
             emit progress_filename(filename);
         }
 
         readBytes = archive_read_data(source, buff, sizeof(buff));
     }
+    if (partialprogress) {
+        m_currentExtractedFilesSize  += size;
+    }
+}
+
+void LibarchivePlugin::copyDataFromSource_ArchiveEntry(Archive::Entry *pSourceEntry, archive *source, archive *dest, bool bInternalDuty)
+{
+    QString fileName = pSourceEntry->name();
+    qint64 fullSize = pSourceEntry->getSize();
+    char buff[10240];
+    qlonglong size = 0;
+    auto readBytes = archive_read_data(source, buff, sizeof(buff));
+    while (readBytes > 0 && !QThread::currentThread()->isInterruptionRequested()) {
+        archive_write_data(dest, buff, static_cast<size_t>(readBytes));
+        if (archive_errno(dest) != ARCHIVE_OK) {
+            return;
+        }
+
+        if (bInternalDuty) {
+            size += readBytes;
+            emit progress(size * 1.0 / fullSize);
+            emit progress_filename(fileName);
+        }
+
+        readBytes = archive_read_data(source, buff, sizeof(buff));
+    }
+    if (bInternalDuty) {
+        m_currentExtractedFilesSize  += size;
+    }
+}
+
+void LibarchivePlugin::copyDataFromSourceAdd(const QString &filename, archive *source, archive *dest, archive_entry *sourceEntry, FileProgressInfo &info, bool bInternalDuty)
+{
+    char buff[10240];
+    m_currentExtractedFilesSize = 0;
+    float entrySize = archive_entry_size(sourceEntry);
+    auto readBytes = archive_read_data(source, buff, sizeof(buff));
+    while (readBytes > 0 && !QThread::currentThread()->isInterruptionRequested()) {
+        archive_write_data(dest, buff, static_cast<size_t>(readBytes));
+        if (archive_errno(dest) != ARCHIVE_OK) {
+            return;
+        }
+
+        if (bInternalDuty) {
+            m_currentExtractedFilesSize += readBytes;
+            float currentProgress = (static_cast<float>(m_currentExtractedFilesSize) / entrySize) * info.fileProgressProportion + info.fileProgressStart;//根据内容写入比例，加上上次的进度值
+            emit progress(currentProgress);
+            //emit progress_filename(file.fileName());
+        }
+        readBytes = archive_read_data(source, buff, sizeof(buff));
+    }
+
 }
 
 void LibarchivePlugin::slotRestoreWorkingDir()

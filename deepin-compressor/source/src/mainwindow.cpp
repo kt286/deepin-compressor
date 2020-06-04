@@ -54,6 +54,7 @@
 #include <QUuid>
 #include "unistd.h"
 #include "compressorapplication.h"
+#include "structs.h"
 
 DWIDGET_USE_NAMESPACE
 
@@ -450,7 +451,7 @@ void MainWindow::InitConnection()
     connect(m_UnCompressPage, &UnCompressPage::sigAutoCompressEntry, m_CompressSetting, &CompressSetting::autoCompressEntry);
     connect(m_UnCompressPage, &UnCompressPage::sigOpenExtractFile, this, &MainWindow::slotExtractSimpleFilesOpen);
     connect(m_UnCompressPage, &UnCompressPage::sigDeleteArchiveFiles, this, &MainWindow::deleteFromArchive);
-    connect(m_UnCompressPage, &UnCompressPage::sigAddArchiveFiles, this, &MainWindow::addToArchive);
+//    connect(m_UnCompressPage, &UnCompressPage::sigAddArchiveFiles, this, &MainWindow::addToArchive);
     connect(m_CompressSetting, &CompressSetting::sigMoveFilesToArchive, this, &MainWindow::moveToArchive);
     connect(this, &MainWindow::deleteJobComplete1, m_UnCompressPage, &UnCompressPage::slotDeleteJobFinished);
     connect(this, &MainWindow::sigUpdateTableView, m_UnCompressPage, &UnCompressPage::sigUpdateUnCompreeTableView);
@@ -626,22 +627,22 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 
 bool MainWindow::onSubWindowActionFinished(int mode, const qint64 &pid, const QStringList &urls)
 {
-    qDebug() << "子界面拖拽完成！进程pid为：" << pid;
-    qDebug() << "当前进程pid为：" << getpid() << ";父类进程pid为：" << getppid();
-    qDebug() << "进程列表中进程有：" << m_tempProcessId.size() << "个！";
-    QWriteLocker locker(&m_lock);
-    if (m_tempProcessId.empty()) {
-        return false;
-    }
-    if (!urls.isEmpty() && pid) {
-        if (m_subWinDragFiles.contains(pid)) {
-            m_subWinDragFiles[pid] = urls;
-        } else {
-            m_subWinDragFiles.insert(pid, urls);
-        }
-        m_mode = mode;
-        return true;
-    }
+//    qDebug() << "子界面拖拽完成！进程pid为：" << pid;
+//    qDebug() << "当前进程pid为：" << getpid() << ";父类进程pid为：" << getppid();
+//    qDebug() << "进程列表中进程有：" << m_tempProcessId.size() << "个！";
+//    QWriteLocker locker(&m_lock);
+//    if (m_tempProcessId.empty()) {
+//        return false;
+//    }
+//    if (!urls.isEmpty() && pid) {
+//        if (m_subWinDragFiles.contains(pid)) {
+//            m_subWinDragFiles[pid] = urls;
+//        } else {
+//            m_subWinDragFiles.insert(pid, urls);
+//        }
+//        m_mode = mode;
+//        return true;
+//    }
     return false;
 }
 
@@ -832,7 +833,7 @@ void MainWindow::refreshPage()
 
         m_Progess->setFilename(m_decompressfilename);
         m_mainLayout->setCurrentIndex(4);
-        m_timer.start();
+        m_Progess->pInfo()->startTimer();
         break;
     case PAGE_UNZIPPROGRESS:
         m_Progess->settype(DECOMPRESSING);
@@ -843,7 +844,7 @@ void MainWindow::refreshPage()
         titlebar()->setTitle(tr("Extracting"));
         m_Progess->setFilename(m_decompressfilename);
         m_mainLayout->setCurrentIndex(4);
-        m_timer.start();
+        m_Progess->pInfo()->startTimer();
         break;
     case PAGE_DELETEPROGRESS:
         m_Progess->setSpeedAndTimeText(DELETEING);
@@ -853,7 +854,7 @@ void MainWindow::refreshPage()
         titlebar()->setTitle(tr("Deleteing"));
         m_Progess->setFilename(m_decompressfilename);
         m_mainLayout->setCurrentIndex(4);
-        m_timer.start();
+        m_Progess->pInfo()->startTimer();
         break;
     case PAGE_ZIP_SUCCESS:
         titlebar()->setTitle("");
@@ -928,6 +929,8 @@ void MainWindow::refreshPage()
 //add calculate size of selected files
 void MainWindow::calSelectedTotalFileSize(const QStringList &files)
 {
+    qint64 before = m_Progess->pInfo()->getTotalSize();
+
     foreach (QString file, files) {
         QFileInfo fi(file);
 
@@ -939,35 +942,22 @@ void MainWindow::calSelectedTotalFileSize(const QStringList &files)
                 maxFileSize_ = curFileSize;
             }
 #endif
-
-            selectedTotalFileSize += curFileSize;
+            m_Progess->pInfo()->getTotalSize() += curFileSize;
         } else if (fi.isDir()) {
-            selectedTotalFileSize += calFileSize(file);
+            m_Progess->pInfo()->getTotalSize() += calFileSize(file);
         }
     }
-    m_CompressSetting->getSelectedFileSize(selectedTotalFileSize);
+    m_CompressSetting->getSelectedFileSize(m_Progess->pInfo()->getTotalSize());
 }
 
 void MainWindow::calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel)
 {
-
+    qint64 size = 0;
     foreach (Archive::Entry *entry, vectorDel) {
-
-//        if (entry->isDir() == false) {
-//            qint64 curFileSize = entry->property("size").toInt();
-
-//#ifdef __aarch64__
-//            if (maxFileSize_ < curFileSize) {
-//                maxFileSize_ = curFileSize;
-//            }
-//#endif
-
-//            selectedTotalFileSize += curFileSize;
-//        } else {
-//          selectedTotalFileSize += calFileSize(entry->fullPath());
-//        }
-        entry->calAllSize(selectedTotalFileSize);
+        entry->calAllSize(size);
     }
+//    m_ProgressIns += size;
+    m_Progess->pInfo()->getTotalSize() += size;
 }
 
 qint64 MainWindow::calFileSize(const QString &path)
@@ -996,24 +986,28 @@ qint64 MainWindow::calFileSize(const QString &path)
 
 void MainWindow::calSpeedAndTime(unsigned long compressPercent)
 {
-    qDebug() << "size" << selectedTotalFileSize;
-    compressTime += m_timer.elapsed();
-    qDebug() << "compresstime" << compressTime;
+//    qDebug() << "size" << selectedTotalFileSize;
+//    compressTime += m_timer.elapsed();
+//    qDebug() << "compresstime" << compressTime;
+//    //处理速度
+//    double m_compressSpeed = ((selectedTotalFileSize / 1024.0) * (compressPercent / 100.0)) / compressTime * 1000;
+//    //剩余大小
+//    double m_sizeLeft = (selectedTotalFileSize / 1024.0) * (100 - compressPercent) / 100;
+//    //剩余时间
+//    qint64 m_timeLeft = (qint64)(m_sizeLeft / m_compressSpeed);
 
-    double m_compressSpeed = ((selectedTotalFileSize / 1024.0) * (compressPercent / 100.0)) / compressTime * 1000;
-    double m_sizeLeft = (selectedTotalFileSize / 1024.0) * (100 - compressPercent) / 100;
-    qint64 m_timeLeft = (qint64)(m_sizeLeft / m_compressSpeed);
+//    qDebug() << "m_sizeLeft" << m_sizeLeft;
+//    qDebug() << "m_compressSpeed" << m_compressSpeed;
+//    qDebug() << "m_timeLeft" << m_timeLeft;
 
-    qDebug() << "m_sizeLeft" << m_sizeLeft;
-    qDebug() << "m_compressSpeed" << m_compressSpeed;
-    qDebug() << "m_timeLeft" << m_timeLeft;
+//    if (lastPercent != 100 && m_timeLeft == 0) {
+//        m_timeLeft = 1;
+//    }
 
-    if (lastPercent != 100 && m_timeLeft == 0) {
-        m_timeLeft = 1;
-    }
-
-    m_Progess->setSpeedAndTime(m_compressSpeed, m_timeLeft);
-    m_timer.restart();
+//    m_Progess->setSpeedAndTime(m_compressSpeed, m_timeLeft);
+//    m_timer.restart();
+//    m_ProgressIns->refreshSpeedAndTime(compressPercent);
+    m_Progess->refreshSpeedAndTime(compressPercent);
 }
 
 void MainWindow::onSelected(const QStringList &files)
@@ -1474,12 +1468,12 @@ void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
 
 void MainWindow::SlotProgress(KJob * /*job*/, unsigned long percent)
 {
-    if (percent > lastPercent) {
-        calSpeedAndTime(percent);
-        lastPercent = percent;
-    }
-
-    qDebug() << "percent" << percent;
+//    if (percent > lastPercent) {
+//        calSpeedAndTime(percent);
+//        lastPercent = percent;
+//        qDebug() << "%%%%lastPercent" << lastPercent;
+//    }
+    calSpeedAndTime(percent);
     if (Encryption_SingleExtract == m_encryptiontype || Encryption_DRAG == m_encryptiontype) {
         if (percent < 100 && WorkProcess == m_workstatus) {
             if (!m_progressdialog->isshown()) {
@@ -2083,7 +2077,10 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     m_CompressSuccess->setCompressPath(Args[QStringLiteral("localFilePath")]);
 
     ReadOnlyArchiveInterface *pIface = Archive::createInterface(createCompressFile_, fixedMimeType);
-
+    if (pIface == nullptr) {
+        qDebug() << "init plugin failed.";
+        return;
+    }
     if (createCompressFile_.isEmpty()) {
         qDebug() << "filename.isEmpty()";
         return;
@@ -2101,7 +2098,8 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     options.setVolumeSize(Args[QStringLiteral("volumeSize")].toULongLong());
 
     QVector< Archive::Entry * > all_entries;
-
+    qDebug() << "00000";
+    qDebug() << "fileToAdd.length:" << filesToAdd.length();
     foreach (QString file, filesToAdd) {
         Archive::Entry *entry = new Archive::Entry();
 
@@ -2112,29 +2110,35 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         if (m_model->getParentEntry() != nullptr) {
             parentPath = m_model->getParentEntry()->property("fullPath").toString();
         }
+
 //        QString tempFile = file;
         entry->setFullPath(parentPath + fi.fileName());//remove external path,added by hsw
         entry->setParent(m_model->getParentEntry());
         if (fi.isDir()) {
+            qDebug() << "11111";
             entry->setIsDirectory(true);
             QHash<QString, QIcon> *map = new QHash<QString, QIcon>();
-            Archive::CreateEntry(fi.absoluteFilePath(), entry, externalPath, map);
+            qDebug() << "22222";
+//            Archive::CreateEntry(fi.absoluteFilePath(), entry, externalPath, map);
+            Archive::CreateEntryNew(fi.filePath(), entry, externalPath, map);
             m_model->appendEntryIcons(*map);
-            delete map;
-            map = nullptr;
+//            delete map;
+//            map = nullptr;
+            qDebug() << "33333";
         } else {
             entry->setProperty("size", fi.size());
         }
         entry->setFullPath(file);
         all_entries.append(entry);
         m_addFile = file;
-    }
 
+    }
+    qDebug() << "555";
     if (all_entries.isEmpty()) {
         qDebug() << "all_entries.isEmpty()";
         return;
     }
-
+    qDebug() << "6666";
     QFileInfo fi(sourceArchivePath);
     Archive::Entry *sourceEntry  = nullptr;
     if (fi.isAbsolute()) {
@@ -2142,12 +2146,20 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
         if (fi.isDir()) {
             sourceEntry->setIsDirectory(true);
         }
-
+        qDebug() << "7777";
         QString globalWorkDir = sourceArchivePath;
+        qDebug() << "7778";
         if (globalWorkDir.right(1) == QLatin1String("/")) {
             globalWorkDir.chop(1);
         }
-        globalWorkDir = QFileInfo(globalWorkDir).dir().absolutePath();
+        qDebug() << globalWorkDir;
+        QFileInfo fileInfo(globalWorkDir);
+        if (fileInfo.isDir()) {
+            globalWorkDir = fileInfo.filePath();
+        } else {
+            globalWorkDir = fileInfo.absolutePath();
+        }
+//        globalWorkDir = QFileInfo(globalWorkDir).dir().absolutePath();
         options.setGlobalWorkDir(globalWorkDir);
     } else {
         if (!m_UnCompressPage) {
@@ -2166,36 +2178,44 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
                 }
             }
         }
+        qDebug() << "9999";
         if (!sourceEntry) {
             return;
         }
         sourceEntry->setIsDirectory(false);
         options.setGlobalWorkDir(sourceArchivePath);
     }
-
+    qDebug() << "开始执行添加任务12";
 //    m_addJob =  m_model->addFiles(all_entries, sourceEntry, options);//this write by hanshuai
-    if (m_model->getParentEntry() != sourceEntry) {
+    if (m_model->getParentEntry() != nullptr && m_model->getParentEntry() != sourceEntry) {
         m_model->mapFilesUpdate;//根据这个获取当前位于那个sourceEntry中
         sourceEntry = m_model->getParentEntry();
     }
 
     resetMainwindow();
-    calSelectedTotalEntrySize(all_entries);
 
+    calSelectedTotalEntrySize(all_entries);
+    qDebug() << "12345";
+    sourceEntry->calAllSize(m_Progess->pInfo()->getTotalSize());//added by hsw for valid total size
+    qint64 ccount = 0;
+    all_entries[0]->calEntriesCount(ccount);
+    qDebug() << "ccount:" << ccount;
     m_addJob = m_model->addFiles(all_entries, sourceEntry, pIface, options);//this added by hsw
     if (!m_addJob) {
+        qDebug("1234567");
         return;
     }
 
     connect(m_addJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)), Qt::ConnectionType::UniqueConnection);
     connect(m_addJob, &CreateJob::percentfilename, this, &MainWindow::SlotProgressFile, Qt::ConnectionType::UniqueConnection);
     connect(m_addJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
-
+    qDebug() << "1001";
     m_pageid = PAGE_ZIPPROGRESS;
 //    m_Progess->settype(COMPRESSING);
     m_Progess->settype(COMPRESSDRAGADD);
     m_Progess->setProgressFilename(QFileInfo(filesToAddStr).fileName());
     m_jobState = JOB_ADD;
+    qDebug() << "1002";
     refreshPage();
     //m_pathstore = Args[QStringLiteral("localFilePath")];
     m_addJob->start();
@@ -2264,6 +2284,25 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool is
         m_jobState = JOB_DELETE_MANUAL;
     } else {
         m_jobState = JOB_DELETE;
+    }
+
+//    resetMainwindow();
+    m_Progess->pInfo()->resetProgress();
+    if (m_DeleteJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_READWRITE_LIBARCHIVE) {//该插件(tar格式)，计算总大小时，需要减去待删除的文件的大小
+        Archive::Entry *pRootEntry = this->m_model->getRootEntry();
+        qint64 size = 0;
+        this->m_model->getRootEntry()->calAllSize(size);//added by hsw for valid total size
+        m_Progess->pInfo()->getTotalSize() += size;
+        Archive::Entry *pFirstEntry = vectorDel[0];
+        qint64 sizeCountWillDel = 0;
+        pFirstEntry->calAllSize(sizeCountWillDel);
+//        selectedTotalFileSize -= sizeCountWillDel;
+        m_Progess->pInfo()->getTotalSize() -= sizeCountWillDel;
+    } else { //其他格式的是否需要减去，删除子项的大小，还待调试优化。
+        Archive::Entry *pRootEntry = this->m_model->getRootEntry();
+        qint64 size = 0;
+        this->m_model->getRootEntry()->calAllSize(size);
+        m_Progess->pInfo()->setTotalSize(size);//设置总大小
     }
 
     //refreshPage();
@@ -2861,7 +2900,8 @@ QString MainWindow::modelIndexToStr(const QModelIndex &index)
 
 void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QString path, EXTRACT_TYPE type)
 {
-    m_timer.start();
+//    m_timer.start();
+    m_Progess->pInfo()->startTimer();
     QStringList m_tempFileList;
     m_tempFileList.insert(0, path);
 
@@ -2928,7 +2968,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     //m_compressDirFiles = CheckAllFiles(path);
 
     m_encryptionjob = m_model->extractFiles(fileList, destinationDirectory, options);
-
+    m_encryptionjob->archiveInterface()->bindProgressInfo(this->m_Progess->pInfo());
     if (this->m_pWatcher == nullptr) {
         this->m_pWatcher = new TimerWatcher();
         connect(this->m_pWatcher, &TimerWatcher::sigBindFuncDone, m_encryptionjob, &ExtractJob::slotWorkTimeOut);
@@ -3070,21 +3110,21 @@ void MainWindow::deleteFromArchive(const QStringList &files, const QString &arch
     m_workstatus = WorkProcess;
 }
 
-void MainWindow::addToArchive(const QStringList &files, const QString &archive)
-{
-    qDebug() << "执行添加操作" << "向" << archive << "添加文件";
-    if (!m_CompressSetting) return;
-    if (!m_model) return;
+//void MainWindow::addToArchive(const QStringList &files, const QString &archive)
+//{
+//    qDebug() << "执行添加操作" << "向" << archive << "添加文件";
+//    if (!m_CompressSetting) return;
+//    if (!m_model) return;
 
 
-    //add to source archive
-    qDebug() << "添加路径为：" <<  m_model->archive()->fileName();
-    m_CompressSetting->autoCompress(m_model->archive()->fileName(), files);
+//    //add to source archive
+//    qDebug() << "添加路径为：" <<  m_model->archive()->fileName();
+//    m_CompressSetting->autoCompress(m_model->archive()->fileName(), files);
 
-    //move files to archive
-    m_CompressSetting->autoMoveToArchive(files, archive);
+//    //move files to archive
+//    m_CompressSetting->autoMoveToArchive(files, archive);
 
-}
+//}
 
 void MainWindow::onCancelCompressPressed(int compressType)
 {
@@ -3211,21 +3251,22 @@ void MainWindow::slotCalDeleteRefreshTotalFileSize(const QStringList &files)
 
 void MainWindow::slotUncompressCalDeleteRefreshTotoalSize(QVector<Archive::Entry *> &vectorDel, bool isManual)
 {
-    resetMainwindow();
-
-    calSelectedTotalEntrySize(vectorDel);
-
+//    resetMainwindow();
+////    calSelectedTotalEntrySize(vectorDel);
+//    Archive::Entry *pRootEntry = this->m_model->getRootEntry();
+//    this->m_model->getRootEntry()->calAllSize(selectedTotalFileSize);//added by hsw for valid total size
     removeEntryVector(vectorDel, isManual);
 }
 
 void MainWindow::resetMainwindow()
 {
-    selectedTotalFileSize = 0;
-    lastPercent = 0;
+//    selectedTotalFileSize = 0;
+//    lastPercent = 0;
 
-#ifdef __aarch64__
-    maxFileSize_ = 0;
-#endif
+//#ifdef __aarch64__
+//    maxFileSize_ = 0;
+//#endif
+    m_Progess->pInfo()->resetProgress();
 }
 
 void MainWindow::slotBackButtonClicked()
@@ -3249,9 +3290,10 @@ void MainWindow::slotResetPercentAndTime()
 {
     m_openType = false;
     m_Progess->setopentype(m_openType);
-    lastPercent = 0;
-    compressTime = 0;
-    m_timer.elapsed();
+//    lastPercent = 0;
+//    compressTime = 0;
+//    m_timer.elapsed();
+    m_Progess->pInfo()->resetProgress();
 }
 
 void MainWindow::slotFileUnreadable(QStringList &pathList, int fileIndex)
@@ -3346,3 +3388,4 @@ void MainWindow::onCompressAddfileSlot(bool status)
 //{
 //    return  m_logger;
 //}
+

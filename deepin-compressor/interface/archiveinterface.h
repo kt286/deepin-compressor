@@ -36,16 +36,31 @@
 #include <QStringList>
 #include <QString>
 #include <QVariantList>
+#include <QElapsedTimer>
+
 #include "kpluginmetadata.h"
 
 #define TIMER_TIMEOUT 1000
 
+class ProgressAssistant;
 class Query;
 
 class  ReadOnlyArchiveInterface: public QObject
 {
     Q_OBJECT
 public:
+    /**
+     * @brief The ENUM_PLUGINTYPE enum
+     * @see 插件类型
+     * @author added by hsw 20200601
+     */
+    enum ENUM_PLUGINTYPE {
+        PLUGIN_READWRITE_LIBARCHIVE,//ReadWriteLibarchivePlugin
+        PLUGIN_CLIINTERFACE,//CliInterface
+        PLUGIN_LIBARCHIVE,//LibarchivePlugin
+        PLUGIN_LIBZIP//LibzipPlugin
+    };
+
     enum ExtractPsdStatus {
         Default,
         NotChecked,
@@ -190,22 +205,24 @@ public:
      */
     virtual void cleanIfCanceled() = 0;
     /**
-     * the timer can check if source files changed in the disk between compressing;
-     * should be called one time if the compress begin;
-     * @brief timerStart:derived class need override
+     * @brief watchFileList
+     * @param strList
+     * @see 监视文件列表
      */
-//    virtual void timerStart() = 0;
-    /**
-     * the timer should be killed if the compress finished
-     * @brief timerEnd:derived class need override
-     */
-//    virtual void timerEnd() = 0;
     virtual void watchFileList(QStringList *strList) = 0;
+    /**
+     * @brief bindProgressInfo
+     * @param pProgressIns
+     * @see 绑定进度条信息，方便在插件内部去控制
+     */
+    void bindProgressInfo(ProgressAssistant *pProgressIns);
 public:
+    ENUM_PLUGINTYPE mType;
     QString extractTopFolderName;
     QString destDirName;        //取消解压，需要该变量
     bool ifReplaceTip = false;  //是否有替换提示
     ExtractPsdStatus extractPsdStatus = ReadOnlyArchiveInterface::Default;
+    ProgressAssistant *m_pProgressInfo = nullptr;
 Q_SIGNALS:
 
     /**
@@ -245,6 +262,10 @@ protected:
     bool isWrongPassword() const;
     QString m_comment;
     int m_numberOfVolumes;
+    /**
+     * @brief m_numberOfEntries
+     * @see 原有的归档数量
+     */
     uint m_numberOfEntries;
     KPluginMetaData m_metaData;
 

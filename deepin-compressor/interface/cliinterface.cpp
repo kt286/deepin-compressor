@@ -41,6 +41,7 @@
 
 CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWriteArchiveInterface(parent, args)
 {
+    mType = ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE;
     // because this interface uses the event loop
     setWaitForFinishedSignal(true);
 
@@ -1028,7 +1029,7 @@ bool CliInterface::handleLine(const QString &line)
     // TODO: This should be implemented by each plugin; the way progress is
     //       shown by each CLI application is subject to a lot of variation.
 
-//    qDebug() << "#####" << line;
+    qDebug() << "#####" << line;
 //    if (line == QString("没有那个文件或目录") || line == QString("No such file or directory")) {
 //        emit cancelled();
 //        emit finished(false);
@@ -1087,22 +1088,24 @@ bool CliInterface::handleLine(const QString &line)
         int pos = line.indexOf(QLatin1Char('%'));
         if (pos > 1) {
             int percentage = line.midRef(pos - 3, 3).toInt();
+            if (percentage > 0 && percentage != 46) {
+                qDebug() << "line:" << line;
+                if (line.contains(OneBBBB) == true) {
+                    QStringRef strfilename;
+                    int count = line.indexOf("+");
+                    if (-1 == count) {
+                        count = line.indexOf("-");
+                    }
+                    if (count > 0) {
+                        strfilename = line.midRef(count + 2);
+                    }
 
-            QStringRef strfilename;
-            int count = line.indexOf("+");
-            if (-1 == count) {
-                count = line.indexOf("-");
-            }
-            if (count > 0) {
-                strfilename = line.midRef(count + 2);
-            }
-
-            if (!strfilename.toString().contains("Wrong password")) {
-                if (percentage > 0) {
-//                    emit progress(float(percentage) / 100);
-                    emitProgress(float(percentage) / 100);
-//                    emit progress_filename(strfilename.toString());
-                    emitFileName(strfilename.toString());
+                    if (!strfilename.toString().contains("Wrong password")) {
+                        if (percentage > 0) {
+                            emitProgress(float(percentage) / 100);
+                            emitFileName(strfilename.toString());
+                        }
+                    }
                 }
             }
         }

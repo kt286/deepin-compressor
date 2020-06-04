@@ -26,6 +26,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QTextCodec>
+#include "structs.h"
 
 Q_DECLARE_METATYPE(KPluginMetaData)
 ReadOnlyArchiveInterface::ReadOnlyArchiveInterface(QObject *parent, const QVariantList &args)
@@ -273,6 +274,11 @@ bool ReadOnlyArchiveInterface::isUserCancel() const
 bool ReadOnlyArchiveInterface::isAnyFileExtracted() const
 {
     return bAnyFileExtracted;
+}
+
+void ReadOnlyArchiveInterface::bindProgressInfo(ProgressAssistant *pProgressIns)
+{
+    this->m_pProgressInfo = pProgressIns;
 }
 
 bool ReadWriteArchiveInterface::isReadOnly() const

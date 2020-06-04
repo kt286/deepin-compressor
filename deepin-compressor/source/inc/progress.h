@@ -37,7 +37,7 @@ enum COMPRESS_TYPE {
     DECOMPRESSING,
     DELETEING
 };
-
+class ProgressAssistant;
 class Progress: public DWidget
 {
     Q_OBJECT
@@ -61,7 +61,8 @@ public:
     void setSpeedAndTimeText(COMPRESS_TYPE type);
 
     void setTempProgress();
-
+    void refreshSpeedAndTime(unsigned long compressPercent);
+    ProgressAssistant *pInfo();
 signals:
     void  sigCancelPressed(int compressType);
 
@@ -92,6 +93,7 @@ private:
     double m_speed = 0;
     double m_percent = 0;
     bool m_openType = false;
+    ProgressAssistant *m_pInfo = nullptr;
 };
 
 #endif // PROGRESS_H

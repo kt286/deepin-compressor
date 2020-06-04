@@ -158,6 +158,10 @@ struct OpenInfo {
     bool open = false;
 };
 
+/**
+ * @brief The MainWindow_AuxInfo struct
+ * @see 存放MainWindow的重要辅助信息
+ */
 struct MainWindow_AuxInfo {
     /**
      * @brief infomation
@@ -179,6 +183,7 @@ static QVector<qint64> m_tempProcessId;
 class QStackedLayout;
 static int m_windowcount = 1;
 class MonitorAdaptor;
+
 class MainWindow : public DMainWindow
 {
     Q_OBJECT
@@ -205,6 +210,7 @@ public:
      * @brief removeEntryVector
      * @param vectorDel
      * @param isManual,true:by action clicked; false: by message emited.
+     * @see true:手动删除；false:子面板消息通知删除。
      */
     void removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool isManual);
     void moveToArchive(QMap<QString, QString> &Args);
@@ -301,7 +307,7 @@ private slots:
     void slotWorkTimeOut();
 
     void deleteFromArchive(const QStringList &files, const QString &archive);
-    void addToArchive(const QStringList &files, const QString &archive);//废弃，added by hsw 20200528
+//    void addToArchive(const QStringList &files, const QString &archive);//废弃，added by hsw 20200528
 
 signals:
     void sigquitApp();
@@ -402,10 +408,10 @@ private:
     qint64 calFileSize(const QString &path);
     void calSpeedAndTime(unsigned long compressPercent);
 
-    QElapsedTimer m_timer;
-    unsigned long lastPercent = 0;
-    qint64 selectedTotalFileSize = 0;
-    qint64 compressTime = 0;
+//    QElapsedTimer m_timer;
+//    unsigned long lastPercent = 0;
+//    qint64 selectedTotalFileSize = 0;//选中的总大小
+//    qint64 compressTime = 0;
     QReadWriteLock m_lock;
     QString program;
     QMap<qint64, QStringList> m_subWinDragFiles;

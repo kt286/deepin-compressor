@@ -791,7 +791,7 @@ void fileViewer::deleteCompressFile()
 
 void fileViewer::subWindowChangedMsg(const SUBACTION_MODE &mode, const QStringList &msg)
 {
-    com::archive::mainwindow::monitor monitor("com.archive.mainwindow.monitor", "/QtDusServer/registry", QDBusConnection::sessionBus());
+    com::archive::mainwindow::monitor monitor("com.archive.mainwindow.monitor", HEADBUS, QDBusConnection::sessionBus());
     QDBusPendingReply<bool> reply = monitor.onSubWindowActionFinished((int)mode, getppid(), msg);
     reply.waitForFinished();
     if (reply.isValid()) {

@@ -22,6 +22,7 @@
 
 #include "utils.h"
 #include <QDir>
+#include <QDirIterator>
 #include <QFile>
 #include <QDebug>
 #include <QFileInfo>
@@ -485,4 +486,23 @@ QString Utils::toShortString(QString strSrc, int limitCounts, int left)
     QString displayName = "";
     displayName = strSrc.length() > limitCounts ? strSrc.left(left) + "..." + strSrc.right(right) : strSrc;
     return displayName;
+}
+
+quint64 Utils::getAllFileCount(const QString &fullPath)
+{
+    QFileInfo fileInfo(fullPath);
+    quint64 size = 1;
+    if (fileInfo.isDir()) {
+        QDirIterator it(fullPath,
+                        QDir::AllEntries | QDir::Readable |
+                        QDir::Hidden | QDir::NoDotAndDotDot,
+                        QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            size++;
+            it.next();
+        }
+        return size;
+    } else {
+        return size;
+    }
 }

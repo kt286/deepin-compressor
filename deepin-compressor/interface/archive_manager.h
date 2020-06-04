@@ -123,7 +123,8 @@ public:
     static LoadJob *load(const QString &fileName, Plugin *plugin, QObject *parent = nullptr);
     static LoadJob *load(const QString &fileName, bool isbatch = false, QObject *parent = nullptr);
     static ReadOnlyArchiveInterface *createInterface(const QString &fileName, const QString &fixedMimeType);
-    static Archive::Entry *CreateEntry(QString path, Archive::Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map);
+    static Archive::Entry *CreateEntry(QString path, Archive::Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map);//废弃
+    static void CreateEntryNew(QString path, Archive::Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map);//added by hsw
 
     ~Archive() override;
 

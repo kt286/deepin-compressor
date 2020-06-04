@@ -129,6 +129,7 @@ LibzipPlugin::LibzipPlugin(QObject *parent, const QVariantList &args)
     , m_skipAll(false)
     , m_listAfterAdd(false)
 {
+    mType = ENUM_PLUGINTYPE::PLUGIN_LIBZIP;
     connect(this, &ReadOnlyArchiveInterface::error, this, &LibzipPlugin::slotRestoreWorkingDir);
     connect(this, &ReadOnlyArchiveInterface::cancelled, this, &LibzipPlugin::slotRestoreWorkingDir);
 }
@@ -600,27 +601,24 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
         emit error(tr("Failed to open archive: %1"));
         return false;
     }
-    QElapsedTimer timer;
-    timer.start();
+    //QElapsedTimer timer;
+    //timer.start();
 
-//    for (int i = 1; i < 110; i++) {
-//        qDebug() << i << ":>>>" << zip_get_name(archive, i, ZIP_FL_ENC_GUESS);
-//    }
-
-
+    // Register the callback function to get progress feedback.
+    m_addarchive = nullptr;
+    zip_register_progress_callback_with_state(archive, 0.001, progressCallback, nullptr, this);
     for (Archive::Entry *pCurEntry : files) {
         int i = 0;
-        int count = 0;
-        pCurEntry->getFilesCount(pCurEntry, count);
-
-        bool status = this->deleteEntry(pCurEntry, archive, i, count); //delete from archive
+        qint64 count = 0;
+        pCurEntry->calEntriesCount(count);
+        bool status = this->deleteEntry(pCurEntry, archive/*, i, count*/);  //delete from archive
         if (status == true) {
-            emit entryRemoved(pCurEntry->fullPath());       //delete from model
-//            emit progress(float(++i) / files.size());
+            emit entryRemoved(pCurEntry->fullPath());                   //delete from model
+            //emit progress(float(++i) / files.size());
         }
     }
 
-    qDebug() << "" << timer.elapsed() << "milliseconds";
+    //qDebug() << "" << timer.elapsed() << "milliseconds";
     if (zip_close(archive)) {
         emit error(tr("Failed to write archive."));
         return false;
@@ -655,11 +653,11 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
 //    return true;
 //}
 
-bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive, int &curNo, int count)
+bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive/*, int &curNo, int count*/)
 {
     if (pCurEntry->isDir() == true) {
         for (int i = 0; i < pCurEntry->entries().length(); i++) {
-            this->deleteEntry(pCurEntry->entries().at(i), archive, curNo, count);
+            this->deleteEntry(pCurEntry->entries().at(i), archive/*, curNo, count*/);
         }
     }
     if (QThread::currentThread()->isInterruptionRequested()) {
@@ -670,38 +668,20 @@ bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive, int &c
         return false;
     }
     QString fullpath = pCurEntry->fullPath();
-//    char *path = fullpath.toUtf8().data();
-//    char *filenameDel = (char *)malloc((strlen(path) + 1) * sizeof(char));
-//    strcpy(filenameDel, path);
-//    char *fileNameDel = fullpath.toUtf8().data();
-
-//    QString str = "beifen/0000 装机常用软件/workPush/compressor/deepin-compressor/source/inc/openwithdialog/durl.h";
     char *fileNameDel = nullptr;
-//    int llen = fullpath.length();
-    char *path = fullpath.toUtf8().data();
-    int lllen = strlen(fullpath.toUtf8().data());
-    fileNameDel = (char *)malloc((lllen + 1) * sizeof(char));
+    //char *path = fullpath.toUtf8().data();
+    size_t length = strlen(fullpath.toUtf8().data());
+    fileNameDel = (char *)malloc((length + 1) * sizeof(char));
     strcpy(fileNameDel, fullpath.toUtf8().data());
-//    qDebug() << fileNameDel;
-//    const char *nn1 = zip_get_name(archive, 0, ZIP_FL_ENC_GUESsS);
-
-
+    //const char *nn1 = zip_get_name(archive, 0, ZIP_FL_ENC_GUESsS);
     zip_int64_t index = zip_name_locate(archive, fileNameDel, ZIP_FL_ENC_GUESS);
-    int len = strlen(fileNameDel);
-
     if (index == -1) {
-//        qDebug() << "------deleteError------" << fileNameDel;
         free(fileNameDel);
-//        emit error(tr("Failed to delete entry: %1"));
-//        if (zip_close(archive)) {
-//            emit error(tr("Failed to write archive."));
-//            return false;
-//        }
         return false;
     } else {
-//        qDebug() << "------deleteOk------" << fileNameDel;
+        //qDebug() << "------deleteOk------" << fileNameDel;
         free(fileNameDel);
-        zip_uint64_t indexDel = index;
+        zip_int64_t indexDel = index;
         int statusDel = zip_delete(archive, indexDel);
         if (statusDel == -1) {
             emit error(tr("Failed to delete entry: %1"));
@@ -710,23 +690,8 @@ bool LibzipPlugin::deleteEntry(Archive::Entry *pCurEntry, zip_t *archive, int &c
                 return false;
             }
             return false;
-        } else {
-            if (curNo >= 0) {
-                //qDebug() << ">>>>>>" << float(++curNo) / count;
-                emit progress(float(++curNo) / count);
-            }
         }
     }
-//    zip_uint64_t indexDel = index;
-//    int statusDel = zip_delete(archive, indexDel);
-//    if (statusDel == -1) {
-//        emit error(tr("Failed to delete entry: %1"));
-//        if (zip_close(archive)) {
-//            emit error(tr("Failed to write archive."));
-//            return false;
-//        }
-//        return false;
-//    }
     return true;
 }
 

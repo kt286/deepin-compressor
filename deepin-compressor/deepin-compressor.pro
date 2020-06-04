@@ -93,7 +93,9 @@ HEADERS +=  \
     interface/tscommontypes.h \
     interface/tstypes.h \
     interface/globalarchivemanager_p.h \
-    interface/archiverunnable.h
+    interface/archiverunnable.h \
+    interface/structs.h
+
 
 
 
@@ -158,7 +160,8 @@ SOURCES +=  \
     source/src/monitorInterface.cpp \
     interface/TSMutex.cpp \
     interface/globalarchivemanager.cpp \
-    interface/archiverunnable.cpp
+    interface/archiverunnable.cpp \
+    interface/structs.cpp
 
 
 RESOURCES += deepin-compressor.qrc

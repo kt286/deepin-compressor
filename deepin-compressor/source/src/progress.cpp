@@ -31,6 +31,8 @@
 #include "utils.h"
 #include <QTimerEvent>
 #include "mainwindow.h"
+#include "archiveinterface.h"
+#include "structs.h"
 
 Progress::Progress(DWidget *parent)
     : DWidget(parent)
@@ -42,7 +44,7 @@ Progress::Progress(DWidget *parent)
     m_timerTime = new QTimer(this);
     m_timerTime->setInterval(1000);
     connect(m_timerTime, &QTimer::timeout, this, &Progress::slotChangeTimeLeft);
-
+    m_pInfo = new ProgressAssistant();
 //    m_timerProgress = new QTimer(this);
 //    m_timerProgress->setInterval(1000);
 //    connect(m_timerProgress, &QTimer::timeout, this, &Progress::setTempProgress);
@@ -154,7 +156,20 @@ void Progress::setTempProgress()
 
 //    m_percent += 0.3;
 //    setprogress(m_percent);
-//    qDebug() << "临时百分比" << m_percent;
+    //    qDebug() << "临时百分比" << m_percent;
+}
+
+void Progress::refreshSpeedAndTime(unsigned long compressPercent)
+{
+    double speed = this->m_pInfo->getSpeed(compressPercent);
+    qint64 timeLeft = this->m_pInfo->getLeftTime(compressPercent);
+    this->setSpeedAndTime(speed, timeLeft);
+    this->m_pInfo->restartTimer();
+}
+
+ProgressAssistant *Progress::pInfo()
+{
+    return m_pInfo;
 }
 
 void Progress::slotChangeTimeLeft()
@@ -170,6 +185,7 @@ void Progress::slotChangeTimeLeft()
 
 void Progress::setprogress(double percent)
 {
+    qDebug() << "setProgress(percent)" << percent;
     m_progressbar->setValue(percent);
     m_progressbar->update();
     m_percent = percent;
