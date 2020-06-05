@@ -1029,12 +1029,7 @@ bool CliInterface::handleLine(const QString &line)
     // TODO: This should be implemented by each plugin; the way progress is
     //       shown by each CLI application is subject to a lot of variation.
 
-    qDebug() << "#####" << line;
-//    if (line == QString("没有那个文件或目录") || line == QString("No such file or directory")) {
-//        emit cancelled();
-//        emit finished(false);
-//        return false;
-//    }
+    //qDebug() << "#####" << line;
 
     if (pAnalyseHelp != nullptr) {
         pAnalyseHelp->analyseLine(line);
@@ -1055,17 +1050,13 @@ bool CliInterface::handleLine(const QString &line)
     if ((m_operationMode == Extract || m_operationMode == Add) && m_cliProps->property("captureProgress").toBool()) {
         // read the percentage
         int pos = line.indexOf(QLatin1Char('%'));
-//        qDebug()<<"####"<<line;
         if (pos > 1) {
             int percentage = line.midRef(pos - 3, 3).toInt();
-//            emit progress(float(percentage) / 100);
             emitProgress(float(percentage) / 100);
             if (line.contains("Extracting")) {
                 QStringRef strfilename = line.midRef(12, pos - 24);
-//                emit progress_filename(strfilename.toString());
                 emitFileName(strfilename.toString());
             }
-
             return true;
         }
     }
@@ -1075,12 +1066,9 @@ bool CliInterface::handleLine(const QString &line)
         // read the percentage
         int pos = line.indexOf(QLatin1Char(':'));
         if (pos > 1 && line.length() > 17) {
-
             m_curfilenumber++;
-//            emit progress(float(m_curfilenumber) / m_allfilenumber);
             emitProgress(float(m_curfilenumber) / m_allfilenumber);
             QStringRef strfilename = line.midRef(pos + 2, line.length() - 24);
-//            emit progress_filename(strfilename.toString());
             emitFileName(strfilename.toString());
             return true;
         }
@@ -1089,7 +1077,6 @@ bool CliInterface::handleLine(const QString &line)
         if (pos > 1) {
             int percentage = line.midRef(pos - 3, 3).toInt();
             if (percentage > 0 && percentage != 46) {
-                qDebug() << "line:" << line;
                 if (line.contains(OneBBBB) == true) {
                     QStringRef strfilename;
                     int count = line.indexOf("+");

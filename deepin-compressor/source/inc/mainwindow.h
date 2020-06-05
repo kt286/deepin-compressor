@@ -155,7 +155,7 @@ public:
 
 struct OpenInfo {
     QString strWinId = "";//open view the winId
-    bool open = false;
+    bool open = false;//暂时不用
 };
 
 /**
@@ -205,7 +205,7 @@ public:
     void creatBatchArchive(QMap<QString, QString> &Args, QMap<QString, QStringList> &filetoadd);
     void addArchive(QMap<QString, QString> &Args);
     void addArchiveEntry(QMap<QString, QString> &args, Archive::Entry *pWorkEntry);
-//    void removeFromArchive(const QStringList &removeFilePaths);
+
     /**
      * @brief removeEntryVector
      * @param vectorDel
@@ -319,8 +319,7 @@ signals:
     void sigUpdateTableView(const QFileInfo &);
     void sigTipsWindowPopUp(int, const QStringList &);
     void sigTipsUpdateEntry(int, QVector<Archive::Entry *> &vectorDel);
-    void deleteJobComplete();
-    void deleteJobComplete1(Archive::Entry *pEntry);
+    void deleteJobComplete(Archive::Entry *pEntry);
 
 private:
     Archive *m_archive_manager = nullptr;
@@ -364,13 +363,14 @@ private:
 
     DIconButton *m_titlebutton = nullptr;
 
-    BatchCompress *batchJob = nullptr;
-    ExtractJob *m_encryptionjob = nullptr;
-    LoadJob *m_loadjob = nullptr;
-    CreateJob *m_createJob = nullptr;
-    AddJob *m_addJob = nullptr;
-    MoveJob *m_moveJob = nullptr;
-    DeleteJob *m_DeleteJob = nullptr;
+    KJob *m_pJob = nullptr;// 指向所有Job派生类对象
+//    BatchCompress *batchJob = nullptr;
+//    ExtractJob *m_encryptionjob = nullptr;
+//    LoadJob *m_loadjob = nullptr;
+//    CreateJob *m_createJob = nullptr;
+//    AddJob *m_addJob = nullptr;
+//    MoveJob *m_moveJob = nullptr;
+//    DeleteJob *m_DeleteJob = nullptr;
     EncryptionType m_encryptiontype = Encryption_NULL;
     bool m_isrightmenu = false;
     WorkState m_workstatus = WorkNone;

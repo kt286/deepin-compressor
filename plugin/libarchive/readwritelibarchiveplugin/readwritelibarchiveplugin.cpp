@@ -9,6 +9,9 @@
 
 #include <archive_entry.h>
 
+// 300M
+#define MB300 314572800 /*(300*1024*1024)*/
+
 //K_PLUGIN_CLASS_WITH_JSON(ReadWriteLibarchivePlugin, "kerfuffle_libarchive.json")
 
 ReadWriteLibarchivePluginFactory::ReadWriteLibarchivePluginFactory()
@@ -68,7 +71,7 @@ bool ReadWriteLibarchivePlugin::addFiles(const QVector<Archive::Entry *> &files,
     qint64 sizeOfAdd = 0;
     files[0]->calAllSize(sizeOfAdd);
     bool bInternalDuty = false;
-    if (sizeOfAdd > 300000000 && files[0]->isDir() == false) {//如果大于300M
+    if (sizeOfAdd > MB300 && files[0]->isDir() == false) {//如果大于300M
 //        bool bInternalDuty  = totalCount < 6;//如果总文件数量小于6个，那么启动细分进度
         bInternalDuty = true;
     }
@@ -119,7 +122,7 @@ bool ReadWriteLibarchivePlugin::addFiles(const QVector<Archive::Entry *> &files,
 
                 bInternalDuty = false;
                 FileProgressInfo info;
-                if (it.fileInfo().size() > 300000000 && it.fileInfo().isDir() == false) {//如果不是文件夹，且大小超过300M，则执行内部进度分析
+                if (it.fileInfo().size() > MB300 && it.fileInfo().isDir() == false) {//如果不是文件夹，且大小超过300M，则执行内部进度分析
                     bInternalDuty = true;
                 }
                 if (bInternalDuty) {
@@ -531,7 +534,7 @@ bool ReadWriteLibarchivePlugin::processOldEntries_Add(uint &entriesCounter, Read
         FileProgressInfo info;
         float entrySize = archive_entry_size(entry);
         bool bInternalDuty = false;
-        if (entrySize > 300000000) { //如果大于300M
+        if (entrySize > MB300) { //如果大于300M
             bInternalDuty = true;
             info.fileProgressStart = (newEntries + entriesCounter) * 1.0 / (totalCount); //记录当前进度值
             info.fileProgressProportion = (float)1.0 / totalCount;//设定内度百分比范围,1表示对当前这一个压缩包进行内部进度细分分析
@@ -549,7 +552,7 @@ bool ReadWriteLibarchivePlugin::processOldEntries_Add(uint &entriesCounter, Read
 
         if (bInternalDuty == false) {
             double percent = float(newEntries + entriesCounter) / totalCount;
-            qDebug() << "add========" << "newEntries:" << newEntries << ",entriesCounter:" << entriesCounter << ",totalCount:" << totalCount << ",percent:" << percent;
+            //qDebug() << "add========" << "newEntries:" << newEntries << ",entriesCounter:" << entriesCounter << ",totalCount:" << totalCount << ",percent:" << percent;
             emit progress(percent);
         }
 
@@ -561,7 +564,7 @@ bool ReadWriteLibarchivePlugin::processOldEntries_Add(uint &entriesCounter, Read
 bool ReadWriteLibarchivePlugin::deleteEntry(uint &entriesCounter, uint totalCount)
 {
     const uint newEntries = entriesCounter;
-//    entriesCounter = 0;
+    // entriesCounter = 0;
     uint iteratedEntries = 0;
 
     // Create a map that contains old path as key and new path as value.
@@ -573,15 +576,15 @@ bool ReadWriteLibarchivePlugin::deleteEntry(uint &entriesCounter, uint totalCoun
         const QString file = QFile::decodeName(archive_entry_pathname(entry));
         if (m_filesPaths.contains(file)) {
             archive_read_data_skip(m_archiveReader.data());
-//            entriesCounter++;
+            //entriesCounter++;
             m_filesPaths.removeOne(file);
-//            emit entryRemoved(file);
+            //emit entryRemoved(file);
         } else {
             // Write old entries.
             if (writeEntry(entry)) {
                 iteratedEntries++;
                 double percent = float(newEntries + /*entriesCounter + */iteratedEntries) / float(totalCount);
-                qDebug() << "==========deleteEntry:percent:" << percent;
+                //qDebug() << "==========deleteEntry:percent:" << percent;
                 emit progress(percent);
             } else {
                 return false;

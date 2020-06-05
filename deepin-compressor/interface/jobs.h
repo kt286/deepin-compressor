@@ -36,7 +36,6 @@
 class  Job : public KJob
 {
     Q_OBJECT
-
 public:
 
     Archive *archive() const;
@@ -194,7 +193,7 @@ class ExtractJob : public Job
     Q_OBJECT
 
 public:
-    ExtractJob(const QVector<Archive::Entry *> &entries, const QString &destinationDir, const ExtractionOptions &options, ReadOnlyArchiveInterface *interface);
+    explicit ExtractJob(const QVector<Archive::Entry *> &entries, const QString &destinationDir, const ExtractionOptions &options, ReadOnlyArchiveInterface *interface);
 
     QString destinationDirectory() const;
     ExtractionOptions extractionOptions() const;
@@ -241,7 +240,7 @@ class TempExtractJob : public Job
     Q_OBJECT
 
 public:
-    TempExtractJob(Archive::Entry *entry, bool passwordProtectedHint, ReadOnlyArchiveInterface *interface);
+    explicit TempExtractJob(Archive::Entry *entry, bool passwordProtectedHint, ReadOnlyArchiveInterface *interface);
     QString validatedFilePath() const;
 
     ExtractionOptions extractionOptions() const;
@@ -308,7 +307,7 @@ class MoveJob : public Job
     Q_OBJECT
 
 public:
-    MoveJob(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options, ReadWriteArchiveInterface *interface);
+    explicit MoveJob(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options, ReadWriteArchiveInterface *interface);
 
 public Q_SLOTS:
     void doWork() override;
@@ -349,7 +348,7 @@ class DeleteJob : public Job
     Q_OBJECT
 
 public:
-    DeleteJob(const QVector<Archive::Entry *> &files, ReadWriteArchiveInterface *interface);
+    explicit DeleteJob(const QVector<Archive::Entry *> &files, ReadWriteArchiveInterface *interface);
 
 public Q_SLOTS:
     void doWork() override;

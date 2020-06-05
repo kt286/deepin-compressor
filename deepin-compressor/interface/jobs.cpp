@@ -260,6 +260,7 @@ LoadJob::LoadJob(Archive *archive, ReadOnlyArchiveInterface *interface)
     , m_dirCount(0)
     , m_filesCount(0)
 {
+    mType = Job::ENUM_JOBTYPE::LOADJOB;
     qDebug() << "LoadJob job instance";
     connect(this, &LoadJob::newEntry, this, &LoadJob::onNewEntry);
 }
@@ -380,6 +381,7 @@ BatchExtractJob::BatchExtractJob(LoadJob *loadJob, const QString &destination, b
     , m_autoSubfolder(autoSubfolder)
     , m_preservePaths(preservePaths)
 {
+    mType = Job::ENUM_JOBTYPE::BATCHEXTRACTJOB;
     qDebug() << "BatchExtractJob job instance";
 }
 
@@ -493,6 +495,7 @@ CreateJob::CreateJob(Archive *archive, const QVector<Archive::Entry *> &entries,
     , m_entries(entries)
     , m_options(options)
 {
+    mType = Job::ENUM_JOBTYPE::CREATEJOB;
     qDebug() << "Created job instance";
 }
 
@@ -538,12 +541,12 @@ ExtractJob::ExtractJob(const QVector<Archive::Entry *> &entries, const QString &
     , m_destinationDir(destinationDir)
     , m_options(options)
 {
+    mType = Job::ENUM_JOBTYPE::EXTRACTJOB;
     qDebug() << "ExtractJob job instance";
     connect(interface, &ReadOnlyArchiveInterface::sigExtractNeedPassword, this, &ExtractJob::sigExtractJobPassword, Qt::QueuedConnection);
     connect(interface, &ReadOnlyArchiveInterface::sigExtractPwdCheckDown, this, &ExtractJob::slotExtractJobPwdCheckDown, Qt::QueuedConnection);
     connect(interface, &ReadOnlyArchiveInterface::progress, this, &ExtractJob::onProgress, Qt::ConnectionType::UniqueConnection);
     connect(interface, &ReadOnlyArchiveInterface::progress_filename, this, &ExtractJob::onProgressFilename, Qt::ConnectionType::UniqueConnection);
-
 
 }
 
@@ -660,6 +663,7 @@ TempExtractJob::TempExtractJob(Archive::Entry *entry, bool passwordProtectedHint
     , m_entry(entry)
     , m_passwordProtectedHint(passwordProtectedHint)
 {
+    mType = Job::ENUM_JOBTYPE::TEMPEXTRACTJOB;
     m_tmpExtractDir = new QTemporaryDir();
 }
 
@@ -716,18 +720,21 @@ QString TempExtractJob::extractionDir() const
 PreviewJob::PreviewJob(Archive::Entry *entry, bool passwordProtectedHint, ReadOnlyArchiveInterface *interface)
     : TempExtractJob(entry, passwordProtectedHint, interface)
 {
+    mType = Job::ENUM_JOBTYPE::PREVIEWJOB;
     qDebug() << "PreviewJob job instance";
 }
 
 OpenJob::OpenJob(Archive::Entry *entry, bool passwordProtectedHint, ReadOnlyArchiveInterface *interface)
     : TempExtractJob(entry, passwordProtectedHint, interface)
 {
+    mType = Job::ENUM_JOBTYPE::OPENJOB;
     qDebug() << "OpenJob job instance";
 }
 
 OpenWithJob::OpenWithJob(Archive::Entry *entry, bool passwordProtectedHint, ReadOnlyArchiveInterface *interface)
     : OpenJob(entry, passwordProtectedHint, interface)
 {
+    mType = Job::ENUM_JOBTYPE::OPENWITHJOB;
     qDebug() << "OpenWithJob job instance";
 }
 
@@ -737,6 +744,7 @@ AddJob::AddJob(const QVector<Archive::Entry *> &entries, const Archive::Entry *d
     , m_destination(destination)
     , m_options(options)
 {
+    mType = Job::ENUM_JOBTYPE::ADDJOB;
     qDebug() << "AddJob job instance";
 }
 quint64 getAllFileCount(const QString &fullPath)
@@ -839,6 +847,7 @@ MoveJob::MoveJob(const QVector<Archive::Entry *> &entries, Archive::Entry *desti
     , m_destination(destination)
     , m_options(options)
 {
+    mType = Job::ENUM_JOBTYPE::MOVEJOB;
     qDebug() << "MoveJob job instance";
 }
 
@@ -879,6 +888,7 @@ CopyJob::CopyJob(const QVector<Archive::Entry *> &entries, Archive::Entry *desti
     , m_destination(destination)
     , m_options(options)
 {
+    mType = Job::ENUM_JOBTYPE::COPYJOB;
     qDebug() << "CopyJob job instance";
 }
 
@@ -916,6 +926,7 @@ DeleteJob::DeleteJob(const QVector<Archive::Entry *> &entries, ReadWriteArchiveI
     : Job(interface)
     , m_entries(entries)
 {
+    mType = Job::ENUM_JOBTYPE::DELETEJOB;
     qDebug() << "deleteJob instance";
 }
 
@@ -950,6 +961,7 @@ CommentJob::CommentJob(const QString &comment, ReadWriteArchiveInterface *interf
     : Job(interface)
     , m_comment(comment)
 {
+    mType = Job::ENUM_JOBTYPE::COMMENTJOB;
 }
 
 void CommentJob::doWork()
@@ -973,6 +985,7 @@ void CommentJob::doWork()
 TestJob::TestJob(ReadOnlyArchiveInterface *interface)
     : Job(interface)
 {
+    mType = Job::ENUM_JOBTYPE::TESTJOB;
     m_testSuccess = false;
 }
 

@@ -1092,7 +1092,7 @@ QString getShortName(QString &destFileName)
 
 void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
 {
-    qDebug() << "更新消息通知接受处理，弹窗提问" << urls;
+    qDebug() << "更新消息通知接受处理，弹窗提问是否更新" << urls;
     if (!urls.isEmpty()) {
         if (urls.length() == 0) {
             return;
@@ -1131,20 +1131,19 @@ void fileViewer::SubWindowDragMsgReceive(int mode, const QStringList &urls)
         QFont font = DFontSizeManager::instance()->get(DFontSizeManager::T6);
         pContent0->setMinimumHeight(font.pixelSize() * 2 + 12);
         pContent0->setWordWrap(true);
-        pContent0->move(dialog.width() / 2 - 400 / 2, 84 - 20);
-
-
+        pContent0->move(dialog.width() / 2 - 400 / 2, 90 - 20);
 
         DLabel *pContent1 = new DLabel(warningStr0, &dialog);
-        pContent1->setFixedWidth(400);
-        pContent1->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        pContent1->setMinimumWidth(400);
         pContent1->setWordWrap(true);
         pa = DApplicationHelper::instance()->palette(pContent1);
         pa.setBrush(DPalette::Text, pa.color(DPalette::ButtonText));
         DFontSizeManager::instance()->bind(pContent1, DFontSizeManager::T5, QFont::Bold);
         font = DFontSizeManager::instance()->get(DFontSizeManager::T5);
-        pContent1->setMinimumHeight(font.pixelSize()  + 12);
-        pContent1->move(dialog.width() / 2 - 400 / 2, 48 - 20);
+//        pContent1->setMinimumHeight(font.pixelSize()  + 12);
+        pContent1->adjustSize();
+        pContent1->setAlignment(Qt::AlignmentFlag::AlignCenter);
+        pContent1->move(dialog.width() / 2 - pContent1->width() / 2, 48 - pContent1->height() / 2);
 
         connect(&dialog, &DDialog::buttonClicked, this, &fileViewer::clickedSlot);
         dialog.exec();

@@ -185,7 +185,7 @@ void Progress::slotChangeTimeLeft()
 
 void Progress::setprogress(double percent)
 {
-    qDebug() << "setProgress(percent)" << percent;
+    //qDebug() << "setProgress(percent)" << percent;
     m_progressbar->setValue(percent);
     m_progressbar->update();
     m_percent = percent;

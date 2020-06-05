@@ -36,6 +36,8 @@ BatchExtract::BatchExtract(QObject *parent)
       m_preservePaths(true),
       m_openDestinationAfterExtraction(false)
 {
+    mType = Job::ENUM_JOBTYPE::BATCHEXTRACTJOB;
+
     setCapabilities(KJob::Killable);
 
     connect(this, &KJob::result, this, &BatchExtract::showFailedFiles);

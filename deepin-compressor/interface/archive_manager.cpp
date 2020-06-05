@@ -308,7 +308,6 @@ void Archive::CreateEntryNew(QString path, Archive::Entry *&parent, QString exte
             continue;
         }
         Archive::Entry *entry = new Archive::Entry();
-        qDebug() << "===" << Info.filePath();
         entry->setProperty("timestamp", QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd hh:mm:ss")));
         QString parentPath = parent->fullPath();
         if (parentPath.right(1) != QDir::separator()) {
@@ -317,13 +316,11 @@ void Archive::CreateEntryNew(QString path, Archive::Entry *&parent, QString exte
 
         parent->appendEntry(entry);
         if (Info.isDir()) {
-            qDebug() << Info.filePath();
             entry->setIsDirectory(true);
             entry->setFullPath(parentPath + Info.fileName() + QDir::separator());
             entry->setParent(parent);
             CreateEntryNew(Info.filePath(), entry, externalPath, map);    //recursive function
         } else {
-            qDebug() << Info.filePath();
             qint64 size = Info.size();
             entry->setProperty("size", size);
             entry->setSize(size);
