@@ -58,10 +58,6 @@ int main(int argc, char *argv[])
         }
         newfilelist.append(file);
     }
-    if (fileList.length() == 0) {
-        newfilelist.append("/home/hushiwei/Desktop/qt-everywhere-src-5.13.1.tar.xz");
-    }
-
 
     QDBusConnection bus = QDBusConnection::sessionBus();
     bool busRegistered = bus.registerService("com.archive.mainwindow.monitor");
