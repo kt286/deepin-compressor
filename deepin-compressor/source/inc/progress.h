@@ -31,17 +31,32 @@
 
 DWIDGET_USE_NAMESPACE
 
-enum COMPRESS_TYPE {
-    COMPRESSING,//正常压缩
-    COMPRESSDRAGADD,//拖拽添加压缩
-    DECOMPRESSING,
-    DELETEING
-};
+//enum COMPRESS_TYPE {
+//    COMPRESSING,//正常压缩
+//    COMPRESSDRAGADD,//拖拽添加压缩
+//    DECOMPRESSING,
+//    DELETEING
+//};
+
+
+
 class ProgressAssistant;
 class Progress: public DWidget
 {
     Q_OBJECT
 public:
+    /**
+     * @brief The ENUM_OPERATION enum
+     * @see 进度的类型
+     */
+    enum ENUM_PROGRESS_TYPE {
+        OP_NONE,            // 非进度界面
+        OP_COMPRESSING,     // 正常压缩进度
+        OP_COMPRESSDRAGADD, // 拖拽添加压缩进度
+        OP_DECOMPRESSING,   // 解压缩进度
+        OP_DELETEING        // 删除进度
+    };
+
     Progress(DWidget *parent = nullptr);
     void InitUI();
     void InitConnection();
@@ -49,8 +64,10 @@ public:
     void setprogress(double percent);
     void setFilename(QString filename);
     void setProgressFilename(QString filename);
-    void settype(COMPRESS_TYPE type);
+    void settype(Progress::ENUM_PROGRESS_TYPE type);
+    Progress::ENUM_PROGRESS_TYPE getType();
     void setopentype(bool type);
+    bool getOpenType();
     void setTypeImage(QString type);
 
     int showConfirmDialog();
@@ -58,13 +75,13 @@ public:
 
     void setSpeedAndTime(double speed, qint64 timeLeft);
     void displaySpeedAndTime(double speed, qint64 timeLeft);
-    void setSpeedAndTimeText(COMPRESS_TYPE type);
+    void setSpeedAndTimeText(Progress::ENUM_PROGRESS_TYPE type);
 
     void setTempProgress();
     void refreshSpeedAndTime(unsigned long compressPercent);
     ProgressAssistant *pInfo();
 signals:
-    void  sigCancelPressed(int compressType);
+    void  sigCancelPressed(Progress::ENUM_PROGRESS_TYPE compressType);
 
 public slots:
     void cancelbuttonPressedSlot();
@@ -81,7 +98,7 @@ private:
     DLabel *m_shadow;
 
     QString m_filename;
-    COMPRESS_TYPE m_type;
+    ENUM_PROGRESS_TYPE m_ProgressType;
 
     //add
     DLabel *m_speedLabel = nullptr;

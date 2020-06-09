@@ -55,6 +55,7 @@
 #include "unistd.h"
 #include "compressorapplication.h"
 #include "structs.h"
+#include <QMessageBox>
 
 DWIDGET_USE_NAMESPACE
 
@@ -130,7 +131,7 @@ bool MainWindow::applicationQuit()
         m_pJob = nullptr;
     }
 
-    if (m_compressType == COMPRESSDRAGADD) {
+    if (m_Progess->getType() == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
 
         return true;
     }
@@ -282,7 +283,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
         } else if (options == OpenInfo::CLOSE) {//如果子面板那正常关闭
             event->accept();
             this->option = OpenInfo::CLOSE;
-            this->pMapGlobalWnd->remove(QString::number(this->winId()));
+            if (this->pMapGlobalWnd != nullptr) {
+                this->pMapGlobalWnd->remove(QString::number(this->winId()));
+            }
+
         }
     } else {
         if (options == OpenInfo::QUERY_CLOSE_CANCEL) {
@@ -298,7 +302,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
             } else if (mode == 1) {
                 event->accept();
                 this->option = OpenInfo::CLOSE;
-                this->pMapGlobalWnd->remove(QString::number(this->winId()));
+                if (this->pMapGlobalWnd != nullptr) {
+                    this->pMapGlobalWnd->remove(QString::number(this->winId()));
+                }
             }
 
         }
@@ -306,7 +312,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 //    }
 
-    if (m_compressType == COMPRESSDRAGADD) {
+    if (m_Progess->getType() == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
         if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::ADDJOB) {
             AddJob *pAddJob = dynamic_cast<AddJob *>(m_pJob);
             pAddJob->kill();
@@ -843,11 +849,6 @@ void MainWindow::setDisable()
 
 void MainWindow::refreshPage()
 {
-    //    m_openAction->setEnabled(false);
-    //    setAcceptDrops(false);
-    //    m_titlebutton->setVisible(false);
-    qDebug() << m_pageid;
-
     m_encryptionpage->resetPage();
 
     switch (m_pageid) {
@@ -898,7 +899,6 @@ void MainWindow::refreshPage()
             m_watchTimer = 0;
         }
         if (this->m_encryptiontype == EncryptionType::Encryption_Load) {
-//            m_Progess->setSpeedAndTimeText(COMPRESSDRAGADD);
             int limitCounts = 10;
             int left = 5, right = 5;
             QString displayName = "";
@@ -908,8 +908,7 @@ void MainWindow::refreshPage()
         } else {
             titlebar()->setTitle(tr("Compressing"));
         }
-        m_Progess->setSpeedAndTimeText(COMPRESSING);
-
+        m_Progess->setSpeedAndTimeText(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING);
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
@@ -919,12 +918,11 @@ void MainWindow::refreshPage()
         m_Progess->pInfo()->startTimer();
         break;
     case PAGE_UNZIPPROGRESS:
-        m_Progess->settype(DECOMPRESSING);
-        m_Progess->setSpeedAndTimeText(DECOMPRESSING);
+        m_Progess->setSpeedAndTimeText(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
-        if (m_openType) {
+        if (m_Progess->getType()) {
             titlebar()->setTitle(tr("Opening"));
         } else {
             titlebar()->setTitle(tr("Extracting"));
@@ -934,7 +932,7 @@ void MainWindow::refreshPage()
         m_Progess->pInfo()->startTimer();
         break;
     case PAGE_DELETEPROGRESS:
-        m_Progess->setSpeedAndTimeText(DELETEING);
+        m_Progess->setSpeedAndTimeText(Progress::ENUM_PROGRESS_TYPE::OP_DELETEING);
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
@@ -1107,7 +1105,7 @@ void MainWindow::onSelected(const QStringList &files)
     calSelectedTotalFileSize(files);
 
     if (files.count() == 1 && Utils::isCompressed_file(files.at(0))) {
-        m_compressType = DECOMPRESSING;
+        m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
         if (0 == m_CompressPage->getCompressFilelist().count()) {
             QString filename;
             filename = files.at(0);
@@ -1127,6 +1125,7 @@ void MainWindow::onSelected(const QStringList &files)
                 m_UnCompressPage->setdefaultpath(fileinfo.path());
             }
 
+            m_pageid = PAGE_LOADING;
             loadArchive(filename);
         } else {
             DDialog *dialog = new DDialog(this);
@@ -1169,7 +1168,7 @@ void MainWindow::onSelected(const QStringList &files)
             }
         }
     } else {
-        m_compressType = COMPRESSING;
+        m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING);
         m_pageid = PAGE_ZIP;
         emit sigZipSelectedFiles(files);
         refreshPage();
@@ -1186,8 +1185,14 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
 
     m_UnCompressPage->getMainWindowWidth(this->width());
     calSelectedTotalFileSize(files);
+    QString info = "";
+    for (int i = 0; i < files.length(); i++) {
+        info += files[i];
+    }
+//    QMessageBox::information(nullptr, "Title", info,
+//                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    if (files.last() == QStringLiteral("extract_here")) {//解压
 
-    if (files.last() == QStringLiteral("extract_here")) {
         m_isrightmenu = true;
         QFileInfo fileinfo(files.at(0));
         m_decompressfilename = fileinfo.fileName();
@@ -1195,7 +1200,7 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         m_UnCompressPage->setdefaultpath(fileinfo.path());
         loadArchive(files.at(0));
         m_pageid = PAGE_UNZIPPROGRESS;
-        m_Progess->settype(DECOMPRESSING);
+        m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
         refreshPage();
     } else if (files.last() == QStringLiteral("extract_here_multi")) {
         QStringList pathlist = files;
@@ -1206,7 +1211,7 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         m_UnCompressPage->setdefaultpath(fileinfo.path());
         m_decompressfilepath = fileinfo.path();
         m_pageid = PAGE_UNZIPPROGRESS;
-        m_Progess->settype(DECOMPRESSING);
+        m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
         refreshPage();
 
         BatchExtract *batchJob = new BatchExtract();
@@ -1279,7 +1284,7 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         m_UnCompressPage->setdefaultpath(curpath);
         m_decompressfilepath = curpath;
         m_pageid = PAGE_UNZIPPROGRESS;
-        m_Progess->settype(DECOMPRESSING);
+        m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
         refreshPage();
 
         BatchExtract *batchJob = new BatchExtract();
@@ -1331,7 +1336,7 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
                 m_UnCompressPage->setdefaultpath(fileinfo.path());
                 loadArchive(filepath);
                 m_pageid = PAGE_UNZIPPROGRESS;
-                m_Progess->settype(DECOMPRESSING);
+                m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
                 refreshPage();
             } else {
                 m_CompressFail->setFailStrDetail(tr("Damaged file, unable to extract"));
@@ -1377,7 +1382,7 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         } else {
             m_UnCompressPage->setdefaultpath(fileinfo.path());
         }
-
+        m_pageid = Page_ID::PAGE_LOADING;
         loadArchive(filename);
     } else {
         emit sigZipSelectedFiles(files);
@@ -1424,27 +1429,21 @@ void MainWindow::loadArchive(const QString &files)
 {
     QString transFile = files;
     transSplitFileName(transFile);
-
     WatcherFile(transFile);
 
     m_workstatus = WorkProcess;
     m_loadfile = transFile;
     m_encryptiontype = Encryption_Load;
-    m_pJob = dynamic_cast< LoadJob * >(m_model->loadArchive(transFile, "", m_model));
-
+    m_pJob = m_model->loadArchive(transFile, "", m_model);
     if (m_pJob == nullptr) {
         return;
     }
-
-    m_Progess->settype(DECOMPRESSING);
     LoadJob *pLoadJob = dynamic_cast<LoadJob *>(m_pJob);
     connect(pLoadJob, &LoadJob::sigLodJobPassword, this, &MainWindow::SlotNeedPassword);
     connect(pLoadJob, &LoadJob::sigWrongPassword, this, &MainWindow::SlotNeedPassword);
 
     m_pJob->start();
     m_homePage->spinnerStart(this, static_cast<pMember_callback>(&MainWindow::isWorkProcess));
-
-    m_pageid = PAGE_LOADING;
     refreshPage();
 }
 
@@ -1572,17 +1571,10 @@ void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
 
 void MainWindow::SlotProgress(KJob * /*job*/, unsigned long percent)
 {
-//    if (percent > lastPercent) {
-//        calSpeedAndTime(percent);
-//        lastPercent = percent;
-//        qDebug() << "%%%%lastPercent" << lastPercent;
-//    }
+
     calSpeedAndTime(percent);
-    if (m_compressType == COMPRESS_TYPE::COMPRESSDRAGADD) {
-        m_pageid = PAGE_ZIPPROGRESS;
-        m_Progess->setprogress(percent);
-        refreshPage();
-    } else if (Encryption_SingleExtract == m_encryptiontype || Encryption_DRAG == m_encryptiontype) {
+
+    if (Encryption_SingleExtract == m_encryptiontype || Encryption_DRAG == m_encryptiontype) {
         if (percent < 100 && WorkProcess == m_workstatus) {
             if (!m_progressdialog->isshown()) {
                 if (m_pageid != PAGE_UNZIP) {
@@ -1593,37 +1585,33 @@ void MainWindow::SlotProgress(KJob * /*job*/, unsigned long percent)
             }
             m_progressdialog->setProcess(percent);
         }
-    } else if (Encryption_TempExtract_Open_Choose == m_encryptiontype || Encryption_TempExtract == m_encryptiontype) {
+        return;
+    } /*else if (Encryption_TempExtract_Open_Choose == m_encryptiontype || Encryption_TempExtract == m_encryptiontype) {
         m_pageid = PAGE_LOADING;
-        m_Progess->settype(DECOMPRESSING);
+        m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
+        refreshPage();
+    }*/
+
+    // 该函数尽量使用m_pageid来判断刷新到哪种界面，尽量不要根据m_encryptiontype去判断。
+    if (m_pageid == PAGE_LOADING) {
         refreshPage();
     } else if (PAGE_ZIPPROGRESS == m_pageid || PAGE_UNZIPPROGRESS == m_pageid || PAGE_DELETEPROGRESS == m_pageid) {
         m_Progess->setprogress(percent);
     } else if ((PAGE_UNZIP == m_pageid || PAGE_ENCRYPTION == m_pageid) && (percent < 100) && m_pJob) {
-        /*if (!m_progressTransFlag) {
-            if (0 == m_timerId) {
-                m_timerId = startTimer(800);
-            }
-        } else*/
-        {
-            m_pageid = PAGE_UNZIPPROGRESS;
-            m_Progess->settype(DECOMPRESSING);
-            refreshPage();
-        }
+        m_pageid = PAGE_UNZIPPROGRESS;
+        m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
+        refreshPage();
     } else if ((PAGE_ZIPSET == m_pageid) && (percent < 100)) {
         m_pageid = PAGE_ZIPPROGRESS;
-        m_Progess->settype(COMPRESSING);
+        m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING);
         refreshPage();
     }
 }
 
 void MainWindow::SlotProgressFile(KJob * /*job*/, const QString &filename)
 {
-    // if (Encryption_SingleExtract == m_encryptiontype && PAGE_UNZIP == m_pageid) {
     m_progressdialog->setCurrentFile(filename);
-    //} else if (PAGE_ZIPPROGRESS == m_pageid || PAGE_UNZIPPROGRESS == m_pageid) {
     m_Progess->setProgressFilename(filename);
-    //}
 }
 
 void MainWindow::slotBatchExtractFileChanged(const QString &name)
@@ -1642,6 +1630,7 @@ void MainWindow::slotBatchExtractError(const QString &name)
 void MainWindow::slotExtractionDone(KJob *job)
 {
     m_workstatus = WorkNone;
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_NONE);
     Archive::Entry *pExtractWorkEntry = nullptr;
     if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::EXTRACTJOB) {
         ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
@@ -1992,7 +1981,7 @@ void MainWindow::onCompressPressed(QMap< QString, QString > &Args)
 
 void MainWindow::onUncompressStateAutoCompress(QMap<QString, QString> &Args)
 {
-    m_compressType = COMPRESSDRAGADD;
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD);
     m_progressdialog->setProcess(0);
     m_Progess->setprogress(0);
     IsAddArchive = true;
@@ -2002,7 +1991,7 @@ void MainWindow::onUncompressStateAutoCompress(QMap<QString, QString> &Args)
 
 void MainWindow::onUncompressStateAutoCompressEntry(QMap<QString, QString> &Args, Archive::Entry *pWorkEntry)
 {
-    m_compressType = COMPRESSDRAGADD;
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD);
     m_progressdialog->setProcess(0);
     m_Progess->setprogress(0);
     IsAddArchive = true;
@@ -2037,7 +2026,7 @@ void MainWindow::creatBatchArchive(QMap< QString, QString > &Args, QMap< QString
 
     m_pageid = PAGE_ZIPPROGRESS;
     m_jobState = JOB_BATCHCOMPRESS;
-    m_Progess->settype(COMPRESSING);
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING);
     refreshPage();
     m_pJob->start();
 }
@@ -2175,7 +2164,7 @@ void MainWindow::addArchiveEntry(QMap<QString, QString> &Args, Archive::Entry *p
     connect(m_pJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
 
     m_pageid = PAGE_ZIPPROGRESS;
-    m_Progess->settype(COMPRESSDRAGADD);
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD);
     m_Progess->setProgressFilename(QFileInfo(filesToAddStr).fileName());
     m_jobState = JOB_ADD;
     refreshPage();
@@ -2322,7 +2311,7 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     connect(m_pJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
     m_pageid = PAGE_ZIPPROGRESS;
 //    m_Progess->settype(COMPRESSING);
-    m_Progess->settype(COMPRESSDRAGADD);
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD);
     m_Progess->setProgressFilename(QFileInfo(filesToAddStr).fileName());
     m_jobState = JOB_ADD;
     refreshPage();
@@ -2347,7 +2336,7 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool is
     connect(m_pJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)), Qt::ConnectionType::UniqueConnection);
 
     m_pageid = PAGE_DELETEPROGRESS;
-    m_Progess->settype(DELETEING);
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DELETEING);
     refreshPage();
 
     //m_Progess->settype(DECOMPRESSING);
@@ -2470,7 +2459,7 @@ void MainWindow::moveToArchive(QMap<QString, QString> &Args)
     connect(m_pJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
 
     m_pageid = PAGE_ZIPPROGRESS;
-    m_Progess->settype(COMPRESSING);
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING);
 
     m_jobState = JOB_MOVE;
     refreshPage();
@@ -2625,7 +2614,7 @@ bool clearTempFiles(const QString &temp_path)
 
 void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/)
 {
-    if (m_compressType == COMPRESSDRAGADD) {
+    if (m_Progess->getType() == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
         QFile fi(createCompressFile_ + ".tmp");
         if (fi.exists()) {
             fi.remove();
@@ -2794,7 +2783,7 @@ void MainWindow::creatArchive(QMap< QString, QString > &Args)
     connect(m_pJob, &CreateJob::percentfilename, this, &MainWindow::SlotProgressFile, Qt::ConnectionType::UniqueConnection);
 
     m_pageid = PAGE_ZIPPROGRESS;
-    m_Progess->settype(COMPRESSING);
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING);
     m_jobState = JOB_CREATE;
     refreshPage();
 
@@ -2808,6 +2797,7 @@ void MainWindow::creatArchive(QMap< QString, QString > &Args)
 void MainWindow::slotCompressFinished(KJob *job)
 {
     qDebug() << "job finished" << job->error();
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_NONE);
     m_workstatus = WorkNone;
     if (job->error() && (job->error() != KJob::KilledJobError)) {
         if (m_pathstore.left(6) == "/media") {
@@ -2845,6 +2835,7 @@ void MainWindow::slotJobFinished(KJob *job)
 {
     qDebug() << "job finished" << job->error();
     m_workstatus = WorkNone;
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_NONE);
     if (job->error() && (job->error() != KJob::KilledJobError)) {
         if (m_pathstore.left(6) == "/media") {
             if (getMediaFreeSpace() <= 50) {
@@ -3001,8 +2992,9 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
 
     if (type == EXTRACT_TEMP) {
         m_encryptiontype = Encryption_TempExtract;
-        m_openType = true;
-        m_Progess->setopentype(m_openType);
+        m_pageid = Page_ID::PAGE_LOADING;
+        // m_openType = true;
+        m_Progess->setopentype(true);
         if (pCurAuxInfo == nullptr) {
             pCurAuxInfo = new MainWindow_AuxInfo();
         }
@@ -3030,8 +3022,8 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
 
     } else if (type == EXTRACT_TEMP_CHOOSE_OPEN) {
         m_encryptiontype =  Encryption_TempExtract_Open_Choose;
-        m_openType = true;
-        m_Progess->setopentype(m_openType);
+        // m_openType = true;
+        m_Progess->setopentype(true);
     } else if (type == EXTRACT_DRAG) {
         m_encryptiontype =  Encryption_DRAG;
     } else {
@@ -3202,7 +3194,7 @@ void MainWindow::deleteFromArchive(const QStringList &files, const QString &arch
 
     connect(m_pJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
     m_pageid = PAGE_DELETEPROGRESS;
-    m_Progess->settype(DECOMPRESSING);
+    m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
     m_jobState = JOB_DELETE;
 
     m_pJob->start();
@@ -3225,9 +3217,9 @@ void MainWindow::deleteFromArchive(const QStringList &files, const QString &arch
 
 //}
 
-void MainWindow::onCancelCompressPressed(int compressType)
+void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressType)
 {
-    m_compressType = compressType;
+//    m_compressType = compressType;
     slotResetPercentAndTime();
     m_isrightmenu = false;
     m_encryptiontype = Encryption_NULL;
@@ -3263,7 +3255,7 @@ void MainWindow::onCancelCompressPressed(int compressType)
 
 
 
-    if (compressType == COMPRESSING) {
+    if (compressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING) {
         if (m_pJob) {
 //            m_createJob->deleteLater();
             m_pJob->kill();
@@ -3274,9 +3266,9 @@ void MainWindow::onCancelCompressPressed(int compressType)
             m_pJob = nullptr;
         }
         m_pageid = PAGE_ZIP;
-    } else if (compressType == DECOMPRESSING) {
+    } else if (compressType == Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING) {
         m_pageid = PAGE_UNZIP;
-    } else if (compressType == COMPRESSDRAGADD) {
+    } else if (compressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
         if (m_pJob) {
 //            m_createJob->deleteLater();
             m_pJob->kill();
@@ -3384,11 +3376,7 @@ void MainWindow::slotBackButtonClicked()
 
 void MainWindow::slotResetPercentAndTime()
 {
-    m_openType = false;
-    m_Progess->setopentype(m_openType);
-//    lastPercent = 0;
-//    compressTime = 0;
-//    m_timer.elapsed();
+    m_Progess->setopentype(false);
     m_Progess->pInfo()->resetProgress();
 }
 

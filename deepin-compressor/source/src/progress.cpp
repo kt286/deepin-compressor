@@ -132,15 +132,15 @@ void Progress::InitConnection()
     connect(m_cancelbutton, &DPushButton::clicked, this, &Progress::cancelbuttonPressedSlot);
 }
 
-void Progress::setSpeedAndTimeText(COMPRESS_TYPE type)
+void Progress::setSpeedAndTimeText(Progress::ENUM_PROGRESS_TYPE type)
 {
-    if (type == COMPRESSING) {
+    if (type == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING) {
         m_speedLabel->setText(tr("Speed", "compress") + ": " + tr("Calculating..."));
-    } else if (type == DECOMPRESSING) {
+    } else if (type == Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING) {
         m_speedLabel->setText(tr("Speed", "uncompress") + ": " + tr("Calculating..."));
-    } else if (type == DELETEING) {
+    } else if (type == Progress::ENUM_PROGRESS_TYPE::OP_DELETEING) {
         m_speedLabel->setText(tr("Speed", "delete") + ": " + tr("Calculating..."));
-    } else if (type == COMPRESSDRAGADD) {
+    } else if (type == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
         m_speedLabel->setText(tr("Speed", "compress") + ": " + tr("Calculating..."));
     }
     m_restTimeLabel->setText(tr("Time left") + ": " + tr("Calculating..."));
@@ -220,7 +220,7 @@ void Progress::displaySpeedAndTime(double speed, qint64 timeLeft)
     QString ss = QString("%1").arg(seconds, 2, 10, QLatin1Char('0'));
 
     //add update speed and time label
-    if (m_type == COMPRESSING) {
+    if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING) {
         if (speed < 1024) {
             m_speedLabel->setText(tr("Speed", "compress") + ": " + QString::number(speed, 'f', 2) + "KB/S");
         } else if (speed > 1024 && speed < 1024 * 300) {
@@ -228,9 +228,9 @@ void Progress::displaySpeedAndTime(double speed, qint64 timeLeft)
         } else {
             m_speedLabel->setText(tr("Speed", "compress") + ": " + ">300MB/S");
         }
-    } else if (m_type == DELETEING) {
+    } else if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_DELETEING) {
         m_speedLabel->setText(tr("Speed", "delete") + ": " + QString::number((speed / 1024), 'f', 2) + "MB/S");
-    } else if (m_type == COMPRESSDRAGADD) {
+    } else if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
 //        m_speedLabel->setText(tr("Speed", "compress") + ": " + tr("Calculating..."));
         if (speed < 1024) {
             m_speedLabel->setText(tr("Speed", "compress") + ": " + QString::number(speed, 'f', 2) + "KB/S");
@@ -273,7 +273,7 @@ void Progress::setProgressFilename(QString filename)
     }
 
     QFontMetrics elideFont(m_progressfilelabel->font());
-    if (m_type == COMPRESSING || m_type == COMPRESSDRAGADD) {
+    if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING || m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
         m_progressfilelabel->setText(elideFont.elidedText(tr("Compressing") + ": " + filename, Qt::ElideMiddle, 520));
 
     } else {
@@ -285,14 +285,24 @@ void Progress::setProgressFilename(QString filename)
     }
 }
 
-void Progress::settype(COMPRESS_TYPE type)
+void Progress::settype(Progress::ENUM_PROGRESS_TYPE type)
 {
-    m_type = type;
+    m_ProgressType = type;
+}
+
+Progress::ENUM_PROGRESS_TYPE Progress::getType()
+{
+    return m_ProgressType;
 }
 
 void Progress::setopentype(bool type)
 {
     m_openType = type;
+}
+
+bool Progress::getOpenType()
+{
+    return m_openType;
 }
 
 int Progress::showConfirmDialog()
@@ -322,7 +332,7 @@ int Progress::showConfirmDialog()
 
 //    DFontSizeManager::instance()->bind(strlabel2, DFontSizeManager::T7, QFont::Medium);
 
-    if (m_type == COMPRESSING) {
+    if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING) {
         //strlabel->setText(tr("Stop compressing "));
         strlabel2->setText(tr("Are you sure you want to stop the compression?"));
     } else {
@@ -371,6 +381,6 @@ void Progress::cancelbuttonPressedSlot()
 //        m_timerProgress->stop();
         m_speed = 0;
         lastTimeLeft = 0;
-        emit sigCancelPressed(m_type);
+        emit sigCancelPressed(m_ProgressType);
     }
 }

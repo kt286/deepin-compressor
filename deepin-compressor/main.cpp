@@ -27,7 +27,7 @@
 #include <DLog>
 #include "utils.h"
 #include <DApplicationSettings>
-#include <QMessageBox>
+//#include <QMessageBox>
 #include "monitorAdaptor.h"
 #include "monitorInterface.h"
 #include "openwithdialog/openwithdialog.h"
@@ -57,6 +57,9 @@ int main(int argc, char *argv[])
             file.remove("file://");
         }
         newfilelist.append(file);
+    }
+    if (fileList.length() == 0) {
+        newfilelist.append("/home/hushiwei/Desktop/qt-everywhere-src-5.13.1.tar.xz");
     }
 
 

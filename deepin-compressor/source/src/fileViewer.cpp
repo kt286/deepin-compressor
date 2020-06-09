@@ -1236,9 +1236,10 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
                 m_indexmode = curIndex;
                 Archive::Entry *entry = m_decompressmodel->entryForIndex(sourceIndex);
                 restoreHeaderSort(zipPathUnique + MainWindow::getLoadFile() + "/" + entry->fullPath());
-                if (0 == entry->entries().count()) {
+                /*if (0 == entry->entries().count()) {
                     showPlable();
-                }
+                }*/
+                showPlable();
             } else {
                 QVector<Archive::Entry *> fileList = filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows()));
                 QString fileName = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles" + QDir::separator() + fileList.at(0)->name();

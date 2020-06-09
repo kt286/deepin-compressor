@@ -276,7 +276,7 @@ private slots:
     void onUncompressStateAutoCompress(QMap<QString, QString> &Args);
     // added by hsw 20200525
     void onUncompressStateAutoCompressEntry(QMap<QString, QString> &Args, Archive::Entry *pWorkEntry = nullptr);
-    void onCancelCompressPressed(int compressType);
+    void onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressType);
     void onTitleButtonPressed();
     void onCompressAddfileSlot(bool status);
 
@@ -376,23 +376,15 @@ private:
     DIconButton *m_titlebutton = nullptr;
 
     KJob *m_pJob = nullptr;// 指向所有Job派生类对象
-//    BatchCompress *batchJob = nullptr;
-//    ExtractJob *m_encryptionjob = nullptr;
-//    LoadJob *m_loadjob = nullptr;
-//    CreateJob *m_createJob = nullptr;
-//    AddJob *m_addJob = nullptr;
-//    MoveJob *m_moveJob = nullptr;
-//    DeleteJob *m_DeleteJob = nullptr;
     EncryptionType m_encryptiontype = Encryption_NULL;
     bool m_isrightmenu = false;
     WorkState m_workstatus = WorkNone;
     JobState m_jobState = JOB_NULL;
 
     int m_timerId = 0;
-    //bool m_progressTransFlag = false;
+
     QAction *m_openAction;
 
-    //QStringList m_compressDirFiles;
     QString createCompressFile_;
 
     QString m_pathstore;
@@ -406,13 +398,12 @@ private:
     DSpinner *m_spinner = nullptr;
 
     TimerWatcher *m_pWatcher = nullptr;
-    bool m_openType = false; //false解压 true打开
+    // bool m_openType = false; //false解压 true打开
     bool IsAddArchive = false;
 
     GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
     MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
     MainWindow_AuxInfo *pCurAuxInfo = nullptr;//added by hsw 20200525
-    int m_compressType;
 
 private:
     void calSelectedTotalFileSize(const QStringList &files);

@@ -288,15 +288,15 @@ LoadJob::LoadJob(ReadOnlyArchiveInterface *interface, bool isbatch)
 void LoadJob::doWork()
 {
     //emit description(this, tr("Loading archive"), qMakePair(tr("Archive"), archiveInterface()->filename()));
-    emit description(this, ("Loading archive"), qMakePair(QString("Archive"), archiveInterface()->filename()));
+    ReadOnlyArchiveInterface *pTool = archiveInterface();
+    emit description(this, ("Loading archive"), qMakePair(QString("Archive"), pTool->filename()));
     connectToArchiveInterfaceSignals();
 
     bool ret = false;
 
-    if (archiveInterface()) {
+    if (pTool) {
         connect(archiveInterface(), &ReadOnlyArchiveInterface::sigExtractNeedPassword, this, &LoadJob::sigLodJobPassword);
-
-        ret = archiveInterface()->list(m_isbatch);
+        ret = pTool->list(m_isbatch);
     }
 
     if (!archiveInterface()->waitForFinishedSignal()) {
@@ -593,7 +593,7 @@ void ExtractJob::doWork()
 //             << "Destination dir:" << m_destinationDir
 //             << "Options:" << m_options;
     ReadOnlyArchiveInterface *pTool = archiveInterface();
-    bool ret = archiveInterface()->extractFiles(m_entries, m_destinationDir, m_options);
+    bool ret = pTool->extractFiles(m_entries, m_destinationDir, m_options);
 
     if (!archiveInterface()->waitForFinishedSignal() /*&& archiveInterface()->isUserCancel() == false*/) {
 //        onFinished(ret);
