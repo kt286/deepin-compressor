@@ -26,6 +26,7 @@
 #include "mimetypes.h"
 #include "source/inc/mimetypedisplaymanager.h"
 
+#include <QCollator>
 
 ArchiveSortFilterModel::ArchiveSortFilterModel(QObject *parent)
     : QSortFilterProxyModel(parent)
@@ -44,11 +45,25 @@ bool ArchiveSortFilterModel::lessThan(const QModelIndex &leftIndex,
     const Archive::Entry *right = srcModel->entryForIndex(rightIndex);
 
     if (left->isDir() && !right->isDir()) {
-        return true;
+        if (sortOrder() == Qt::DescendingOrder) {
+            return false;
+        } else {
+            return true;
+        }
     } else if (!left->isDir() && right->isDir()) {
         return false;
     } else {
         switch (col) {
+
+        case Timestamp: {
+            const QDateTime leftTime = left->property("timestamp").toDateTime();
+            const QDateTime rightTime = right->property("timestamp").toDateTime();
+
+            if (leftTime < rightTime) {
+                return true;
+            }
+        }
+        break;
         case Size: {
             uint dirs;
             uint files;
@@ -64,26 +79,53 @@ bool ArchiveSortFilterModel::lessThan(const QModelIndex &leftIndex,
             } else if (right->isDir()) {
                 return false;
             }
-        }
-        break;
-        case Timestamp: {
-            const QDateTime leftTime = left->property("timestamp").toDateTime();
-            const QDateTime rightTime = right->property("timestamp").toDateTime();
 
-            if (leftTime < rightTime) {
+            if (left->property(property.constData()).toULongLong() < right->property(property.constData()).toULongLong()) {
                 return true;
             }
         }
         break;
-        default:
+        case Type: {
             QMimeType mimeLeftType = determineMimeType(left->fullPath());
             QMimeType mimeRightType = determineMimeType(right->fullPath());
 
-            if (m_mimetype->displayName(mimeLeftType.name()) > m_mimetype->displayName(mimeRightType.name())) {
+//            if (m_mimetype->displayName(mimeLeftType.name()) > m_mimetype->displayName(mimeRightType.name())) {
+//                return true;
+//            }
+
+            QCollator col;
+            if (col.compare(m_mimetype->displayName(mimeLeftType.name()), m_mimetype->displayName(mimeRightType.name())/*, Qt::CaseInsensitive*/) < 0) {
+                return false;
+            } else {
                 return true;
             }
-
-            break;
+        }
+        break;
+        case FullPath: {
+            if (left->name().at(0).script() == QChar::Script_Han) {
+                if (right->name().at(0).script() == QChar::Script_Han) {
+                    QCollator col;
+                    if (col.compare(left->name(), right->name()) < 0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                if (right->name().at(0).script() == QChar::Script_Han) {
+                    return true;
+                } else {
+                    if (QString::compare(left->name(), right->name(), Qt::CaseInsensitive) < 0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        break;
         }
     }
     return false;

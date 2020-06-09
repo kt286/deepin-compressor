@@ -174,6 +174,11 @@ void Job::onError(const QString &message, const QString &details)
         setErrorText(message);
         emitResult();
         return;
+    } else if (message == "Filename is too long") {
+        setError(KJob::UserFilenameLong);
+        setErrorText(message);
+        emitResult();
+        return;
     }
     setError(KJob::UserDefinedError);
     setErrorText(message);
@@ -211,7 +216,10 @@ void Job::onFinished(bool result)
     if (m_archiveInterface && m_archiveInterface->isUserCancel()) {
         setError(KJob::KilledJobError);
     } else if ((archive() && !archive()->isValid())  || false == result) {
-        setError(KJob::UserDefinedError);
+        if (KJob::UserFilenameLong == error()) {
+        } else {
+            setError(KJob::UserDefinedError);
+        }
     } else if (m_archiveInterface && m_archiveInterface->isAnyFileExtracted() == false) {
         setError(KJob::UserSkiped);
     } else {
@@ -514,7 +522,7 @@ void CreateJob::doWork()
     connect(archiveInterface(), &ReadOnlyArchiveInterface::progress, this, &CreateJob::onProgress);
     connect(archiveInterface(), &ReadOnlyArchiveInterface::progress_filename, this, &CreateJob::onProgressFilename);
 
-    m_addJob = archive()->addFiles(m_entries, nullptr, m_options);
+    m_addJob = archive()->addFiles(m_entries, nullptr, nullptr, m_options);
 
     if (m_addJob) {
         connect(m_addJob, &KJob::result, this, &CreateJob::emitResult);

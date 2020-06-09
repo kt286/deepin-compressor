@@ -104,6 +104,8 @@ public:
         LoadError = 2,
         /*** Subclasses should define error codes starting at this value */
         UserSkiped = 3,
+        /*** File name is too long error */
+        UserFilenameLong = 4,
         UserDefinedError = 100
     };
 

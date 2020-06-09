@@ -24,7 +24,7 @@
 #include "DApplicationHelper"
 #include "DFontSizeManager"
 #include "utils.h"
-
+#include <DDialog>
 #include <DFileDialog>
 #include <DStyle>
 #include <QDebug>
@@ -593,8 +593,10 @@ void CompressSetting::onSplitChanged(int /*status*/)
 {
     if (m_splitcompress->isChecked() && "7z" == m_compresstype->text()) {
         m_splitnumedit->setEnabled(true);
-        if ((m_getFileSize / 1024 / 1024) > 1) {
-            m_splitnumedit->setValue(m_getFileSize / 1024 / 1024 / 2 + 1);
+        if ((m_getFileSize / 1024 / 1024) >= 1) { //1M以上的文件
+            m_splitnumedit->setValue(m_getFileSize / 1024.0 / 1024.0 / 2.0 + 0.1);
+        } else if ((m_getFileSize / 1024) > 102 && (m_getFileSize / 1024) <= 1024) { //0.1M－1M的文件
+            m_splitnumedit->setValue(m_getFileSize / 1024.0 / 1024.0 / 2.0);
         }
         isSplitChecked = true;
     } else {
@@ -1127,7 +1129,7 @@ bool CompressSetting::existSameFileName()
 {
     DDialog *dialog = new DDialog(this);
     dialog->setMinimumSize(QSize(380, 190));
-    QPixmap pixmap = Utils::renderSVG(":/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(64, 64));
+    QPixmap pixmap = Utils::renderSVG(":assets/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(64, 64));
     dialog->setIcon(pixmap);
 
     DLabel *strlabel = new DLabel(dialog);

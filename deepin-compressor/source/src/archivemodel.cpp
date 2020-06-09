@@ -757,6 +757,9 @@ void ArchiveModel::newEntry(Archive::Entry *receivedEntry, InsertBehaviour behav
     if (entry) {
         entry->copyMetaData(receivedEntry);
         entry->setProperty("fullPath", entryFileName);
+        if (!entry->isDir()) {
+            insertEntry(entry, behaviour);
+        }
     } else {
         QString parentPath = QString(parent->property("fullPath").toString());
         QString childPath = QString(receivedEntry->property("fullPath").toString());
@@ -785,6 +788,8 @@ void ArchiveModel::slotLoadingFinished(KJob *job)
     }
 
     emit loadingFinished(job);
+
+    m_tableview->sortByColumn(0, Qt::AscendingOrder);
 }
 
 void ArchiveModel::insertEntry(Archive::Entry *entry, InsertBehaviour behaviour)
@@ -806,6 +811,9 @@ void ArchiveModel::insertEntry(Archive::Entry *entry, InsertBehaviour behaviour)
     entry->isDir()
     ? icon = QIcon::fromTheme(db.mimeTypeForName(QStringLiteral("inode/directory")).iconName()).pixmap(24, 24)
              : icon = QIcon::fromTheme(db.mimeTypeForFile(entry->fullPath()).iconName()).pixmap(24, 24);
+    if (icon.isNull()) {
+        icon = QIcon::fromTheme("empty").pixmap(24, 24);
+    }
 //    qDebug()<<icon;
     m_entryIcons.insert(entry->fullPath(NoTrailingSlash), icon);
 }
@@ -923,22 +931,22 @@ AddJob *ArchiveModel::addFiles(QVector<Archive::Entry *> &entries, const Archive
     return nullptr;
 }
 
-AddJob *ArchiveModel::addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options)
-{
-    if (!m_archive) {
-        return nullptr;
-    }
+//AddJob *ArchiveModel::addFilesOld(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options)
+//{
+//    if (!m_archive) {
+//        return nullptr;
+//    }
 
-    if (!m_archive->isReadOnly()) {
-        AddJob *job = m_archive->addFiles(entries, destination, options);
-        connect(job, &AddJob::newEntry, this, &ArchiveModel::slotNewEntry);
-        connect(job, &AddJob::userQuery, this, &ArchiveModel::slotUserQuery);
+//    if (!m_archive->isReadOnly()) {
+//        AddJob *job = m_archive->addFilesOld(entries, destination, options);
+//        connect(job, &AddJob::newEntry, this, &ArchiveModel::slotNewEntry);
+//        connect(job, &AddJob::userQuery, this, &ArchiveModel::slotUserQuery);
 
 
-        return job;
-    }
-    return nullptr;
-}
+//        return job;
+//    }
+//    return nullptr;
+//}
 
 MoveJob *ArchiveModel::moveFiles(QVector<Archive::Entry *> &entries, Archive::Entry *destination, const CompressionOptions &options)
 {

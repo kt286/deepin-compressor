@@ -116,7 +116,7 @@ public:
     bool hasMultipleTopLevelEntries() const;
     static BatchExtractJob *batchExtract(const QString &fileName, const QString &destination, bool autoSubfolder, bool preservePaths, QObject *parent = nullptr);
     static CreateJob *create(const QString &fileName, const QString &mimeType, const QVector<Archive::Entry *> &entries, const CompressionOptions &options, QObject *parent = nullptr, bool useLibArchive = false);
-    static AddJob *add(Archive *pArchive, const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
+    //static AddJob *add(Archive *pArchive, const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     static Archive *createEmpty(const QString &fileName, const QString &mimeType, QObject *parent = nullptr);
     static LoadJob *load(const QString &fileName, QObject *parent = nullptr);
     static LoadJob *load(const QString &fileName, const QString &mimeType, QObject *parent = nullptr);
@@ -133,9 +133,9 @@ public:
 
     DeleteJob *deleteFiles(QVector<Archive::Entry *> &entries);
     CommentJob *addComment(const QString &comment);
-    TestJob *testArchive();
+    //TestJob *testArchive();
     AddJob *addFiles(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, ReadOnlyArchiveInterface *pIface = nullptr, const CompressionOptions &options = CompressionOptions());
-    AddJob *addFiles(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
+    //AddJob *addFilesOld(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     MoveJob *moveFiles(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     CopyJob *copyFiles(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     ExtractJob *extractFiles(const QVector<Archive::Entry *> &files, const QString &destinationDir, const ExtractionOptions &options = ExtractionOptions());

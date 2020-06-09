@@ -57,6 +57,7 @@ public:
     void slotCompressedAddFile();
     fileViewer *getFileViewer();
     int showReplaceDialog(QString name);
+    void resizeEvent(QResizeEvent *event) override;
 
 signals:
     void sigDecompressPress(const QString &localPath);

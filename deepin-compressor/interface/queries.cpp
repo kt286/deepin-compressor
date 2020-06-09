@@ -121,6 +121,11 @@ void OverwriteQuery::colorTypeChange(QWidget *widget, DPalette::ColorType ct, do
     DApplicationHelper::instance()->setPalette(widget, palette);
 }
 
+bool OverwriteQuery::applyAll()
+{
+    return m_bApplyAll;
+}
+
 void OverwriteQuery::execute()
 {
 
@@ -131,11 +136,15 @@ void OverwriteQuery::execute()
         path.remove("file://");
     }
 
+    if (path.contains("file:")) {
+        path.remove("file:");
+    }
+
     QFileInfo file(path);
 
     DDialog *dialog = new DDialog(getMainWindow());
     dialog->setMinimumSize(QSize(380, 190));
-    QPixmap pixmap = renderSVG(":/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(64, 64));
+    QPixmap pixmap = renderSVG(":assets/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(64, 64));
     dialog->setIcon(pixmap);
 
     DLabel *strlabel = new DLabel;
@@ -216,6 +225,8 @@ void OverwriteQuery::execute()
             setResponse(Result_Overwrite);
         }
     }
+
+    m_bApplyAll = checkbox->isChecked();
 
     delete dialog;
     //QApplication::restoreOverrideCursor();
@@ -301,7 +312,7 @@ void PasswordNeededQuery::execute()
 
     qDebug() << m_data[QStringLiteral("archiveFilename")];
     DDialog *dialog = new DDialog(getMainWindow());
-    QPixmap pixmap = renderSVG(":/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(64, 64));
+    QPixmap pixmap = renderSVG(":assets/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(64, 64));
     dialog->setIcon(pixmap);
 
     DLabel *strlabel = new DLabel(dialog);
@@ -367,7 +378,7 @@ void WrongPasswordQuery::execute()
     qDebug() << m_data[QStringLiteral("archiveFilename")];
     QFileInfo file(m_data[QStringLiteral("archiveFilename")].toString());
     DDialog *dialog = new DDialog(getMainWindow());
-    QPixmap pixmap = renderSVG(":/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(64, 64));
+    QPixmap pixmap = renderSVG(":assets/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(64, 64));
     dialog->setIcon(pixmap);
 
     DLabel *strlabel = new DLabel(dialog);

@@ -36,6 +36,7 @@
 class  Job : public KJob
 {
     Q_OBJECT
+
 public:
 
     Archive *archive() const;

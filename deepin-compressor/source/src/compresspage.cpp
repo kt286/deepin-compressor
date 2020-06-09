@@ -83,7 +83,7 @@ void CompressPage::onNextPress()
     if (m_filelist.isEmpty()) {
         DDialog *dialog = new DDialog(this);
 
-        QPixmap pixmap = Utils::renderSVG(":/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(30, 30));
+        QPixmap pixmap = Utils::renderSVG(":assets/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(30, 30));
         dialog->setIcon(pixmap);
         dialog->setMessage(tr("Please add files"));
         dialog->addButton(tr("OK"));
@@ -102,7 +102,7 @@ void CompressPage::showDialog()
 {
     DDialog *dialog = new DDialog(this);
 
-    QPixmap pixmap = Utils::renderSVG(":/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(48, 48));
+    QPixmap pixmap = Utils::renderSVG(":assets/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(48, 48));
     dialog->setIcon(pixmap);
 
     DPalette pa;
@@ -178,17 +178,33 @@ void CompressPage::onSelectedFilesSlot(const QStringList &files)
     }
 
     QStringList inputlist = files;
+    int mode = 0;
+    bool bAll = false;
+
     foreach (QString m_path, m_filelist) {
         QFileInfo mfile(m_path);
         foreach (QString path, files) {
             QFileInfo file(path);
             if (file.fileName() == mfile.fileName()) {
-                int mode = showReplaceDialog(path);
+
+                if (!bAll) {
+                    OverwriteQuery query(path);
+                    query.execute();
+                    mode = query.getExecuteReturn();
+
+                    bAll = query.applyAll();
+                }
+                if (-1 == mode || 0 == mode) {        // skip or cancel
+                    inputlist.removeOne(path);
+                } else {                // overwrite
+                    m_filelist.removeOne(m_path);
+                }
+                /*int mode = showReplaceDialog(path);
                 if (0 == mode) {
                     inputlist.removeOne(path);
                 } else {
                     m_filelist.removeOne(m_path);
-                }
+                }*/
             }
         }
     }

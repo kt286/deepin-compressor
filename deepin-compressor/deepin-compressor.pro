@@ -94,7 +94,8 @@ HEADERS +=  \
     interface/tstypes.h \
     interface/globalarchivemanager_p.h \
     interface/archiverunnable.h \
-    interface/structs.h
+    interface/structs.h \
+    source/inc/openloadingpage.h
 
 
 
@@ -161,12 +162,13 @@ SOURCES +=  \
     interface/TSMutex.cpp \
     interface/globalarchivemanager.cpp \
     interface/archiverunnable.cpp \
-    interface/structs.cpp
+    interface/structs.cpp \
+    source/src/openloadingpage.cpp
 
 
 RESOURCES += deepin-compressor.qrc
 RESOURCES += config.qrc
-TRANSLATIONS += translations/*.ts
+TRANSLATIONS += ../translations/*.ts
 
 isEmpty(BINDIR):BINDIR=/usr/bin
 isEmpty(APPDIR):APPDIR=/usr/share/applications
@@ -192,7 +194,7 @@ manual.files = $$PWD/dman/*
 #translations.files = $$PWD/translations/*.qm
 
 CONFIG(release, debug|release) {
-    TRANSLATIONS = $$files($$PWD/translations/*.ts)
+    TRANSLATIONS = $$files($$PWD/../translations/*.ts)
     #遍历目录中的ts文件，调用lrelease将其生成为qm文件
     for(tsfile, TRANSLATIONS) {
         qmfile = $$replace(tsfile, .ts$, .qm)
@@ -200,15 +202,15 @@ CONFIG(release, debug|release) {
     }
     #将qm文件添加到安装包
     dtk_translations.path = /usr/share/$$TARGET/translations
-    dtk_translations.files = $$PWD/translations/*.qm
+    dtk_translations.files = $$PWD/../translations/*.qm
     INSTALLS += dtk_translations
 }
 
 icon_files.path = /usr/share/icons/hicolor/scalable/apps
-icon_files.files = $$PWD/icons/deepin/builtin/icons/deepin-compressor.svg
+icon_files.files = $$PWD/assets/icons/deepin/builtin/icons/deepin-compressor.svg
 
 mime_file.path = /usr/share/mime/packages
-mime_file.files = $$PWD/mimetype/*.xml
+mime_file.files = $$PWD/assets/mimetype/*.xml
 
 INSTALLS += target desktop icon_files desktopcontext mime_file
 
@@ -216,4 +218,4 @@ DISTFILES += \
     ../README.md \
     ../debian/control \
     ../debian/rules \
-    translations/*.ts
+    ../translations/*.ts

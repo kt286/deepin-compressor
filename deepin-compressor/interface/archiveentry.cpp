@@ -94,7 +94,6 @@ void Archive::Entry::removeEntryAt(int index)
     Q_ASSERT(index < m_entries.count());
     m_mapIndex.remove(m_entries[index]->name());
     m_entries.remove(index);
-
     m_iIndex--;
 
     QMap<QString, int>::iterator iter = m_mapIndex.begin();

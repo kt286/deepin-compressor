@@ -35,9 +35,9 @@
 #include <QTemporaryDir>
 #include <QTemporaryFile>
 #include <QUrl>
+#include <linux/limits.h>
 #include "analysepsdtool.h"
 #include "filewatcher.h"
-//#include "archiverunnable.h"
 
 CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWriteArchiveInterface(parent, args)
 {
@@ -138,6 +138,7 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
         this->extractPsdStatus = Checked;
         emit sigExtractPwdCheckDown();
     }
+    qDebug() << "####destpath：" << destPath;
     m_extractDestDir = destPath;
 //    qDebug() << m_extractDestDir;
     if (extractDst7z_.isEmpty() == false) {
@@ -552,6 +553,9 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
         if (password().isEmpty()) {
             //            qDebug() << "Extraction failed, the file is broken";
             //            emit error(tr("Extraction failed. the file is broken"));
+            if (destDirName.toUtf8().length() > NAME_MAX) { //Is the file name too long
+                emit error("Filename is too long");
+            }
         } else {
             qDebug() << "Extraction failed, the file is broken";
             //emit error(tr("Extraction failed. the file is broken"));

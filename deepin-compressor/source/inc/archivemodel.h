@@ -101,7 +101,7 @@ public:
     OpenJob *open(Archive::Entry *file) const;
     OpenWithJob *openWith(Archive::Entry *file) const;
 
-    AddJob *addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
+    //AddJob *addFilesOld(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     AddJob *addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, ReadOnlyArchiveInterface *pIface = nullptr, const CompressionOptions &options = CompressionOptions());
     MoveJob *moveFiles(QVector<Archive::Entry *> &entries, Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
     CopyJob *copyFiles(QVector<Archive::Entry *> &entries, Archive::Entry *destination, const CompressionOptions &options = CompressionOptions());
@@ -171,7 +171,6 @@ private:
 
     enum InsertBehaviour { NotifyViews, DoNotNotifyViews };
     Archive::Entry *parentFor(const Archive::Entry *entry, InsertBehaviour behaviour = NotifyViews);
-
     static bool compareAscending(const QModelIndex &a, const QModelIndex &b);
     static bool compareDescending(const QModelIndex &a, const QModelIndex &b);
     /**

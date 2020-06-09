@@ -48,6 +48,7 @@
 #include "archivesortfiltermodel.h"
 #include "batchextract.h"
 #include "batchcompress.h"
+#include "openloadingpage.h"
 #include <DFileWatcher>
 #include <QElapsedTimer>
 #include <QQueue>
@@ -71,7 +72,8 @@ enum Page_ID {
     PAGE_UNZIP_FAIL,
     PAGE_ENCRYPTION,
     PAGE_DELETEPROGRESS,
-    PAGE_MAX
+    PAGE_MAX,
+    PAGE_LOADING
 };
 
 enum EncryptionType {
@@ -154,8 +156,16 @@ public:
 };
 
 struct OpenInfo {
+    enum ENUM_OPTION {
+        CLOSE = 0,//正常关闭
+        OPEN = 1,//打开
+        QUERY_CLOSE_CANCEL = 2//询问后，关闭取消
+    };
+
+
     QString strWinId = "";//open view the winId
-    bool open = false;//暂时不用
+    ENUM_OPTION option = OPEN;
+    KJob *pJob = nullptr;
 };
 
 /**
@@ -235,11 +245,12 @@ public:
 //    void logShutDown();
     void bindAdapter();
 //    static Log4Qt::Logger *getLogger();
-
+    OpenInfo::ENUM_OPTION option = OpenInfo::OPEN;
 private:
     void saveWindowState();
     void loadWindowState();
     QString modelIndexToStr(const QModelIndex &modelIndex);//added by hsw 20200525
+    int queryDialogForClose();
 protected:
     void dragEnterEvent(QDragEnterEvent *) override;
     void dragLeaveEvent(QDragLeaveEvent *) override;
@@ -355,6 +366,7 @@ private:
     EncryptionPage *m_encryptionpage;
     ProgressDialog *m_progressdialog;
     SettingDialog *m_settingsDialog = nullptr;
+    OpenLoadingPage *m_pOpenLoadingPage;
     EncodingPage *m_encodingpage;
     QSettings *m_settings;
     Page_ID m_pageid;

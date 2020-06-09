@@ -488,6 +488,56 @@ QString Utils::toShortString(QString strSrc, int limitCounts, int left)
     return displayName;
 }
 
+bool Utils::checkAndDeleteDir(const QString &iFilePath)
+{
+    QFileInfo tempFileInfo(iFilePath);
+
+    if (tempFileInfo.isDir()) {
+        deleteDir(iFilePath);
+    } else if (tempFileInfo.isFile()) {
+        QFile deleteFile(iFilePath);
+        return  deleteFile.remove();
+    }
+}
+
+bool Utils::deleteDir(const QString &iFilePath)
+{
+    QDir directory(iFilePath);
+    if (!directory.exists()) {
+        return true;
+    }
+
+    QString srcPath = QDir::toNativeSeparators(iFilePath);
+    if (!srcPath.endsWith(QDir::separator()))
+        srcPath += QDir::separator();
+
+    QStringList fileNames = directory.entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
+    bool error = false;
+    for (QStringList::size_type i = 0; i != fileNames.size(); ++i) {
+        QString filePath = srcPath + fileNames.at(i);
+        QFileInfo fileInfo(filePath);
+        if (fileInfo.isFile() || fileInfo.isSymLink()) {
+            QFile::setPermissions(filePath, QFile::WriteOwner);
+            if (!QFile::remove(filePath)) {
+                qDebug() << "remove file" << filePath << " faild!";
+                error = true;
+            }
+        } else if (fileInfo.isDir()) {
+            if (!deleteDir(filePath)) {
+                error = true;
+            }
+        }
+    }
+
+    if (!directory.rmdir(QDir::toNativeSeparators(directory.path()))) {
+        qDebug() << "remove dir" << directory.path() << " faild!";
+        error = true;
+    }
+
+    return !error;
+
+}
+
 quint64 Utils::getAllFileCount(const QString &fullPath)
 {
     QFileInfo fileInfo(fullPath);

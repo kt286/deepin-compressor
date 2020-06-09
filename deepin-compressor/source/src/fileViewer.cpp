@@ -418,6 +418,7 @@ void fileViewer::InitUI()
         deleteAction = new QAction(tr("Delete"), this);
         m_pRightMenu->addAction(deleteAction);
         m_pRightMenu->addAction(tr("Open"));
+
         openWithDialogMenu = new  DMenu(tr("Open style"), this);
         m_pRightMenu->addMenu(openWithDialogMenu);
         pTableViewFile->setDragDropMode(QAbstractItemView::DragDrop);
@@ -461,18 +462,21 @@ void fileViewer::refreshTableview()
     firstmodel->setHorizontalHeaderItem(3, item);
 
     int rowindex = 0;
-    QFileIconProvider icon_provider;
     foreach (QFileInfo fileinfo, m_curfilelist) {
-        item = new MyFileItem(icon_provider.icon(fileinfo), fileinfo.fileName());
+        QMimeDatabase db;
+        QIcon icon;
+        fileinfo.isDir() ? icon = QIcon::fromTheme(db.mimeTypeForName(QStringLiteral("inode/directory")).iconName()).pixmap(24, 24)
+                                  : icon = QIcon::fromTheme(db.mimeTypeForFile(fileinfo.fileName()).iconName()).pixmap(24, 24);
+        //qDebug() << db.mimeTypeForFile(fileinfo.fileName()).iconName();
+        if (icon.isNull()) {
+            icon = QIcon::fromTheme("empty").pixmap(24, 24);
+        }
+        item = new MyFileItem(icon, fileinfo.fileName());
 
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         QFont font = DFontSizeManager::instance()->get(DFontSizeManager::T6);
         font.setWeight(QFont::Medium);
         item->setFont(font);
-
-//        DPalette pal ;
-//        pal.setBrush(DPalette::WindowText,pal.color(DPalette::WindowText));
-
 
         firstmodel->setItem(rowindex, 0, item);
         if (fileinfo.isDir()) {
@@ -489,7 +493,7 @@ void fileViewer::refreshTableview()
         item->setFont(font);
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         firstmodel->setItem(rowindex, 3, item);
-        QMimeType mimetype = determineMimeType(fileinfo.filePath());
+        QMimeType mimetype = determineMimeType(fileinfo.fileName());
         item = new MyFileItem(m_mimetype->displayName(mimetype.name()));
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         font = DFontSizeManager::instance()->get(DFontSizeManager::T7);
@@ -532,7 +536,16 @@ void fileViewer::updateAction(const QString &fileType)
     QList<QAction *> listAction =  OpenWithDialog::addMenuOpenAction(fileType);
 
     openWithDialogMenu->addActions(listAction);
-    openWithDialogMenu->addAction(new QAction(tr("Choose default programma")));
+    openWithDialogMenu->addAction(new QAction(tr("Choose default programma"), openWithDialogMenu));
+}
+
+void fileViewer::updateAction(bool isdirectory, const QString &fileType)
+{
+    if (isdirectory) {
+        updateAction(fileType + QDir::separator());
+    } else {
+        updateAction(fileType);
+    }
 }
 
 void fileViewer::openWithDialog(const QModelIndex &index)
@@ -945,7 +958,6 @@ void fileViewer::slotCompressRePreviousDoubleClicked()
         qDebug() << pModel->fileInfo(m_indexmode).path() << m_indexmode.data();
     } else {
         m_pathindex--;
-//        QModelIndex parentIndex = m_decompressmodel->indexForEntry(m_decompressmodel->getParentEntry());
         if (0 == m_pathindex) {
             pTableViewFile->setRootIndex(QModelIndex());
             pTableViewFile->setPreviousButtonVisible(false);
@@ -1252,20 +1264,15 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
         } else {
             QVector<Archive::Entry *> fileList = filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows()));
             QString fileName = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles" + QDir::separator() + fileList.at(0)->name();
-            QFile tempFile(fileName);
-            if (tempFile.exists()) {
-                tempFile.remove();
-            }
-            if (m_tempProcessId.empty()) {
-                emit sigextractfiles(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), EXTRACT_TEMP);
-            }
-
+            Utils::checkAndDeleteDir(fileName);
+            emit sigextractfiles(fileList, EXTRACT_TEMP);
         }
     }
 }
 void fileViewer::showRightMenu(const QPoint &pos)
 {
-    if (!pTableViewFile->indexAt(pos).isValid()) {
+    QModelIndex curindex = pTableViewFile->currentIndex();
+    if (!pTableViewFile->indexAt(pos).isValid() || !curindex.isValid()) {
         return;
     }
     if (m_pagetype == PAGE_COMPRESS) {
@@ -1275,10 +1282,42 @@ void fileViewer::showRightMenu(const QPoint &pos)
             m_pRightMenu->addAction(deleteAction);
         }
     }
-    m_pRightMenu->popup(QCursor::pos());
-    openWithDialogMenu->clear();
-    updateAction(pTableViewFile->indexAt(pos).data().toString());
 
+    openWithDialogMenu->clear();
+    //updateAction(pTableViewFile->indexAt(pos).data().toString());
+
+    if (m_pagetype == PAGE_COMPRESS) {
+        if (0 == m_pathindex) {
+            QModelIndex selectIndex = pTableViewFile->model()->index(curindex.row(), 0);
+            if (m_curfilelist.isEmpty()) {
+                return;
+            }
+            QString selectStr = selectIndex.data().toString();
+            int atindex = -1;
+            for (auto it : m_curfilelist) {
+                ++atindex;
+                if (selectStr == it.fileName()) {
+                    break;
+                }
+            }
+            updateAction(m_curfilelist.at(atindex).isDir(), selectStr);
+        } else {
+            QModelIndex currentparent = pTableViewFile->model()->parent(curindex);
+            QModelIndex selectIndex = pTableViewFile->model()->index(curindex.row(), 0, currentparent);
+//            qDebug() << pTableViewFile->indexAt(pos).data().toString() << m_curfilelist << pModel->fileInfo(curindex);
+            updateAction(pModel && pModel->fileInfo(curindex).isDir(), selectIndex.data().toString());
+        }
+    } else {
+        QModelIndex currentparent = pTableViewFile->model()->parent(curindex);
+//        qDebug() << pTableViewFile->rowAt(pos.y()) << pTableViewFile->columnAt(pos.x()) << curindex << pTableViewFile->model()->index(curindex.row(), 0, currentparent).data() << currentparent.isValid();
+        QModelIndex selectIndex = pTableViewFile->model()->index(curindex.row(), 0, currentparent);
+        QVector<Archive::Entry *> selectEntry = filesForIndexes(QModelIndexList() << selectIndex);
+        if (!selectEntry.isEmpty()) {
+            updateAction(selectEntry.at(0)->isDir(), selectIndex.data().toString());
+        }
+    }
+
+    m_pRightMenu->popup(QCursor::pos());
 }
 
 void fileViewer::slotDragLeave(QString path)
@@ -1322,11 +1361,31 @@ void fileViewer::onRightMenuOpenWithClicked(QAction *action)
     if (PAGE_UNCOMPRESS == m_pagetype) {
         QVector<Archive::Entry *> fileList = filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows()));
         QString fileName = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles" + QDir::separator() + fileList.at(0)->name();
-        QFile tempFile(fileName);
-        if (tempFile.exists()) {
-            tempFile.remove();
+
+        Utils::checkAndDeleteDir(fileName);
+        /*emit sigOpenWith(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), action->text());*/
+        if (action->text() == tr("Choose default programma")) {
+
+            QModelIndex curindex = pTableViewFile->currentIndex();
+            QModelIndex currentparent = pTableViewFile->model()->parent(curindex);
+            QModelIndex selectIndex = pTableViewFile->model()->index(curindex.row(), 0, currentparent);
+//            QVector<Archive::Entry *> selectEntry = filesForIndexes(QModelIndexList() << selectIndex);
+//            if (!selectEntry.isEmpty()) {
+//                updateAction(selectEntry.at(0)->isDir(), selectIndex.data().toString());
+//            }
+
+            OpenWithDialog *openDialog = new OpenWithDialog(DUrl(selectIndex.data().toString()), this);
+            openDialog->SetShowType(SelApp);
+            openDialog->exec();
+            QString strAppDisplayName = openDialog->AppDisplayName();
+            if (!strAppDisplayName.isEmpty()) {
+                emit sigOpenWith(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), strAppDisplayName);
+            }
+
+        } else {
+            emit sigOpenWith(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), action->text());
         }
-        emit sigOpenWith(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), action->text());
+        //emit sigOpenWith(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), action->text());
     } else {
         if (action->text() != tr("Choose default programma")) {
             openWithDialog(pTableViewFile->currentIndex(), action->text());

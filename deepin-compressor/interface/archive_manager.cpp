@@ -29,7 +29,6 @@
 #include <QRegularExpression>
 #include "kpluginloader.h"
 #include "kpluginfactory.h"
-//#include "globalarchivemanager.h"
 
 Q_DECLARE_METATYPE(KPluginMetaData)
 
@@ -279,7 +278,7 @@ Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString exter
         map->insert(entry->fullPath(NoTrailingSlash), icon);
         i++;
     } ;
-    qDebug() << "SSSSS4";
+    //qDebug() << "SSSSS4";
 }
 
 void Archive::CreateEntryNew(QString path, Archive::Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map)
@@ -339,14 +338,14 @@ void Archive::CreateEntryNew(QString path, Archive::Entry *&parent, QString exte
     }
 }
 
-AddJob *Archive::add(Archive *pArchive, const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
-{
-    if (!pArchive) {
-        return nullptr;
-    }
-    auto newarchive =  pArchive->addFiles(files, destination, options);
-    return newarchive;
-}
+//AddJob *Archive::add(Archive *pArchive, const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
+//{
+//    if (!pArchive) {
+//        return nullptr;
+//    }
+//    auto newarchive =  pArchive->addFiles(files, destination, options);
+//    return newarchive;
+//}
 
 Archive *Archive::createEmpty(const QString &fileName, const QString &mimeType, QObject *parent)
 {
@@ -489,16 +488,16 @@ CommentJob *Archive::addComment(const QString &comment)
     return job;
 }
 
-TestJob *Archive::testArchive()
-{
-    if (!isValid()) {
-        return nullptr;
-    }
+//TestJob *Archive::testArchive()
+//{
+//    if (!isValid()) {
+//        return nullptr;
+//    }
 
 
-    TestJob *job = new TestJob(m_iface);
-    return job;
-}
+//    TestJob *job = new TestJob(m_iface);
+//    return job;
+//}
 
 QMimeType Archive::mimeType()
 {
@@ -650,6 +649,11 @@ AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive:
         newOptions.setEncryptedArchiveHint(true);
     }
 
+
+    if (pIface == nullptr) {
+        pIface = m_iface;
+    }
+
     Q_ASSERT(!pIface->isReadOnly());
     if (pIface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_LIBZIP) {
         qDebug() << "a";
@@ -660,28 +664,29 @@ AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive:
     } else if (pIface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_READWRITE_LIBARCHIVE) {
         qDebug() << "d";
     }
+
     AddJob *newJob = new AddJob(files, destination, newOptions, static_cast<ReadWriteArchiveInterface *>(pIface));
     connect(newJob, &AddJob::result, this, &Archive::onAddFinished);
     return newJob;
 }
 
-AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
-{
-    if (!isValid()) {
-        return nullptr;
-    }
+//AddJob *Archive::addFilesOld(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
+//{
+//    if (!isValid()) {
+//        return nullptr;
+//    }
 
-    CompressionOptions newOptions = options;
-    if (encryptionType() != Unencrypted) {
-        newOptions.setEncryptedArchiveHint(true);
-    }
+//    CompressionOptions newOptions = options;
+//    if (encryptionType() != Unencrypted) {
+//        newOptions.setEncryptedArchiveHint(true);
+//    }
 
-    Q_ASSERT(!m_iface->isReadOnly());
+//    Q_ASSERT(!m_iface->isReadOnly());
 
-    AddJob *newJob = new AddJob(files, destination, newOptions, static_cast<ReadWriteArchiveInterface *>(m_iface));
-    connect(newJob, &AddJob::result, this, &Archive::onAddFinished);
-    return newJob;
-}
+//    AddJob *newJob = new AddJob(files, destination, newOptions, static_cast<ReadWriteArchiveInterface *>(m_iface));
+//    connect(newJob, &AddJob::result, this, &Archive::onAddFinished);
+//    return newJob;
+//}
 
 MoveJob *Archive::moveFiles(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options)
 {
