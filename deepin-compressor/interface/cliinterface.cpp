@@ -100,7 +100,13 @@ bool CliInterface::list(bool isbatch)
         setPassword("temp");
     }
 
-    return runProcess(m_cliProps->property("listProgram").toString(), m_cliProps->listArgs(filename(), password()));
+    //用个标志位ischeckdown判断是否有密码，是否验证密码
+    //7z t 用来检测是否有密码、密码是否正确
+    if (ischeckdown) {
+        return runProcess(m_cliProps->property("listProgram").toString(), m_cliProps->listArgs(filename(), password()));
+    } else {
+        return runProcess(m_cliProps->property("testProgram").toString(), m_cliProps->testArgs(filename(), password()));
+    }
 }
 
 bool CliInterface::extractFiles(const QVector< Archive::Entry * > &files, const QString &destinationDirectory,
@@ -426,8 +432,13 @@ void CliInterface::processFinished(int exitCode, QProcess::ExitStatus exitStatus
         setPassword(QString());
         return;
     } else {
-        emit progress(1.0);
-        emit finished(true);
+        if (ischeckdown == false) { //test通过后再list
+            ischeckdown = true;
+            list(m_isbatchlist);
+        } else {
+            emit progress(1.0);
+            emit finished(true);
+        }
     }
 }
 
@@ -929,7 +940,8 @@ void CliInterface::readStdout(bool handleAll)
 
     QByteArray dd = m_process->readAllStandardOutput();
     m_stdOutData += dd;
-
+    // QString str = m_stdOutData;
+    // qDebug() << str;
     QList< QByteArray > lines = m_stdOutData.split('\n');
 
     // The reason for this check is that archivers often do not end
