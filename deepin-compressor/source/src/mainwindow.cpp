@@ -794,6 +794,7 @@ bool MainWindow::createSubWindow(const QStringList &urls)
 //    }
     MainWindow *subWindow = new MainWindow();
     subWindow->pMapGlobalWnd = this->pMapGlobalWnd;//获取deepin-compressor进程中的全局窗口map
+    subWindow->strChildMndExtractPath = this->strChildMndExtractPath;//子面板的解压路径必须和父面板的解压路径统一
     if (this->pMapGlobalWnd == nullptr) {
         this->pMapGlobalWnd = new GlobalMainWindowMap();
     }
@@ -1119,10 +1120,14 @@ void MainWindow::onSelected(const QStringList &files)
             QFileInfo fileinfo(filename);
             m_decompressfilename = fileinfo.fileName();
             m_UnCompressPage->SetDefaultFile(fileinfo);
+            if (strChildMndExtractPath == nullptr) {
+                strChildMndExtractPath = new QString(fileinfo.path());
+            }
             if ("" != m_settingsDialog->getCurExtractPath() && m_UnCompressPage->getExtractType() != EXTRACT_HEAR) {
                 m_UnCompressPage->setdefaultpath(m_settingsDialog->getCurExtractPath());
             } else {
-                m_UnCompressPage->setdefaultpath(fileinfo.path());
+//                m_UnCompressPage->setdefaultpath(fileinfo.path());
+                m_UnCompressPage->setdefaultpath(*strChildMndExtractPath);
             }
 
             m_pageid = PAGE_LOADING;
@@ -1380,7 +1385,12 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         if ("" != m_settingsDialog->getCurExtractPath() && m_UnCompressPage->getExtractType() != EXTRACT_HEAR) {
             m_UnCompressPage->setdefaultpath(m_settingsDialog->getCurExtractPath());
         } else {
-            m_UnCompressPage->setdefaultpath(fileinfo.path());
+//            m_UnCompressPage->setdefaultpath(fileinfo.path());
+//            m_UnCompressPage->setdefaultpath("/home/hushiwei/Documents");//只需要在这里把路径设置为第一级窗口的解压路径，而不是临时路径。
+            if (strChildMndExtractPath == nullptr) {
+                strChildMndExtractPath = new QString(fileinfo.path());
+            }
+            m_UnCompressPage->setdefaultpath(*strChildMndExtractPath);
         }
         m_pageid = Page_ID::PAGE_LOADING;
         loadArchive(filename);
