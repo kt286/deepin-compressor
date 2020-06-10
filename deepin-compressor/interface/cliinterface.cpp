@@ -168,20 +168,20 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
     }
 
 
-    //get user input password
-    QString psdd = password();
-    if (!m_cliProps->property("passwordSwitch").toStringList().isEmpty() && ifNeedPsd
-            && psdd.isEmpty()) {
-        qDebug() << "Password hint enabled, querying user";
-        if (m_extractionOptions.isBatchExtract()) {
-            if (!passwordQuery()) {
-                return false;
-            }
-        } else {
-            emit sigExtractNeedPassword();
-            return false;
-        }
-    }
+//    //get user input password
+//    QString psdd = password();
+//    if (!m_cliProps->property("passwordSwitch").toStringList().isEmpty() && ifNeedPsd
+//            && psdd.isEmpty()) {
+//        qDebug() << "Password hint enabled, querying user";
+//        if (m_extractionOptions.isBatchExtract()) {
+//            if (!passwordQuery()) {
+//                return false;
+//            }
+//        } else {
+//            emit sigExtractNeedPassword();
+//            return false;
+//        }
+//    }
 
     QUrl destDir = QUrl(destPath);
     m_oldWorkingDirExtraction = QDir::currentPath();
@@ -264,13 +264,13 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
         filesToPass = files;
     }
 
-    if (!m_cliProps->property("passwordSwitch").toString().isEmpty() && options.encryptedArchiveHint()
-            && password().isEmpty()) {
-        qDebug() << "Password hint enabled, querying user";
-        if (!passwordQuery()) {
-            return false;
-        }
-    }
+//    if (!m_cliProps->property("passwordSwitch").toString().isEmpty() && options.encryptedArchiveHint()
+//            && password().isEmpty()) {
+//        qDebug() << "Password hint enabled, querying user";
+//        if (!passwordQuery()) {
+//            return false;
+//        }
+//    }
 
     QStringList arguments = m_cliProps->addArgs(filename(),
                                                 entryFullPaths(filesToPass, NoTrailingSlash),
@@ -432,7 +432,7 @@ void CliInterface::processFinished(int exitCode, QProcess::ExitStatus exitStatus
         setPassword(QString());
         return;
     } else {
-        if (ischeckdown == false) { //test通过后再list
+        if (m_operationMode == List && ischeckdown == false) { //test通过后再list
             ischeckdown = true;
             list(m_isbatchlist);
         } else {
