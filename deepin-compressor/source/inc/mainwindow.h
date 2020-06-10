@@ -191,7 +191,7 @@ struct MainWindow_AuxInfo {
 
 static QVector<qint64> m_tempProcessId;
 class QStackedLayout;
-static int m_windowcount = 1;
+
 class MonitorAdaptor;
 
 class MainWindow : public DMainWindow
@@ -200,6 +200,7 @@ class MainWindow : public DMainWindow
     Q_CLASSINFO("D-Bus Interface", "com.archive.mainwindow.monitor")
 
 public:
+    static int m_windowcount;
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
@@ -349,7 +350,13 @@ private:
     QStringList CheckAllFiles(QString path);
     void deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/);
     void deleteDecompressFile(QString destDirName = "");
-
+    /**
+     * @brief startCmd
+     * @param executeName
+     * @param arguments
+     * @see 启动一个命令，完成后自动销毁
+     */
+    bool startCmd(const QString &executeName, QStringList arguments);
 private:
     DLabel *m_logo;
     QPixmap m_logoicon;

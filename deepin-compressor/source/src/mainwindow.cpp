@@ -64,6 +64,8 @@ DWIDGET_USE_NAMESPACE
 
 QString MainWindow::m_loadfile;
 
+int MainWindow::m_windowcount = 1;
+
 MainWindow::MainWindow(QWidget *parent) : DMainWindow(parent)
 {
 //    setAttribute(Qt::WA_DeleteOnClose);
@@ -1054,7 +1056,10 @@ qint64 MainWindow::calFileSize(const QString &path)
 {
     QDir dir(path);
     qint64 size = 0;
-
+    if (dir.entryInfoList().length() == 0) {
+        QFileInfo file(path);
+        return file.size();
+    }
     foreach (QFileInfo fileInfo, dir.entryInfoList(QDir::Files)) {
         qint64 curFileSize = fileInfo.size();
 
@@ -1153,23 +1158,15 @@ void MainWindow::onSelected(const QStringList &files)
             if (1 == mode) {
                 emit sigZipSelectedFiles(files);
             } else if (2 == mode) {
-                KProcess *cmdprocess = new KProcess(this);
+
                 QStringList arguments;
-
-                QString programPath = QStandardPaths::findExecutable("deepin-compressor");
-                if (programPath.isEmpty()) {
-                    qDebug() << "error can't find xdg-mime";
-                    return;
-                }
-
                 arguments << files.at(0);
-
                 qDebug() << arguments;
-
-                cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
-                cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
-                cmdprocess->setProgram(programPath, arguments);
-                cmdprocess->start();
+//                cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
+//                cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
+//                cmdprocess->setProgram(programPath, arguments);
+//                cmdprocess->start();
+                startCmd("deepin-compressor", arguments);
             }
         }
     } else {
@@ -1685,15 +1682,15 @@ void MainWindow::slotExtractionDone(KJob *job)
     } else if (Encryption_TempExtract == m_encryptiontype) {
 
         m_pOpenLoadingPage->stop();
-        KProcess *cmdprocess = new KProcess;
+
         QStringList arguments;
-        QString programPath = QStandardPaths::findExecutable("xdg-open");
+        QString programName = "xdg-open";
         /*for (int i = 0; i < m_extractSimpleFiles.count(); i++)*/
 //        {
         QString firstFileName = m_extractSimpleFiles.at(0)->name();
         bool isCompressedFile = Utils::isCompressed_file(firstFileName);
         if (isCompressedFile == true) {
-            programPath = QStandardPaths::findExecutable("deepin-compressor");
+            programName = "deepin-compressor";
         }
         QFileInfo file(firstFileName);
         if (file.fileName().contains("%")/* && file.fileName().contains(".png")*/) {
@@ -1734,10 +1731,12 @@ void MainWindow::slotExtractionDone(KJob *job)
 //        }
 
         qDebug() << arguments;
-        cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
-        cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
-        cmdprocess->setProgram(programPath, arguments);
-        cmdprocess->start();
+        startCmd(programName, arguments);
+//        KProcess *cmdprocess = new KProcess;
+//        cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
+//        cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
+//        cmdprocess->setProgram(programPath, arguments);
+//        cmdprocess->start();
         m_pageid = PAGE_UNZIP;
         refreshPage();
     } else if (Encryption_SingleExtract == m_encryptiontype || m_encryptiontype == Encryption_DRAG) {
@@ -2719,6 +2718,30 @@ void MainWindow::deleteDecompressFile(QString destDirName)
     }
 }
 
+bool MainWindow::startCmd(const QString &executeName, QStringList arguments)
+{
+    QString programPath = QStandardPaths::findExecutable(executeName);
+    if (programPath.isEmpty()) {
+        qDebug() << "error can't find xdg-mime";
+        return false;
+    }
+    KProcess *cmdprocess = new KProcess;
+    cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
+    cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
+    cmdprocess->setProgram(programPath, arguments);
+    auto func = [ = ](int status)->void {
+        if (cmdprocess != nullptr)
+        {
+            QObject::disconnect(cmdprocess);
+            delete cmdprocess; //防止内存泄露，结束之后一定要delete
+        }
+    };
+
+    QObject::connect(cmdprocess, QOverload< int, QProcess::ExitStatus >::of(&QProcess::finished), func);
+    cmdprocess->start();
+    return true;
+}
+
 void MainWindow::creatArchive(QMap< QString, QString > &Args)
 {
     const QStringList filesToAdd = m_CompressPage->getCompressFilelist();
@@ -2987,7 +3010,6 @@ QString MainWindow::modelIndexToStr(const QModelIndex &index)
 
 void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QString path, EXTRACT_TYPE type)
 {
-//    m_timer.start();
     m_Progess->pInfo()->startTimer();
     QStringList m_tempFileList;
     m_tempFileList.insert(0, path);
@@ -2996,7 +3018,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     calSelectedTotalFileSize(m_tempFileList);
     m_progressdialog->setProcess(0);
     m_Progess->setprogress(0);
-    // m_progressTransFlag = false;
+
     m_workstatus = WorkProcess;
     m_pathstore = path;
 
@@ -3032,7 +3054,6 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
 
     } else if (type == EXTRACT_TEMP_CHOOSE_OPEN) {
         m_encryptiontype =  Encryption_TempExtract_Open_Choose;
-        // m_openType = true;
         m_Progess->setopentype(true);
     } else if (type == EXTRACT_DRAG) {
         m_encryptiontype =  Encryption_DRAG;
@@ -3044,9 +3065,6 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         return;
     }
 
-//    if (m_encryptionjob) {
-//        m_encryptionjob = nullptr;
-//    }
     if (m_pJob) {
         m_pJob->deleteLater();
         m_pJob = nullptr;
@@ -3055,9 +3073,48 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     ExtractionOptions options;
     options.setDragAndDropEnabled(true);
     m_extractSimpleFiles = fileList;
-    const QString destinationDirectory = path;
+    QString destinationDirectory = path;
 
     //m_compressDirFiles = CheckAllFiles(path);
+
+
+    Archive::Entry *pDestEntry = fileList[0];
+    if (destinationDirectory.right(1) == QDir::separator() == false) {
+        destinationDirectory = destinationDirectory + QDir::separator();
+    }
+    QString destEntryPath = destinationDirectory + pDestEntry->fullPath();
+    QFileInfo fileInfo(destEntryPath);
+
+    if (fileInfo.exists()) {//判断解压文件是否已经在目标路径下已经解压出来，如果解压出来，则不再解压
+        qint64 size = pDestEntry->getSize();
+        qint64 size1 = calFileSize(destEntryPath);
+        if (size == size1) {
+
+            QString programName = "xdg-open";
+            QString firstFileName = m_extractSimpleFiles.at(0)->name();
+            bool isCompressedFile = Utils::isCompressed_file(pDestEntry->fullPath());
+
+
+            QStringList arguments;
+            arguments << destEntryPath;//the first arg
+
+            if (pMapGlobalWnd == nullptr) {
+                pMapGlobalWnd = new GlobalMainWindowMap();
+            }
+            pMapGlobalWnd->insert(QString::number(this->winId()), this);
+            if (isCompressedFile == true) {
+                programName = "deepin-compressor";
+                arguments << HEADBUS + QString::number(this->winId());//the second arg
+                QModelIndex index = this->m_model->indexForEntry(pDestEntry);
+                QString strIndex = modelIndexToStr(index);
+                arguments << strIndex;//the third arg
+            }
+
+            startCmd(programName, arguments);
+            return;
+        }
+
+    }
 
     m_pJob = m_model->extractFiles(fileList, destinationDirectory, options);
     if (m_pJob == nullptr || m_pJob->mType != Job::ENUM_JOBTYPE::EXTRACTJOB) {

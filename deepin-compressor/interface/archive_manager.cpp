@@ -218,11 +218,11 @@ CreateJob *Archive::create(const QString &fileName, const QString &mimeType, con
     return createJob;
 }
 
-Archive::Entry *Archive::CreateEntry(QString path, Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map)
+void Archive::CreateEntry(QString path, Entry *&parent, QString externalPath, QHash<QString, QIcon> *&map)
 {
     QDir dir(path);
     if (!dir.exists()) {
-        return nullptr;
+        return ;
     }
     if (map == nullptr) {
         map = new QHash<QString, QIcon>();
