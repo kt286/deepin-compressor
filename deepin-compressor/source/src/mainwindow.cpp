@@ -1645,8 +1645,41 @@ void MainWindow::slotExtractionDone(KJob *job)
             delete this->m_pWatcher;
             this->m_pWatcher = nullptr;
         }
+//        m_pJob->deleteLater();
+//        m_pJob = nullptr;
+        int errcode = this->m_pJob->error();
+
         m_pJob->deleteLater();
         m_pJob = nullptr;
+        if (errcode == 0 && m_encryptiontype != Encryption_SingleExtract) {  // 解压成功后关闭独立窗口,提取单个不关闭界面
+            if (this->pCurAuxInfo == nullptr || this->pCurAuxInfo->information.size() == 0) {
+                m_pageid = PAGE_UNZIP_SUCCESS;
+                refreshPage();
+                this->close();
+                if (this->pCurAuxInfo != nullptr) {
+                    MainWindow_AuxInfo *parentInfo = this->pCurAuxInfo->parentAuxInfo;
+                    QString strWId = QString::number(this->winId());
+                    if (parentInfo) {
+                        QMap<QString, OpenInfo *>::iterator iter;
+                        QString key;
+                        for (iter = parentInfo->information.begin(); iter != parentInfo->information.end();) {
+                            //先存key
+                            key = iter.key();
+                            //指针移至下一个位置
+                            iter++;
+                            if (parentInfo->information[key]->strWinId == strWId) {
+                                //删除当前位置数据
+                                OpenInfo *p = parentInfo->information.take(key);
+                                delete p;
+                                p = nullptr;
+                            }
+                        }
+                    }
+
+                }
+                return;
+            }
+        }
     }
 
     int errorCode = job->error();

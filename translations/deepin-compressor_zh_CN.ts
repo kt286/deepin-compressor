@@ -194,7 +194,7 @@
     <message>
         <location filename="../deepin-compressor/source/src/compresssetting.cpp" line="1139"/>
         <source>The file name under this path already exists, replace it?</source>
-        <translation type="unfinished"></translation>
+        <translation>您选择的路径存在同名压缩包，是否替换？</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/compresssetting.cpp" line="1141"/>

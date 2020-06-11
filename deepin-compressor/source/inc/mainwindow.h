@@ -80,7 +80,7 @@ enum EncryptionType {
     Encryption_NULL,
     Encryption_Load,
     Encryption_Extract,
-    Encryption_SingleExtract,
+    Encryption_SingleExtract,//提取单个
     Encryption_ExtractHere,
     Encryption_TempExtract,
     Encryption_TempExtract_Open,
@@ -162,9 +162,11 @@ struct OpenInfo {
         QUERY_CLOSE_CANCEL = 2//询问后，关闭取消
     };
 
-
-    QString strWinId = "";//open view the winId
+    // 逻辑子窗口的WinId
+    QString strWinId = "";
+    // 逻辑子窗口的状态
     ENUM_OPTION option = OPEN;
+    // 逻辑子窗口的job
     KJob *pJob = nullptr;
 };
 
@@ -175,16 +177,14 @@ struct OpenInfo {
 struct MainWindow_AuxInfo {
     /**
      * @brief infomation
+     * @see节点详情
      * @ key :strModexIndex,see as modelIndexToStr()
      * @ value :the pointer of open info
      */
     QMap<QString, OpenInfo *> information;
     /**
-     * @brief childAuxInfo
-     */
-//    MainWindow_AuxInfo *childAuxInfo = nullptr;
-    /**
      * @brief parentAuxInfo
+     * @see 逻辑父面板辅助信息节点
      */
     MainWindow_AuxInfo *parentAuxInfo = nullptr;
 };
@@ -412,6 +412,10 @@ private:
 
     GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
     MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
+    /**
+     * @brief pCurAuxInfo
+     * @see 当前面板辅助信息
+     */
     MainWindow_AuxInfo *pCurAuxInfo = nullptr;//added by hsw 20200525
 
 private:
