@@ -61,9 +61,6 @@ DWIDGET_USE_NAMESPACE
 
 #define DEFAUTL_PATH DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"+ QDir::separator()
 
-
-QString MainWindow::m_loadfile;
-
 int MainWindow::m_windowcount = 1;
 
 MainWindow::MainWindow(QWidget *parent) : DMainWindow(parent)
@@ -108,7 +105,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::bindAdapter()
 {
-    MonitorAdaptor *adaptor = new MonitorAdaptor(this);
+    m_adaptor = new MonitorAdaptor(this);
 }
 
 qint64 MainWindow::getMediaFreeSpace()
@@ -209,7 +206,7 @@ int MainWindow::queryDialogForClose()
     dialog->setIcon(icon /*, QSize(32, 32)*/);
     dialog->setMessage(tr("Do you want to close the window even it has working job?"));
     dialog->addButton(tr("Cancel"));
-    dialog->addButton(tr("Ok"));
+    dialog->addButton(QObject::tr("OK"));
 //    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect();
 //    effect->setOffset(0, 4);
 //    effect->setColor(QColor(0, 145, 255, 76));
@@ -1438,6 +1435,7 @@ void MainWindow::loadArchive(const QString &files)
 
     m_workstatus = WorkProcess;
     m_loadfile = transFile;
+    m_UnCompressPage->getFileViewer()->setLoadFilePath(m_loadfile);
     m_encryptiontype = Encryption_Load;
     m_pJob = m_model->loadArchive(transFile, "", m_model);
     if (m_pJob == nullptr) {

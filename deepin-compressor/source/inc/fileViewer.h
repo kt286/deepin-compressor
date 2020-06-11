@@ -181,7 +181,7 @@ public:
 
     MyTableView *getTableView();
 
-
+    void setLoadFilePath(const QString &);
 public slots:
     void showPlable();
     void onSortIndicatorChanged(int logicalIndex, Qt::SortOrder order);
@@ -268,7 +268,7 @@ private:
     bool isPromptDelete = false;
     SubActionInfo m_ActionInfo;
     int openFileTempLink = 0;
-
+    QString  m_loadPath = "";
     bool m_bDropAdd;
 };
 

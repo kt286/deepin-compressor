@@ -1881,7 +1881,7 @@ bool LibzipPlugin::verifyPassword()
                     setPassword(QString());
                     zip_set_default_password(archive, passwordUnicode(password()));
                     zip_close(archive);
-                    return false;
+                    return true;
                 }
 
             } else if (zip_error_code_zip(zip_get_error(archive)) == ZIP_ER_WRONGPASSWD) {

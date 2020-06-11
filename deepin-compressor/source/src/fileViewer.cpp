@@ -842,6 +842,11 @@ MyTableView *fileViewer::getTableView()
     return pTableViewFile;
 }
 
+void fileViewer::setLoadFilePath(const QString &path)
+{
+    this->m_loadPath = path;
+}
+
 int fileViewer::getPathIndex()
 {
     return m_pathindex;
@@ -971,7 +976,7 @@ void fileViewer::slotCompressRePreviousDoubleClicked()
             pTableViewFile->setRootIndex(m_sortmodel->mapFromSource(m_indexmode));
             Archive::Entry *entry = m_decompressmodel->entryForIndex(m_indexmode);
             m_decompressmodel->setParentEntry(m_indexmode);//set parentEntry,added by hsw
-            restoreHeaderSort(zipPathUnique + MainWindow::getLoadFile() + "/" + entry->fullPath());
+            restoreHeaderSort(zipPathUnique + this->m_loadPath + "/" + entry->fullPath());
         }
     }
     emit  sigpathindexChanged();
@@ -1071,7 +1076,7 @@ void fileViewer::onSortIndicatorChanged(int logicalIndex, Qt::SortOrder order)
             SortInfo info;
             info.sortOrder = order;
             info.sortRole = logicalIndex;
-            QString rootPath = zipPathUnique + MainWindow::getLoadFile() + "/" + item->fullPath();
+            QString rootPath = zipPathUnique + this->m_loadPath + "/" + item->fullPath();
             sortCache_[rootPath] = info;
             return;
         }
@@ -1235,7 +1240,7 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
                 m_pathindex++;
                 m_indexmode = curIndex;
                 Archive::Entry *entry = m_decompressmodel->entryForIndex(sourceIndex);
-                restoreHeaderSort(zipPathUnique + MainWindow::getLoadFile() + "/" + entry->fullPath());
+                restoreHeaderSort(zipPathUnique + this->m_loadPath + "/" + entry->fullPath());
                 /*if (0 == entry->entries().count()) {
                     showPlable();
                 }*/
@@ -1256,7 +1261,7 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
             m_pathindex++;
             m_indexmode = sourceindex;
             Archive::Entry *entry = m_decompressmodel->entryForIndex(m_sortmodel->mapToSource(index));
-            restoreHeaderSort(zipPathUnique + MainWindow::getLoadFile() + "/" + entry->fullPath());
+            restoreHeaderSort(zipPathUnique + /*MainWindow::getLoadFile()*/this->m_loadPath + "/" + entry->fullPath());
             if (0 == entry->entries().count()) {
                 showPlable();
             }

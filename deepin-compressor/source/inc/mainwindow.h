@@ -233,7 +233,7 @@ public:
     void LoadPassword(QString password);
     void WatcherFile(const QString &files);
     void renameCompress(QString &filename, QString fixedMimeType);
-    static QString getLoadFile();
+    QString getLoadFile();
     qint64 getDiskFreeSpace();
     qint64 getMediaFreeSpace();
 
@@ -335,12 +335,13 @@ signals:
     void deleteJobComplete(Archive::Entry *pEntry);
 
 private:
+    MonitorAdaptor *m_adaptor = nullptr;
     Archive *m_archive_manager = nullptr;
     ArchiveModel *m_model = nullptr;
-    ArchiveSortFilterModel *m_filterModel;
+    ArchiveSortFilterModel *m_filterModel = nullptr;
     QString m_decompressfilename;
     QString m_decompressfilepath;
-    static QString m_loadfile;
+    QString m_loadfile;
     QString m_addFile;
 
     void setCompressDefaultPath();
