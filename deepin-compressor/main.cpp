@@ -31,6 +31,7 @@
 #include "monitorAdaptor.h"
 #include "monitorInterface.h"
 #include "openwithdialog/openwithdialog.h"
+#include <QMessageBox>
 
 int main(int argc, char *argv[])
 {

@@ -3,7 +3,7 @@
 #include <QJsonArray>
 #include <QJsonParseError>
 #include "../../deepin-compressor/interface/queries.h"
-
+#include "../../deepin-compressor/interface/kprocess.h"
 
 
 
@@ -152,7 +152,6 @@ void CliPlugin::processFinished(int exitCode, QProcess::ExitStatus /*exitStatus*
     if (m_process) {
         //handle all the remaining data in the process
         readStdout(true);
-
         delete m_process;
         m_process = nullptr;
     }

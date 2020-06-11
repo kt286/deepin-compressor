@@ -26,7 +26,7 @@ Archive::Entry::Entry(QObject *parent, const QString &fullPath, const QString &r
     : QObject(parent)
     , rootNode(rootNode)
     , compressedSizeIsSet(true)
-    , m_parent((Entry *)(parent))
+//    , m_parent((Entry *)(parent)) //注释by hsw 20200611,请使用setParent
     , m_size(0)
     , m_compressedSize(0)
     , m_isDirectory(false)
@@ -296,7 +296,7 @@ void Archive::Entry::getFilesCount(Archive::Entry *pEntry, int &count)
     }
 }
 
-void *Archive::Entry::checkLeavesNode(Entry *pE, QVector<Archive::Entry *> *pV)
+void Archive::Entry::checkLeavesNode(Entry *pE, QVector<Archive::Entry *> *pV)
 {
     const auto archiveEntries = pE->entries();
     for (auto entry : archiveEntries) {

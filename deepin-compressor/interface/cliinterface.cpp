@@ -224,7 +224,7 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
 
     qDebug() << "Adding" << files.count() << "file(s) to destination:" << destinationPath;
     m_curfilenumber = 0;
-    m_allfilenumber = numberOfEntriesToAdd;
+    m_allfilenumber = static_cast<int>(numberOfEntriesToAdd);
 
     if (!destinationPath.isEmpty()) {
         m_extractTempDir.reset(new QTemporaryDir());
@@ -240,11 +240,7 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
             if (preservedParent == nullptr) {
                 preservedParent = file->getParent();
             }
-
-//            const QString filePath = QDir::currentPath() + QLatin1Char('/') + file->fullPath(NoTrailingSlash);
-//            const QString filePath = QDir::currentPath() + QLatin1Char('/') + file->name();
             const QString filePath = file->fullPath();
-//            const QString newFilePath = absoluteDestinationPath + file->fullPath(NoTrailingSlash);
             const QString newFilePath = absoluteDestinationPath + file->name();
             if (QFile::link(filePath, newFilePath)) {
                 qDebug() << "Symlink's created:" << filePath << newFilePath;
@@ -280,7 +276,19 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
                                                 options.compressionMethod(),
                                                 options.encryptionMethod(),
                                                 options.volumeSize());
-//    arguments.removeOne("-l");//beaucse -l will failed if files contains softLink which links parent folder.
+
+//    7z u -t7z dst.7z "src\*"
+    if (destinationPath.isEmpty()) {//如果不是追加，需要去除-l
+        arguments.removeOne("-l");
+    }
+
+    QString message = "@info";
+    size_t length = strlen(message.toUtf8().data());
+    char *cMsg = static_cast<char *>(malloc((length + 1) * sizeof(char)));
+    strcpy(cMsg, message.toUtf8().data());
+    emit error(cMsg, "Extraction failed because the disk is full.");
+    free(cMsg);
+
     bool ret = runProcess(m_cliProps->property("addProgram").toString(), arguments);
     if (ret == true) {
         this->watchDestFilesBegin();
@@ -472,7 +480,7 @@ void CliInterface::watchFileList(QStringList *strList)
     this->pFileWatcherdd->watch(strList);
 }
 
-void CliInterface::slotFilesWatchedChanged(QString fileChanged)
+void CliInterface::slotFilesWatchedChanged(QString /*fileChanged*/)
 {
     this->watchDestFilesEnd();
     emit cancelled();
@@ -1029,7 +1037,7 @@ bool CliInterface::setAddedFiles()
 void CliInterface::emitProgress(float value)
 {
     if (this->pAnalyseHelp == nullptr) {
-        emit progress(value);
+        emit progress(static_cast<double>(value));
     }
 }
 
@@ -1045,7 +1053,7 @@ bool CliInterface::handleLine(const QString &line)
     // TODO: This should be implemented by each plugin; the way progress is
     //       shown by each CLI application is subject to a lot of variation.
 
-    //qDebug() << "#####" << line;
+    qDebug() << "#####" << line;
 
     if (pAnalyseHelp != nullptr) {
         pAnalyseHelp->analyseLine(line);
@@ -1137,8 +1145,12 @@ bool CliInterface::handleLine(const QString &line)
 
         if (isDiskFullMsg(line)) {
             qDebug() << "Found disk full message:" << line;
-            //emit error(tr("@info", "Extraction failed because the disk is full."));
-            emit error(("@info", "Extraction failed because the disk is full."));
+            QString message = "@info";
+            size_t length = strlen(message.toUtf8().data());
+            char *cMsg = static_cast<char *>(malloc((length + 1) * sizeof(char)));
+            strcpy(cMsg, message.toUtf8().data());
+            emit error(cMsg, "Extraction failed because the disk is full.");
+            free(cMsg);
             return false;
         }
 
@@ -1418,7 +1430,7 @@ void CliInterface::onEntry(Archive::Entry *archiveEntry)
     if (archiveEntry->compressedSizeIsSet) {
         m_listedSize += archiveEntry->property("compressedSize").toULongLong();
         if (m_listedSize <= m_archiveSizeOnDisk) {
-            emit progress(float(m_listedSize) / float(m_archiveSizeOnDisk));
+            emit progress(static_cast<double>(m_listedSize * 1.0 / m_archiveSizeOnDisk));
         } else {
             // In case summed compressed size exceeds archive size on disk.
             emit progress(1.0);

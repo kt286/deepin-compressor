@@ -323,7 +323,7 @@ void ReadWriteArchiveInterface::clearPath(QString path)
     p.waitForFinished();
 }
 
-void ReadWriteArchiveInterface::watchFileList(QStringList *strList)
+void ReadWriteArchiveInterface::watchFileList(QStringList */*strList*/)
 {
 
 }

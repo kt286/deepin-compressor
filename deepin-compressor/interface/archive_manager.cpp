@@ -156,9 +156,11 @@ ReadOnlyArchiveInterface *Archive::createInterface(const QString &fileName, cons
     for (Plugin *plugin : offers) {
         pIface = createInterface(fileName, plugin);
         // Use the first valid plugin, according to the priority sorting.
-        return pIface;
+        if (pIface) {
+            break;
+        }
     }
-
+    return pIface;
 }
 
 ReadOnlyArchiveInterface *Archive::createInterface(const QString &fileName, Plugin *plugin)
@@ -236,7 +238,7 @@ void Archive::CreateEntry(QString path, Entry *&parent, QString externalPath, QH
     while (i < list.size()) {
         QFileInfo file_info = list.at(i);
 
-        if (file_info.fileName() == "." | file_info.fileName() == "..") {
+        if (file_info.fileName() == "." || file_info.fileName() == "..") {
             i++;
             continue;
         }
@@ -303,7 +305,7 @@ void Archive::CreateEntryNew(QString path, Archive::Entry *&parent, QString exte
     QFileInfo Info;
     while (Iterator.hasNext()) {
         Info = Iterator.next();
-        if (Info.fileName() == "." | Info.fileName() == "..") {
+        if (Info.fileName() == "." || Info.fileName() == "..") {
             continue;
         }
         Archive::Entry *entry = new Archive::Entry();

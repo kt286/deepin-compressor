@@ -1248,10 +1248,7 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
 //                    tempFile.remove();
 //                }
 //                Utils::checkAndDeleteDir(fileName);
-                if (m_tempProcessId.empty()) {//this check should be commented.
-                    emit sigextractfiles(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), EXTRACT_TEMP);
-                }
-
+                emit sigextractfiles(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), EXTRACT_TEMP);
             }
         } else if (m_decompressmodel->isentryDir(m_sortmodel->mapToSource(index))) {
             QModelIndex sourceindex = m_decompressmodel->createNoncolumnIndex(m_sortmodel->mapToSource(index));
@@ -1265,8 +1262,6 @@ void fileViewer::slotDecompressRowDoubleClicked(const QModelIndex index)
             }
         } else {
             QVector<Archive::Entry *> fileList = filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows()));
-            QString fileName = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles" + QDir::separator() + fileList.at(0)->name();
-            Utils::checkAndDeleteDir(fileName);
             emit sigextractfiles(fileList, EXTRACT_TEMP);
         }
     }

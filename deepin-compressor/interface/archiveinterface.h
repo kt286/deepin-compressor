@@ -232,7 +232,7 @@ Q_SIGNALS:
      * - the user cancels the overwrite dialog
      */
     void cancelled();
-    void error(const QString &message, const QString &details = QString());
+    void error(const QString &message = "", const QString &details = "");
     void entry(Archive::Entry *archiveEntry);
     void progress(double progress);
     void progress_filename(const QString &filename);

@@ -106,13 +106,13 @@ public:
     QString rootNode;
     bool compressedSizeIsSet;
 private:
-    void *checkLeavesNode(Archive::Entry *pE, QVector<Archive::Entry *> *pV);
+    void checkLeavesNode(Archive::Entry *pE, QVector<Archive::Entry *> *pV);
 private:
     QVector<Entry *> m_entries;
     QMap<QString, int> m_mapIndex;
     int m_iIndex;
     QString         m_name;
-    Entry           *m_parent;
+    Entry           *m_parent = nullptr;//此处应该赋值nullptr
 
     QString m_fullPath;
     QString m_permissions;

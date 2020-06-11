@@ -1021,8 +1021,6 @@ void MainWindow::refreshPage()
 //add calculate size of selected files
 void MainWindow::calSelectedTotalFileSize(const QStringList &files)
 {
-    qint64 before = m_Progess->pInfo()->getTotalSize();
-
     foreach (QString file, files) {
         QFileInfo fi(file);
 
@@ -2729,7 +2727,7 @@ bool MainWindow::startCmd(const QString &executeName, QStringList arguments)
     cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
     cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
     cmdprocess->setProgram(programPath, arguments);
-    auto func = [ = ](int status)->void {
+    auto func = [ = ](int)->void {
         if (cmdprocess != nullptr)
         {
             QObject::disconnect(cmdprocess);
@@ -3082,14 +3080,13 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     if (destinationDirectory.right(1) == QDir::separator() == false) {
         destinationDirectory = destinationDirectory + QDir::separator();
     }
-    QString destEntryPath = destinationDirectory + pDestEntry->fullPath();
+    QString destEntryPath = destinationDirectory + pDestEntry->name();
     QFileInfo fileInfo(destEntryPath);
 
     if (fileInfo.exists()) {//判断解压文件是否已经在目标路径下已经解压出来，如果解压出来，则不再解压
         qint64 size = pDestEntry->getSize();
         qint64 size1 = calFileSize(destEntryPath);
         if (size == size1) {
-
             QString programName = "xdg-open";
             QString firstFileName = m_extractSimpleFiles.at(0)->name();
             bool isCompressedFile = Utils::isCompressed_file(pDestEntry->fullPath());
