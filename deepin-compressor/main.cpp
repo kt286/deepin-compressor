@@ -27,11 +27,12 @@
 #include <DLog>
 #include "utils.h"
 #include <DApplicationSettings>
-//#include <QMessageBox>
+#include <DDesktopServices>
+#include <QMessageBox>
 #include "monitorAdaptor.h"
 #include "monitorInterface.h"
 #include "openwithdialog/openwithdialog.h"
-#include <QMessageBox>
+
 
 int main(int argc, char *argv[])
 {
@@ -50,6 +51,21 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("filename", "File path.", "file [file..]");
     parser.process(app);
 
+//    QString tipArgv = "";
+//    for (int i = 0; i < argc; i++) {
+//        char *cArgv = nullptr;
+//        size_t length = strlen(argv[i]);
+//        cArgv = (char *)malloc((length + 1) * sizeof(char));
+//        strcpy(cArgv, argv[i]);
+//        QString str(cArgv);
+//        str += ",";
+//        tipArgv += str;
+//    }
+//    QMessageBox::information(NULL, "argv", tipArgv,
+//                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    //char *path = fullpath.toUtf8().data();
+
     const QStringList fileList = parser.positionalArguments();
 
     QStringList newfilelist;
@@ -59,6 +75,12 @@ int main(int argc, char *argv[])
         }
         newfilelist.append(file);
     }
+    QString tip = "";
+    for (int i = 0; i < fileList.length(); i++) {
+        tip += fileList[i];
+    }
+//    QMessageBox::information(NULL, "Title", tip,
+//                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
     QDBusConnection bus = QDBusConnection::sessionBus();
     bool busRegistered = bus.registerService("com.archive.mainwindow.monitor");
@@ -97,7 +119,7 @@ int main(int argc, char *argv[])
     QIcon appIcon = QIcon::fromTheme("deepin-compressor");
 
     if (appIcon.isNull()) {
-        appIcon = QIcon(":/icons/deepin/builtin/icons/deepin-compressor.svg");
+        appIcon = QIcon(":assets/icons/deepin/builtin/icons/deepin-compressor.svg");
     }
 
     app.setProductIcon(appIcon);
@@ -113,7 +135,10 @@ int main(int argc, char *argv[])
         newfilelist = multilist;
     }
     MainWindow w;
-
+    qDebug() << argv;
+    if (fileList.length() >= 2 && (!w.checkSettings(argv[1]))) {//判断目标文件是否合法
+        return  0;
+    }
     w.bindAdapter();
 
 

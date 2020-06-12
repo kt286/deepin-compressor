@@ -38,6 +38,8 @@
 #include <QTemporaryFile>
 #include <qevent.h>
 
+#include <QRegExp>
+
 TypeLabel::TypeLabel(QWidget *parent) : DLabel(parent)
 {
 }
@@ -218,15 +220,20 @@ void CompressSetting::InitConnection()
         DPalette plt;
         plt = DApplicationHelper::instance()->palette(m_filename);
 
-        if (false == checkfilename(m_filename->text()))
+        if (!m_filename->text().isEmpty())
         {
-            plt.setBrush(DPalette::Text, plt.color(DPalette::TextWarning));
+            if (false == checkfilename(m_filename->text())) {
+                plt.setBrush(DPalette::Text, plt.color(DPalette::TextWarning));
+            } else {
+                plt.setBrush(DPalette::Text, plt.color(DPalette::WindowText));
+            }
         } else
         {
             plt.setBrush(DPalette::Text, plt.color(DPalette::WindowText));
         }
 
         m_filename->setPalette(plt);
+
     });
 
     connect(typepixmap, SIGNAL(labelClickEvent(QMouseEvent *)), this, SLOT(showRightMenu(QMouseEvent *)));
@@ -320,6 +327,7 @@ void CompressSetting::onNextButoonClicked()
 
     if ((((m_getFileSize / 1024 / 1024) / (m_splitnumedit->value())) > 10) && m_compresstype->text().contains("7z") && m_splitcompress->isChecked()) {
         showWarningDialog(tr("Too many volumes, please change and retry"));
+        //  Up to 10 volumes, please change and retry
         return;
     }
 
@@ -342,6 +350,12 @@ void CompressSetting::onNextButoonClicked()
         m_openArgs[QStringLiteral("compressionLevel")] = "-1";  //-1 is unuseful
     } else if ("application/zip" == fixedMimeType) {
         m_openArgs[QStringLiteral("compressionLevel")] = "3";  // 1:Extreme 3:Fast 4:Standard
+
+        if (password.contains(QRegExp("[\\x4e00-\\x9fa5]+"))) {
+            showWarningDialog(tr("The zip format does not support Chinese characters as compressed passwords"));
+            return;
+        }
+
     } else {
         m_openArgs[QStringLiteral("compressionLevel")] = "6";  // 6 is default
     }
@@ -593,11 +607,13 @@ void CompressSetting::onSplitChanged(int /*status*/)
 {
     if (m_splitcompress->isChecked() && "7z" == m_compresstype->text()) {
         m_splitnumedit->setEnabled(true);
-        if ((m_getFileSize / 1024 / 1024) >= 1) { //1M以上的文件
-            m_splitnumedit->setValue(m_getFileSize / 1024.0 / 1024.0 / 2.0 + 0.1);
-        } else if ((m_getFileSize / 1024) > 102 && (m_getFileSize / 1024) <= 1024) { //0.1M－1M的文件
-            m_splitnumedit->setValue(m_getFileSize / 1024.0 / 1024.0 / 2.0);
-        }
+//        if ((m_getFileSize / 1024 / 1024) >= 1) { //1M以上的文件
+//            m_splitnumedit->setValue(m_getFileSize / 1024.0 / 1024.0 / 2.0 + 0.1);
+//        } else if ((m_getFileSize / 1024) > 102 && (m_getFileSize / 1024) <= 1024) { //0.1M－1M的文件
+//            m_splitnumedit->setValue(m_getFileSize / 1024.0 / 1024.0 / 2.0);
+//        }
+        QString size = Utils::humanReadableSize(m_getFileSize, 1);
+        m_splitnumedit->setToolTip(tr("Total file size: %1").arg(size));
         isSplitChecked = true;
     } else {
         m_splitnumedit->setEnabled(false);
@@ -607,13 +623,8 @@ void CompressSetting::onSplitChanged(int /*status*/)
 void CompressSetting::ontypeChanged(QAction *action)
 {
     qDebug() << action->text();
-//    int substrindex = m_filename->text().lastIndexOf('.' + m_compresstype->text());
     setTypeImage(action->text());
     m_compresstype->setText(action->text());
-
-    //update m_filename
-//    QString nanme = m_filename->text().left(substrindex);
-//    setDefaultName(m_filename->text().left(substrindex));
 
     if (action->text().contains("7z")) {
         if (m_splitcompress->isChecked()) {
@@ -656,8 +667,12 @@ void CompressSetting::onThemeChanged()
     DPalette plt;
     plt = DApplicationHelper::instance()->palette(m_filename);
 
-    if (false == checkfilename(m_filename->text())) {
-        plt.setBrush(DPalette::Text, plt.color(DPalette::TextWarning));
+    if (!m_filename->text().isEmpty()) {
+        if (false == checkfilename(m_filename->text())) {
+            plt.setBrush(DPalette::Text, plt.color(DPalette::TextWarning));
+        } else {
+            plt.setBrush(DPalette::Text, plt.color(DPalette::WindowText));
+        }
     } else {
         plt.setBrush(DPalette::Text, plt.color(DPalette::WindowText));
     }

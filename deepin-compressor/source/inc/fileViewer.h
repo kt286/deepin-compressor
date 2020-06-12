@@ -164,7 +164,13 @@ public:
     int getFileCount();
     int getDeFileCount();
     void setDecompressModel(ArchiveSortFilterModel *model);
-
+    /**
+     * @brief selectRowByEntry
+     * @param pSelectedEntry
+     * @see 选中指定的Entry
+     * @author hsw
+     */
+    void selectRowByEntry(Archive::Entry *pSelectedEntry);
     bool isDropAdd();
 
     QVector<Archive::Entry *> filesAndRootNodesForIndexes(const QModelIndexList &list) const;
@@ -233,7 +239,7 @@ private:
     void keyPressEvent(QKeyEvent *event) override;
     int popUpDialog(const QString &desc);
     void openTempFile(QString path);
-
+    int showWarningDialog(const QString &msg);
 private:
     QLineEdit *pLineEditDir;
     MyTableView *pTableViewFile;

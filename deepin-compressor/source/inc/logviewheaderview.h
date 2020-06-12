@@ -26,6 +26,8 @@
 
 class LogViewHeaderView;
 
+#define SCROLLMARGIN 10
+
 class MyLabel: public Dtk::Widget::DLabel
 {
     Q_OBJECT
@@ -56,7 +58,7 @@ signals:
     void doubleClickedSignal();
 
 private:
-    LogViewHeaderView* headerView_;
+    LogViewHeaderView *headerView_;
 
     bool focusIn_ = false;
 };
@@ -84,6 +86,6 @@ private:
     int m_spacing {1};
 
 public:
-    PreviousLabel* gotoPreviousLabel_;
+    PreviousLabel *gotoPreviousLabel_;
 };
 

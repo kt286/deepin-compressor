@@ -36,6 +36,7 @@
 #include <QStringList>
 #include <QString>
 #include <QVariantList>
+#include <QFileDevice>
 #include <QElapsedTimer>
 
 #include "kpluginmetadata.h"
@@ -177,6 +178,9 @@ public:
      *  some/destination/entry
      */
     static QStringList entryPathsFromDestination(QStringList entries, const Archive::Entry *destination, int entriesWithoutChildren);
+
+    //mode_t转成QFileDevice::Permissions
+    static QFileDevice::Permissions getPermissions(const mode_t &perm);
 
     virtual bool doKill();
 

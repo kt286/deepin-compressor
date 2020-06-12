@@ -85,7 +85,7 @@ QVariant ArchiveModel::data(const QModelIndex &index, int role) const
             case FullPath:
                 return entry->name();
             case Type: {
-                QMimeType mimetype = determineMimeType(entry->fullPath());
+                QMimeType mimetype = determineMimeType(entry->name());
                 return m_mimetype->displayName(mimetype.name());
             }
             case Size:
@@ -228,6 +228,10 @@ void ArchiveModel::setParentEntry(const QModelIndex &index)
 
 Archive::Entry *ArchiveModel::getParentEntry()
 {
+    if (m_ppathindex == nullptr) {
+        return nullptr;
+    }
+
     if (*m_ppathindex == 0) {
         return m_rootEntry.data();
     } else {
@@ -376,6 +380,16 @@ bool ArchiveModel::dropMimeData(const QMimeData *data, Qt::DropAction action, in
     emit droppedFiles(paths, entry);
 
     return true;
+}
+
+void ArchiveModel::resetmparent()
+{
+    if (m_parent) {
+        while (m_parent->getParent() != nullptr) {
+            m_parent = m_parent->getParent();
+        }
+        m_parent = m_parent->getParent();
+    }
 }
 
 //void ArchiveModel::sort(int column, Qt::SortOrder order)
@@ -789,7 +803,7 @@ void ArchiveModel::slotLoadingFinished(KJob *job)
     }
 
     emit loadingFinished(job);
-    if (m_tableview) {
+    if (m_tableview && m_showColumns.length() > 0) {
         m_tableview->sortByColumn(0, Qt::AscendingOrder);
     }
 }

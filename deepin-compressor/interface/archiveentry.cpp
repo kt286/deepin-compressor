@@ -32,6 +32,7 @@ Archive::Entry::Entry(QObject *parent, const QString &fullPath, const QString &r
     , m_isDirectory(false)
     , m_isPasswordProtected(false)
 {
+    m_mapIndex.clear();
     if (!fullPath.isEmpty())
         setFullPath(fullPath);
     m_iIndex = 0;

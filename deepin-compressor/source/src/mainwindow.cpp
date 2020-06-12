@@ -50,6 +50,7 @@
 #include "kprocess.h"
 #include <DStandardPaths>
 #include <QStackedLayout>
+#include <QScreen>
 #include "filewatcher.h"
 #include <QUuid>
 #include "unistd.h"
@@ -771,6 +772,10 @@ bool MainWindow::popUpChangedDialog(const qint64 &pid)
 
 bool MainWindow::createSubWindow(const QStringList &urls)
 {
+    int len = urls.length();
+    QString filePath = urls[0];
+    QFileInfo fileInfo(filePath);
+
     QStringList inUrls = std::move(const_cast<QStringList & >(urls));
     qDebug() << "=================urls:" << inUrls;
 
@@ -792,6 +797,9 @@ bool MainWindow::createSubWindow(const QStringList &urls)
 //        return false;
 //    }
     MainWindow *subWindow = new MainWindow();
+    if (fileInfo.exists() == true && (!subWindow->checkSettings(filePath))) {//判断目标文件是否合法
+        return  false;
+    }
     subWindow->pMapGlobalWnd = this->pMapGlobalWnd;//获取deepin-compressor进程中的全局窗口map
     subWindow->strChildMndExtractPath = this->strChildMndExtractPath;//子面板的解压路径必须和父面板的解压路径统一
     if (this->pMapGlobalWnd == nullptr) {
@@ -960,6 +968,11 @@ void MainWindow::refreshPage()
         m_mainLayout->setCurrentIndex(6);
         break;
     case PAGE_UNZIP_SUCCESS:
+        if (m_fileManager) {
+            m_fileManager->stopWatcher();
+            delete m_fileManager;
+            m_fileManager = nullptr;
+        }
         titlebar()->setTitle("");
         m_CompressSuccess->setCompressPath(m_decompressfilepath);
         //m_CompressSuccess->setstringinfo(tr("Extraction successful"));
@@ -971,12 +984,13 @@ void MainWindow::refreshPage()
 //            DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
 //        }
         if (m_isrightmenu) {
-            m_CompressSuccess->showfiledirSlot();
+            m_CompressSuccess->showfiledirSlot(false);
+//            DDesktopServices::showFolder(m_decompressfilepath);
             slotquitApp();
             return;
         } else {
             if (m_settingsDialog->isAutoOpen() && m_encryptiontype != Encryption_NULL) {
-                DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
+                m_CompressSuccess->showfiledirSlot();
             }
         }
 
@@ -1108,6 +1122,15 @@ void MainWindow::onSelected(const QStringList &files)
     if (files.count() == 1 && Utils::isCompressed_file(files.at(0))) {
         m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
         if (0 == m_CompressPage->getCompressFilelist().count()) {
+            if (this->m_model != nullptr) {
+                Archive::Entry *parentEntry = this->m_model->getParentEntry();
+                if (parentEntry) {
+                    delete parentEntry;
+                    parentEntry = nullptr;
+                }
+                this->m_model->resetmparent();
+            }
+
             QString filename;
             filename = files.at(0);
 
@@ -1129,7 +1152,7 @@ void MainWindow::onSelected(const QStringList &files)
 //                m_UnCompressPage->setdefaultpath(fileinfo.path());
                 m_UnCompressPage->setdefaultpath(*strChildMndExtractPath);
             }
-
+            m_UnCompressPage->getFileViewer()->setRootPathIndex();//added by hsw 20200612 重置m_pathindex
             m_pageid = PAGE_LOADING;
             loadArchive(filename);
         } else {
@@ -1182,10 +1205,10 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
 
     m_UnCompressPage->getMainWindowWidth(this->width());
     calSelectedTotalFileSize(files);
-    QString info = "";
-    for (int i = 0; i < files.length(); i++) {
-        info += files[i];
-    }
+//    QString info = "";
+//    for (int i = 0; i < files.length(); i++) {
+//        info += files[i];
+//    }
 //    QMessageBox::information(nullptr, "Title", info,
 //                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
     if (files.last() == QStringLiteral("extract_here")) {//解压
@@ -1472,7 +1495,7 @@ void MainWindow::WatcherFile(const QString &files)
         effect->setColor(QColor(0, 145, 255, 76));
         effect->setBlurRadius(4);
         dialog->getButton(0)->setFixedWidth(340);
-//        dialog->getButton(0)->setGraphicsEffect(effect);
+        //        dialog->getButton(0)->setGraphicsEffect(effect);
         dialog->exec();
         delete dialog;
 
@@ -1735,7 +1758,7 @@ void MainWindow::slotExtractionDone(KJob *job)
             args.append(DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
                         + QDir::separator() + tempFileName);
             arguments << DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
-                      + QDir::separator() + tempFileName;
+                      + QDir::separator() + tempFileName;   //the first arg is filePath
             p.execute(commandCreate, args);
         } else {
             QString destPath = DStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QDir::separator() + "tempfiles"
@@ -1744,7 +1767,7 @@ void MainWindow::slotExtractionDone(KJob *job)
                 this->m_model->mapFilesUpdate.insert(destPath, pExtractWorkEntry);
             }
 
-            arguments << destPath;//the first arg
+            arguments << destPath;  //the first arg is filePath
             if (isCompressedFile == true) {
                 if (pMapGlobalWnd == nullptr) {
                     pMapGlobalWnd = new GlobalMainWindowMap();
@@ -1754,7 +1777,7 @@ void MainWindow::slotExtractionDone(KJob *job)
 
                 QModelIndex index = this->m_model->indexForEntry(pExtractWorkEntry);
                 QString strIndex = modelIndexToStr(index);
-                arguments << strIndex;//the third arg
+                arguments << strIndex;  //the third arg
             }
         }
 //        }
@@ -1845,7 +1868,7 @@ void MainWindow::SlotExtractPassword(QString password)
 void MainWindow::ExtractSinglePassword(QString password)
 {
     m_workstatus = WorkProcess;
-    if (m_pJob == nullptr || m_pJob->mType == Job::ENUM_JOBTYPE::EXTRACTJOB) {
+    if (m_pJob == nullptr) {
         return;
     }
 
@@ -1881,7 +1904,7 @@ void MainWindow::ExtractSinglePassword(QString password)
 void MainWindow::ExtractPassword(QString password)
 {
     m_workstatus = WorkProcess;
-    if (m_pJob == nullptr || m_pJob->mType == Job::ENUM_JOBTYPE::EXTRACTJOB) {
+    if (m_pJob == nullptr) {
         return;
     }
     ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
@@ -2884,10 +2907,6 @@ void MainWindow::slotCompressFinished(KJob *job)
     m_pageid = PAGE_ZIP_SUCCESS;
     refreshPage();
 
-//    if (m_createJob) {
-//        m_createJob->deleteLater();
-//        m_createJob = nullptr;
-//    }
     if (m_pJob) {
         m_pJob->deleteLater();
         m_pJob = nullptr;
@@ -2946,9 +2965,17 @@ void MainWindow::slotJobFinished(KJob *job)
         //reload package archive
         QString filename =   m_model->archive()->fileName();
         QStringList ArchivePath = QStringList() << filename;
+
         //onSelected(ArchivePath);
 
         if (m_pJob) {
+            if (m_pJob->mType == KJob::ENUM_JOBTYPE::ADDJOB) {
+                AddJob *pJob = dynamic_cast<AddJob *>(m_pJob);
+                auto res = pJob->entries();
+                if (res.length() > 0) {
+                    this->m_UnCompressPage->getFileViewer()->selectRowByEntry(res[0]);
+                }
+            }
             m_pJob->deleteLater();
             m_pJob = nullptr;
         }
@@ -2966,6 +2993,7 @@ void MainWindow::slotJobFinished(KJob *job)
         if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::DELETEJOB) {
             DeleteJob *pDeleteJob = nullptr;
             pDeleteJob = dynamic_cast<DeleteJob *>(m_pJob);
+            this->m_UnCompressPage->getFileViewer()->getTableView()->clearSelection();// delete 后清除选中
             Archive::Entry *pWorkEntry = pDeleteJob->getWorkEntry();
             m_pJob->deleteLater();
             m_pJob = nullptr;
@@ -2986,10 +3014,10 @@ void MainWindow::slotJobFinished(KJob *job)
         //reload package archive
         QString filename =   m_model->archive()->fileName();
         QStringList ArchivePath = QStringList() << filename;
-        //onSelected(ArchivePath);
         if (m_pJob->mType == Job::ENUM_JOBTYPE::DELETEJOB) {
 //            DeleteJob *pDeleteJob = nullptr;
 //            pDeleteJob = dynamic_cast<DeleteJob *>(m_pJob);
+            this->m_UnCompressPage->getFileViewer()->getTableView()->clearSelection();// delete 后清除选中
             m_pJob->deleteLater();
             m_pJob = nullptr;
         }
@@ -3542,29 +3570,85 @@ void MainWindow::onCompressAddfileSlot(bool status)
     }
 }
 
-//void MainWindow::initalizeLog(QWidget *widget)
-//{
-////    Log4Qt::BasicConfigurator::configure();
-////    Log4Qt::LogManager::setHandleQtMessages(true);
-////    m_logger = Log4Qt::Logger::rootLogger();
-////    m_logger->removeAllAppenders();
-////    Log4Qt::LogWidgetAppender *appender = new Log4Qt::LogWidgetAppender();
-////    appender->setName("WidgetAppender");
-////    Log4Qt::TTCCLayout *layout = new Log4Qt::TTCCLayout(Log4Qt::TTCCLayout::ISO8601);
-////    layout->setThreadPrinting(true);
-////    appender->setLayout(layout);
-////    appender->activateOptions();
-////    appender->setLogWidget(widget);
-////    m_logger->addAppender(appender);
-//}
+bool MainWindow::checkSettings(QString file)
+{
+    QString fileMime = Utils::judgeFileMime(file);
+    bool hasSetting = true;
 
-//void MainWindow::logShutDown()
-//{
-//    m_logger->removeAllAppenders();
-//}
+    bool existMime = Utils::existMimeType(fileMime);
+    if (existMime) {
+        QString defaultCompress = getDefaultApp(fileMime);
 
-//Log4Qt::Logger *MainWindow::getLogger()
-//{
-//    return  m_logger;
-//}
+        if (defaultCompress.startsWith("dde-open.desktop")) {
+            setDefaultApp(fileMime, "deepin-compressor.desktop");
+        }
+    } else {
+        QString defaultCompress = getDefaultApp(fileMime);
+        if (defaultCompress.startsWith("deepin-compressor.desktop")) {
+            setDefaultApp(fileMime, "dde-open.desktop");
+        }
+
+        int re = promptDialog();
+        if (re != 1) {
+            hasSetting = false;
+        }
+    }
+
+    return hasSetting;
+}
+
+QString MainWindow::getDefaultApp(QString mimetype)
+{
+    QString outInfo;
+    QProcess p;
+    QString command3 = "xdg-mime query default %1";
+    p.start(command3.arg("application/" + mimetype));
+    p.waitForFinished();
+    outInfo = QString::fromLocal8Bit(p.readAllStandardOutput());
+
+    return  outInfo;
+}
+
+void MainWindow::setDefaultApp(QString mimetype, QString desktop)
+{
+    QProcess p;
+    QString command3 = "xdg-mime default %1 %2";
+    p.start(command3.arg(desktop).arg("application/" + mimetype));
+    p.waitForFinished();
+}
+
+
+int MainWindow::promptDialog()
+{
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect screenRect =  screen->availableVirtualGeometry();
+
+    DDialog *dialog = new DDialog(this);
+    QPixmap pixmap = Utils::renderSVG(":assets/icons/deepin/builtin/icons/compress_warning_32px.svg", QSize(32, 32));
+    dialog->setIcon(pixmap);
+    dialog->setMinimumSize(380, 140);
+    dialog->addButton(tr("OK"), true, DDialog::ButtonNormal);
+    dialog->move(((screenRect.width() / 2) - (dialog->width() / 2)), ((screenRect.height() / 2) - (dialog->height() / 2)));
+    DLabel *pContent = new DLabel(tr("Please open the Archive Manager and set the file association type"), dialog);
+
+    pContent->setAlignment(Qt::AlignmentFlag::AlignHCenter);
+    DPalette pa;
+    pa = DApplicationHelper::instance()->palette(pContent);
+    pa.setBrush(DPalette::Text, pa.color(DPalette::ButtonText));
+    DFontSizeManager::instance()->bind(pContent, DFontSizeManager::T6, QFont::Medium);
+    pContent->setMinimumSize(293, 20);
+
+    QVBoxLayout *mainlayout = new QVBoxLayout;
+    mainlayout->setContentsMargins(0, 0, 0, 0);
+    mainlayout->addWidget(pContent, 0, Qt::AlignHCenter | Qt::AlignVCenter);
+    mainlayout->addSpacing(15);
+
+    DWidget *widget = new DWidget(dialog);
+    widget->setLayout(mainlayout);
+    dialog->addContent(widget);
+    int res = dialog->exec();
+    delete dialog;
+
+    return res;
+}
 

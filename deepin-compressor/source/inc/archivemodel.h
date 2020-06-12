@@ -70,7 +70,7 @@ public:
     QMimeData *mimeData(const QModelIndexList &indexes) const override;
     bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
 //    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-
+    void resetmparent();
     void reset();
     void createEmptyArchive(const QString &path, const QString &mimeType, QObject *parent);
     KJob *loadArchive(const QString &path, const QString &mimeType, QObject *parent);
@@ -78,7 +78,7 @@ public:
 
     QList<int> shownColumns() const;
     QMap<int, QByteArray> propertiesMap() const;
-
+    QModelIndex indexForEntry(Archive::Entry *);
     Archive::Entry *entryForIndex(const QModelIndex &index);
     bool isentryDir(const QModelIndex &index);
     void setPathIndex(int *index);
@@ -136,7 +136,6 @@ public:
     //store the map what key is path,value is entryChild. If open a new view to see the entryChild,you need to store it.
     QMap<QString, Archive::Entry *> mapFilesUpdate;
 //    QList<Archive::Entry *> *getLeavesList();
-    QModelIndex indexForEntry(Archive::Entry *entry);
 Q_SIGNALS:
     void loadingStarted();
     void loadingFinished(KJob *);
@@ -199,7 +198,7 @@ private:
     // since directories might have fewer columns than files.
     bool m_fileEntryListed;
 
-    int *m_ppathindex;
+    int *m_ppathindex = nullptr;
     QTableView *m_tableview;
     MimeTypeDisplayManager *m_mimetype;
     Archive::Entry *m_parent = nullptr;

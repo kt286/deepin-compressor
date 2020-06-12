@@ -168,7 +168,7 @@ bool LibzipPlugin::list(bool /*isbatch*/)
     // Get number of archive entries.
     const auto nofEntries = zip_get_num_entries(archive, 0);
 
-    detectAllfile(archive, nofEntries);
+    //detectAllfile(archive, nofEntries);
     // Loop through all archive entries.
     for (int i = 0; i < nofEntries; i++) {
 
@@ -240,7 +240,7 @@ QString  LibzipPlugin::trans2uft8(const char *str)
 
     QByteArray codec_name = detectEncode(str);
     //qDebug() << codec_name;
-    if ("" == m_codecname) {
+    if ("" == codec_name) {
 
         if (codec_name.isEmpty()) {
             return str;
@@ -269,12 +269,12 @@ QString  LibzipPlugin::trans2uft8(const char *str)
             return QString(str);
         } else {
             QTextCodec *codec = QTextCodec::codecForName("GBK");
-            m_codecstr = m_codecname;
+            m_codecstr = codec_name;
             return codec->toUnicode(str);
         }
     } else if (!((QString)codec_name).contains("UTF", Qt::CaseInsensitive)) {
-        QTextCodec *codec = QTextCodec::codecForName(m_codecname);
-        m_codecstr = m_codecname;
+        QTextCodec *codec = QTextCodec::codecForName(codec_name);
+        m_codecstr = codec_name;
         return codec->toUnicode(str);
     } else {
         m_codecstr = "UTF-8";
@@ -906,24 +906,27 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
                 break;
             }
 
+            QString strfileNameTemp = trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW));
+            //QString strfileNameTemp = zip_get_name(archive, i, ZIP_FL_ENC_RAW);
+
             if (i == 0) {
-                extractDst = QDir::fromNativeSeparators(trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW)));
+                extractDst = QDir::fromNativeSeparators(strfileNameTemp);
             } else if (extractDst.isEmpty() == false) {
-                if (QDir::fromNativeSeparators(trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW))).startsWith(extractDst + (extractDst.endsWith("/") ? "" : "/")) == false) {
+                if (QDir::fromNativeSeparators(strfileNameTemp).startsWith(extractDst + (extractDst.endsWith("/") ? "" : "/")) == false) {
                     extractDst.clear();
                 }
             }
 
-            emit progress_filename(trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW)));
+            emit progress_filename(strfileNameTemp);
 
             FileProgressInfo pi;
 
             if (nofEntries < 5) {
-                pi.fileName = trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW));
+                pi.fileName = strfileNameTemp;
                 pi.fileProgressProportion = float(1.0) / float(nofEntries);
                 pi.fileProgressStart = pi.fileProgressProportion * float(i);
             }
-            QString entryName = QDir::fromNativeSeparators(trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW)));
+            QString entryName = QDir::fromNativeSeparators(strfileNameTemp);
             if (i == 0) {
                 destDirName = entryName;
             }
@@ -1055,7 +1058,8 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
     zip_stat_t statBuffer;
 
     if (((QString)m_codecstr).contains("windows", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("IBM", Qt::CaseInsensitive)
-            || ((QString)m_codecstr).contains("x-mac", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("Big5", Qt::CaseInsensitive))  {
+            || ((QString)m_codecstr).contains("x-mac", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("Big5", Qt::CaseInsensitive)
+            || ((QString)m_codecstr).contains("iso", Qt::CaseInsensitive))  {
         m_codecstr = "GBK";
     }
 
@@ -1165,13 +1169,13 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
 
         m_extractFile = destination;
 
-        QFile file1(destination);
-        bool isExists = file1.exists();
-        QFileDevice::Permissions pOldPermission =  file1.permissions();
+        //QFile file1(destination);
+        //bool isExists = file1.exists();
+        //QFileDevice::Permissions pOldPermission =  file1.permissions();
 
-        if (pOldPermission.testFlag(QFileDevice::WriteOwner) == false) {
-            bool status = file1.setPermissions(pOldPermission | QFileDevice::WriteOwner);//set permission include writeowner.
-        }
+        //if (pOldPermission.testFlag(QFileDevice::WriteOwner) == false) {
+        //    bool status = file1.setPermissions(pOldPermission | QFileDevice::WriteOwner);//set permission include writeowner.
+        //}
 
         if (!m_extractionOptions.isAutoCreatDir()) {
             // QFileInfo extractileInfo(destination);
@@ -1485,59 +1489,41 @@ QString LibzipPlugin::permissionsToString(const mode_t &perm)
     return modeval;
 }
 
-QFileDevice::Permissions LibzipPlugin::getPermissions(const mode_t &perm)
-{
-    QFileDevice::Permissions pers = QFileDevice::Permissions();
-
-    if (perm == 0) {
-        pers |= (QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup | QFileDevice::ReadOther);
-        return pers;
-    }
-
-    if (perm & S_IRUSR) {
-        pers |= QFileDevice::ReadUser;
-    }
-    if (perm & S_IWUSR) {
-        pers |= QFileDevice::WriteUser;
-    }
-    if (perm & S_IXUSR) {
-        pers |= QFileDevice::ExeUser;
-    }
-
-    if (perm & S_IRGRP) {
-        pers |= QFileDevice::ReadGroup;
-    }
-    if (perm & S_IWGRP) {
-        pers |= QFileDevice::WriteGroup;
-    }
-    if (perm & S_IXGRP) {
-        pers |= QFileDevice::ExeGroup;
-    }
-
-    if (perm & S_IROTH) {
-        pers |= QFileDevice::ReadOther;
-    }
-    if (perm & S_IWOTH) {
-        pers |= QFileDevice::WriteOther;
-    }
-    if (perm & S_IXOTH) {
-        pers |= QFileDevice::ExeOther;
-    }
-
-    return pers;
-}
-
 QByteArray LibzipPlugin::detectEncode(const QByteArray &data, const QString &fileName)
 {
+//    QString trabsferVal;
+//    QString detected;
+//    char *target = new char[sizeof(data) * 2];
+//    ICU_DetectTextEncoding(data, sizeof(data), detected);
+//    m_codecstr = detected.toLatin1();
+//    qDebug() << "ICU编码：" << detected;
+//    if (detected.contains("UTF-8", Qt::CaseInsensitive)) {
+//        m_codecstr = "UTF-8";
+
+//    }
 
     QString detectedResult;
     float chardetconfidence = 0;
     ChartDet_DetectingTextCoding(data, detectedResult, chardetconfidence);
-    if (detectedResult.contains("UTF-8", Qt::CaseInsensitive)) {
+    qDebug() << "chardet编码：" << detectedResult;
+    m_codecstr = detectedResult.toLatin1();
+    if (detectedResult.contains("UTF-8", Qt::CaseInsensitive) || detectedResult.contains("ASCII", Qt::CaseInsensitive)) {
         m_codecstr = "UTF-8";
         return  m_codecstr;
+    } else {
+        if (((QString)m_codecstr).contains("windows", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("IBM", Qt::CaseInsensitive)
+                || ((QString)m_codecstr).contains("x-mac", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("Big5", Qt::CaseInsensitive)
+                || ((QString)m_codecstr).contains("gb18030", Qt::CaseInsensitive)  || ((QString)m_codecstr).contains("iso", Qt::CaseInsensitive)) {
+            return  m_codecstr;
+        } else {
+            m_codecstr = textCodecDetect(data, fileName);
+        }
     }
+    return  m_codecstr;
+}
 
+QByteArray LibzipPlugin::textCodecDetect(const QByteArray &data, const QString &fileName)
+{
     // Return local encoding if nothing in file.
     if (data.isEmpty()) {
         return QTextCodec::codecForLocale()->name();
@@ -1697,8 +1683,50 @@ QByteArray LibzipPlugin::detectEncode(const QByteArray &data, const QString &fil
         return def_codec->name();
     }
 
-
+    qDebug() << "QCodecs编码：" << encoding;
     return encoding;
+}
+
+QFileDevice::Permissions LibzipPlugin::getPermissions(const mode_t &perm)
+{
+    QFileDevice::Permissions pers = QFileDevice::Permissions();
+
+    if (perm == 0) {
+        pers |= (QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup | QFileDevice::ReadOther);
+        return pers;
+    }
+
+    if (perm & S_IRUSR) {
+        pers |= QFileDevice::ReadUser;
+    }
+    if (perm & S_IWUSR) {
+        pers |= QFileDevice::WriteUser;
+    }
+    if (perm & S_IXUSR) {
+        pers |= QFileDevice::ExeUser;
+    }
+
+    if (perm & S_IRGRP) {
+        pers |= QFileDevice::ReadGroup;
+    }
+    if (perm & S_IWGRP) {
+        pers |= QFileDevice::WriteGroup;
+    }
+    if (perm & S_IXGRP) {
+        pers |= QFileDevice::ExeGroup;
+    }
+
+    if (perm & S_IROTH) {
+        pers |= QFileDevice::ReadOther;
+    }
+    if (perm & S_IWOTH) {
+        pers |= QFileDevice::WriteOther;
+    }
+    if (perm & S_IXOTH) {
+        pers |= QFileDevice::ExeOther;
+    }
+
+    return pers;
 }
 
 void LibzipPlugin::cleanIfCanceled()

@@ -45,6 +45,12 @@ public:
     static bool checkAndDeleteDir(const QString &iFilePath);
     static bool deleteDir(const QString &iFilePath);
     static quint64 getAllFileCount(const QString &path);
+    static QString readConf();
+    static bool existMimeType(QString mimetype);
+    static QString judgeFileMime(QString file);
+
+private:
+    static QStringList m_associtionlist;
 };
 
 #endif

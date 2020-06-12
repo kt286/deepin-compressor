@@ -119,6 +119,7 @@ SettingDialog::SettingDialog(QWidget *parent):
         m_settings->setOption(key, m_data[key].toBool()); //update dsetting from m_data
     }
 
+
 }
 
 void SettingDialog::initUI()
@@ -315,7 +316,7 @@ void SettingDialog::done(int status)
         loop++;
     }
     m_valuelist = m_valuelisttemp;
-    writeToConfbf();
+//    writeToConfbf();
 }
 
 void SettingDialog::readFromConfbf()
@@ -323,6 +324,18 @@ void SettingDialog::readFromConfbf()
     const QString confDir = DStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     const QString confPath = confDir + QDir::separator() + "deepin-compressor.confbf";
     QFile file(confPath);
+
+    if (!file.exists()) {
+        file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+        foreach (QString key, m_associtionlist) {
+            QString content = key + ":" + "true" + "\n";
+            file.write(content.toUtf8());
+        }
+
+        file.close();
+    }
+
     bool readStatus = file.open(QIODevice::ReadOnly | QIODevice::Text);
 
     if (readStatus == true) {
@@ -391,6 +404,8 @@ void SettingDialog::settingsChanged(const QString &key, const QVariant &value)
     } else if (key.contains("default_path") && value.toString() == "") {
         emit sigReset();
     }
+    writeToConfbf();
+
 }
 
 void SettingDialog::selectpressed()

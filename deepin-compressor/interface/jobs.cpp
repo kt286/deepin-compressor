@@ -758,6 +758,12 @@ AddJob::AddJob(const QVector<Archive::Entry *> &entries, const Archive::Entry *d
     mType = Job::ENUM_JOBTYPE::ADDJOB;
     qDebug() << "AddJob job instance";
 }
+
+const QVector<Archive::Entry *> &AddJob::entries()
+{
+    return this->m_entries;
+}
+
 quint64 getAllFileCount(const QString &fullPath)
 {
     QFileInfo fileInfo(fullPath);

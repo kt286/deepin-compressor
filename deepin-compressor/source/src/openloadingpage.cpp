@@ -23,6 +23,8 @@
 #include <DLabel>
 
 #include <QVBoxLayout>
+#include <DFontSizeManager>
+#include <DApplicationHelper>
 
 OpenLoadingPage::OpenLoadingPage(DWidget *parent)
     : DWidget(parent)
@@ -43,10 +45,17 @@ void OpenLoadingPage::stop()
 void OpenLoadingPage::initUI()
 {
     m_pSpinner = new DSpinner(this);
-    m_pSpinner->setFixedSize(40, 40);
+    m_pSpinner->setMinimumSize(32, 32);
 
     DLabel *pTextLbl = new DLabel(this);
+    pTextLbl->setMinimumSize(293, 20);
     pTextLbl->setText(tr("Loading, please wait..."));
+    DFontSizeManager::instance()->bind(pTextLbl, DFontSizeManager::T6, QFont::Medium);
+
+    DPalette pa = DApplicationHelper::instance()->palette(pTextLbl);
+    pa.setBrush(DPalette::ButtonText, pa.color(DPalette::TextTitle));
+    DApplicationHelper::instance()->setPalette(pTextLbl, pa);
+//    pTextLbl->setForegroundRole(DPalette::ButtonText);
     pTextLbl->setAlignment(Qt::AlignCenter);
 
     QHBoxLayout *pSpinnerLayout = new QHBoxLayout;

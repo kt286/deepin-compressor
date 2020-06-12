@@ -48,6 +48,13 @@ void MyFileSystemModel::setTableView(DTableView *tableview)
     m_tableview = tableview;
 }
 
+void MyFileSystemModel::deleteRows(QModelIndexList &list)
+{
+    foreach (QModelIndex index, list) {
+        this->remove(index);
+    }
+}
+
 QVariant MyFileSystemModel::headerData(int section, Qt::Orientation, int role) const
 {
     if (role == Qt::DisplayRole) {

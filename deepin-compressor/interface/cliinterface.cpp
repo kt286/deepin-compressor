@@ -282,12 +282,12 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
         arguments.removeOne("-l");
     }
 
-    QString message = "@info";
-    size_t length = strlen(message.toUtf8().data());
-    char *cMsg = static_cast<char *>(malloc((length + 1) * sizeof(char)));
-    strcpy(cMsg, message.toUtf8().data());
-    emit error(cMsg, "Extraction failed because the disk is full.");
-    free(cMsg);
+//    QString message = "@info";
+//    size_t length = strlen(message.toUtf8().data());
+//    char *cMsg = static_cast<char *>(malloc((length + 1) * sizeof(char)));
+//    strcpy(cMsg, message.toUtf8().data());
+//    emit error(cMsg, "Extraction failed because the disk is full.");
+//    free(cMsg);
 
     bool ret = runProcess(m_cliProps->property("addProgram").toString(), arguments);
     if (ret == true) {
@@ -948,8 +948,7 @@ void CliInterface::readStdout(bool handleAll)
 
     QByteArray dd = m_process->readAllStandardOutput();
     m_stdOutData += dd;
-    // QString str = m_stdOutData;
-    // qDebug() << str;
+
     QList< QByteArray > lines = m_stdOutData.split('\n');
 
     // The reason for this check is that archivers often do not end
@@ -1012,12 +1011,6 @@ void CliInterface::readStdout(bool handleAll)
             }
         }
     }
-
-//    if(m_listEmptyLines && m_operationMode == Extract){
-//        if(m_threadPool.waitForDone()){
-//            return;
-//        }
-//    }
 }
 
 bool CliInterface::setAddedFiles()
@@ -1053,7 +1046,7 @@ bool CliInterface::handleLine(const QString &line)
     // TODO: This should be implemented by each plugin; the way progress is
     //       shown by each CLI application is subject to a lot of variation.
 
-    qDebug() << "#####" << line;
+    // qDebug() << "#####" << line;
 
     if (pAnalyseHelp != nullptr) {
         pAnalyseHelp->analyseLine(line);

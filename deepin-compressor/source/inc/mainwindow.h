@@ -240,12 +240,12 @@ public:
     bool applicationQuit();
     QString getAddFile();
     bool isWorkProcess();
-
+    bool checkSettings(QString file);
     //log
-//    void initalizeLog(QWidget *widget);
-//    void logShutDown();
+    //void initalizeLog(QWidget *widget);
+    //void logShutDown();
     void bindAdapter();
-//    static Log4Qt::Logger *getLogger();
+    //static Log4Qt::Logger *getLogger();
     OpenInfo::ENUM_OPTION option = OpenInfo::OPEN;
     QString *strChildMndExtractPath = nullptr;//保存的有次级面板解压路径（用户解压路径，非临时路径），该变量其他地方用不到
 private:
@@ -423,7 +423,9 @@ private:
     void calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel);
     qint64 calFileSize(const QString &path);
     void calSpeedAndTime(unsigned long compressPercent);
-
+    QString getDefaultApp(QString mimetype);
+    void setDefaultApp(QString mimetype, QString desktop);
+    int promptDialog();
 //    QElapsedTimer m_timer;
 //    unsigned long lastPercent = 0;
 //    qint64 selectedTotalFileSize = 0;//选中的总大小

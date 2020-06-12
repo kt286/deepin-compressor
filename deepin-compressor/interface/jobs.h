@@ -289,7 +289,7 @@ class AddJob : public Job
 
 public:
     AddJob(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options, ReadWriteArchiveInterface *interface);
-
+    const QVector<Archive::Entry *> &entries();
 public Q_SLOTS:
     void doWork() override;
 
