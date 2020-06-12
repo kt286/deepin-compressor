@@ -150,11 +150,11 @@ bool LibarchivePlugin::list(bool /*isbatch*/)
         m_extractedFilesSize += (qlonglong)archive_entry_size(aentry);
 
         emit progress(float(archive_filter_bytes(m_archiveReader.data(), -1)) / float(compressedArchiveSize));
-
+        
         m_cachedArchiveEntryCount++;
         archive_read_data_skip(m_archiveReader.data());
     }
-
+    
     if (result != ARCHIVE_EOF) {
         return false;
     }
@@ -426,7 +426,8 @@ bool LibarchivePlugin::extractFiles(const QVector<Archive::Entry *> &files, cons
                 } else {
                     copyDataFromSource(entryName, m_archiveReader.data(), writer.data(), (extractAll && m_extractedFilesSize));
                 }
-
+                // qDebug() <<  destinationDirectory + QDir::separator() + entryName;
+                QFile::setPermissions(destinationDirectory + QDir::separator() + entryName, getPermissions(archive_entry_perm(entry)));
                 break;
 
             case ARCHIVE_FAILED:
@@ -559,7 +560,6 @@ void LibarchivePlugin::emitEntryFromArchiveEntry(struct archive_entry *aentry)
     QString utf8path = trans2uft8(archive_entry_pathname(aentry));
 
     pCurEntry->setProperty("fullPath", QDir::fromNativeSeparators(utf8path));
-
 
     const QString owner = QString::fromLatin1(archive_entry_uname(aentry));
     if (!owner.isEmpty()) {

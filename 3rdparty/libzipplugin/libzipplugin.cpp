@@ -1271,6 +1271,19 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         file.setPermissions(getPermissions(attributes >> 16));
         //extract = true;
         bAnyFileExtracted = true;
+    } else {
+        const auto index = zip_name_locate(archive, name.constData(), ZIP_FL_ENC_RAW);
+        if (index == -1) {
+            emit error(tr("Failed to locate entry: %1"));
+            return false;
+        }
+        zip_uint8_t opsys;
+        zip_uint32_t attributes;
+        if (zip_file_get_external_attributes(archive, index, ZIP_FL_UNCHANGED, &opsys, &attributes) == -1) {
+            emit error(tr("Failed to read metadata for entry: %1"));
+            return false;
+        }
+        QFile::setPermissions(destination, getPermissions(attributes >> 16));
     }
 
     // Set mtime for entry.
@@ -1485,47 +1498,6 @@ QString LibzipPlugin::permissionsToString(const mode_t &perm)
     return modeval;
 }
 
-QFileDevice::Permissions LibzipPlugin::getPermissions(const mode_t &perm)
-{
-    QFileDevice::Permissions pers = QFileDevice::Permissions();
-
-    if (perm == 0) {
-        pers |= (QFileDevice::ReadUser | QFileDevice::WriteUser | QFileDevice::ReadGroup | QFileDevice::ReadOther);
-        return pers;
-    }
-
-    if (perm & S_IRUSR) {
-        pers |= QFileDevice::ReadUser;
-    }
-    if (perm & S_IWUSR) {
-        pers |= QFileDevice::WriteUser;
-    }
-    if (perm & S_IXUSR) {
-        pers |= QFileDevice::ExeUser;
-    }
-
-    if (perm & S_IRGRP) {
-        pers |= QFileDevice::ReadGroup;
-    }
-    if (perm & S_IWGRP) {
-        pers |= QFileDevice::WriteGroup;
-    }
-    if (perm & S_IXGRP) {
-        pers |= QFileDevice::ExeGroup;
-    }
-
-    if (perm & S_IROTH) {
-        pers |= QFileDevice::ReadOther;
-    }
-    if (perm & S_IWOTH) {
-        pers |= QFileDevice::WriteOther;
-    }
-    if (perm & S_IXOTH) {
-        pers |= QFileDevice::ExeOther;
-    }
-
-    return pers;
-}
 
 QByteArray LibzipPlugin::detectEncode(const QByteArray &data, const QString &fileName)
 {

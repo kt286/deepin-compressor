@@ -491,13 +491,14 @@ QString Utils::toShortString(QString strSrc, int limitCounts, int left)
 bool Utils::checkAndDeleteDir(const QString &iFilePath)
 {
     QFileInfo tempFileInfo(iFilePath);
-
+    bool ret = false;
     if (tempFileInfo.isDir()) {
-        deleteDir(iFilePath);
+        ret = deleteDir(iFilePath);
     } else if (tempFileInfo.isFile()) {
         QFile deleteFile(iFilePath);
-        return  deleteFile.remove();
+        ret = deleteFile.remove();
     }
+    return ret;
 }
 
 bool Utils::deleteDir(const QString &iFilePath)
