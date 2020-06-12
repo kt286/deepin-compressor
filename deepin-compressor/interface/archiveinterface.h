@@ -38,7 +38,7 @@
 #include <QVariantList>
 #include <QFileDevice>
 #include <QElapsedTimer>
-
+#include <QFileDevice>
 #include "kpluginmetadata.h"
 
 #define TIMER_TIMEOUT 1000

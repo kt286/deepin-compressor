@@ -28,6 +28,7 @@
 #include <QTextCodec>
 #include <sys/stat.h>
 #include "structs.h"
+#include <sys/stat.h>
 
 Q_DECLARE_METATYPE(KPluginMetaData)
 ReadOnlyArchiveInterface::ReadOnlyArchiveInterface(QObject *parent, const QVariantList &args)
