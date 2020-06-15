@@ -3168,6 +3168,8 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
 
             startCmd(programName, arguments);
             return;
+        } else {
+            clearTempFiles(destEntryPath);//if file exists but diff in size,so delete it and extract again.
         }
 
     }

@@ -1518,7 +1518,7 @@ QByteArray LibzipPlugin::detectEncode(const QByteArray &data, const QString &fil
     QString detectedResult;
     float chardetconfidence = 0;
     ChartDet_DetectingTextCoding(data, detectedResult, chardetconfidence);
-    qDebug() << "chardet编码：" << detectedResult;
+    //qDebug() << "chardet编码：" << detectedResult;
     m_codecstr = detectedResult.toLatin1();
     if (detectedResult.contains("UTF-8", Qt::CaseInsensitive) || detectedResult.contains("ASCII", Qt::CaseInsensitive)) {
         m_codecstr = "UTF-8";
@@ -1785,10 +1785,10 @@ int LibzipPlugin::ChartDet_DetectingTextCoding(const char *str, QString &encodin
     }
 
 #ifndef CHARDET_BOM_CHECK
-    qDebug() << "encoding:" << obj->encoding << "; confidence: " << obj->confidence;
+//    qDebug() << "encoding:" << obj->encoding << "; confidence: " << obj->confidence;
 #else
     // from 1.0.6 support return whether exists BOM
-    qDebug() << "encoding:" << obj->encoding << "; confidence: " << obj->confidence << "; bom: " << obj->bom;
+//    qDebug() << "encoding:" << obj->encoding << "; confidence: " << obj->confidence << "; bom: " << obj->bom;
 #endif
 
     encoding = obj->encoding;
