@@ -7,10 +7,10 @@
  * @brief The ProgressAssistant struct
  * @see 进度条助手
  */
-class ProgressAssistant
+class ProgressAssistant: public QObject
 {
 public:
-
+    explicit ProgressAssistant(QObject *parent = nullptr);
     void startTimer();
 
     void restartTimer();

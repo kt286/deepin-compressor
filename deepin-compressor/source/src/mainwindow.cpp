@@ -1438,6 +1438,11 @@ void MainWindow::slotLoadingFinished(KJob *job)
             m_pageid = PAGE_UNZIP_FAIL;
             refreshPage();
         }
+
+        if (m_pJob) {
+            m_pJob->deleteLater();
+            m_pJob = nullptr;
+        }
         return;
     }
 

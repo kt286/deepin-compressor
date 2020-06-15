@@ -44,7 +44,7 @@ Progress::Progress(DWidget *parent)
     m_timerTime = new QTimer(this);
     m_timerTime->setInterval(1000);
     connect(m_timerTime, &QTimer::timeout, this, &Progress::slotChangeTimeLeft);
-    m_pInfo = new ProgressAssistant();
+    m_pInfo = new ProgressAssistant(this);
 //    m_timerProgress = new QTimer(this);
 //    m_timerProgress->setInterval(1000);
 //    connect(m_timerProgress, &QTimer::timeout, this, &Progress::setTempProgress);

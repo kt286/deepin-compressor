@@ -1,5 +1,10 @@
 #include "structs.h"
 
+ProgressAssistant::ProgressAssistant(QObject *parent): QObject(parent)
+{
+
+}
+
 void ProgressAssistant::startTimer()
 {
     m_timer.start();
