@@ -30,6 +30,7 @@
 #include <QDebug>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QPainterPath>
 
 static const int kSpacingMargin = 4;
 

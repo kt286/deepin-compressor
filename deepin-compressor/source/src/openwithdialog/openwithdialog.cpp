@@ -39,6 +39,7 @@
 #include <QLabel>
 #include <QScrollArea>
 #include <QPainter>
+#include <QPainterPath>
 #include <QCheckBox>
 #include <QFileDialog>
 #include <QStandardPaths>
