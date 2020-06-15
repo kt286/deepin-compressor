@@ -106,6 +106,8 @@ public:
         UserSkiped = 3,
         /*** File name is too long error */
         UserFilenameLong = 4,
+        /*** open file error */
+        OpenFailedError,
         UserDefinedError = 100
     };
 

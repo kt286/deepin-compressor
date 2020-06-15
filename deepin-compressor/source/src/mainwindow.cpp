@@ -1422,9 +1422,22 @@ void MainWindow::slotLoadingFinished(KJob *job)
     m_homePage->spinnerStop();
     m_workstatus = WorkNone;
     if (job->error()) {
-        m_CompressFail->setFailStrDetail(tr("Damaged file, unable to extract"));
-        m_pageid = PAGE_UNZIP_FAIL;
-        refreshPage();
+        int errorCode = job->error();
+        if (errorCode == KJob::OpenFailedError) {
+            if (job->mType == KJob::ENUM_JOBTYPE::LOADJOB) {
+                LoadJob *pLoadJob = dynamic_cast<LoadJob *>(job);
+                ReadOnlyArchiveInterface *pFace = pLoadJob->archiveInterface();
+                QString fileName = pFace->filename();
+                QString tipError = tr("Failed to open archive: %1").arg(fileName);
+                m_CompressFail->setFailStrDetail(tipError);
+                m_pageid = PAGE_UNZIP_FAIL;
+                refreshPage();
+            }
+        } else {
+            m_CompressFail->setFailStrDetail(tr("Damaged file, unable to extract"));
+            m_pageid = PAGE_UNZIP_FAIL;
+            refreshPage();
+        }
         return;
     }
 
@@ -1726,6 +1739,8 @@ void MainWindow::slotExtractionDone(KJob *job)
         }
         if (KJob::UserFilenameLong == errorCode) {
             m_CompressFail->setFailStrDetail(tr("Filename is too long, unable to extract"));
+        } else if (KJob::OpenFailedError == errorCode) {
+            m_CompressFail->setFailStrDetail(tr("Failed to open archive: %1"));
         }
 
         m_pageid = PAGE_UNZIP_FAIL;

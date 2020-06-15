@@ -179,6 +179,10 @@ void Job::onError(const QString &message, const QString &details)
         setErrorText(message);
         emitResult();
         return;
+    } else if (message == "Failed to open archive: %1") {
+        setError(KJob::OpenFailedError);
+        setErrorText(message);
+        emitResult();
     }
     setError(KJob::UserDefinedError);
     setErrorText(message);
@@ -305,9 +309,6 @@ void LoadJob::doWork()
         QTimer::singleShot(0, this, [ = ]() {
             onFinished(ret);
         });
-    }
-    if (ret == false) {
-        onFinished(false);
     }
 }
 
