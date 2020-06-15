@@ -310,6 +310,9 @@ void LoadJob::doWork()
             onFinished(ret);
         });
     }
+//    if (ret == false) {
+//        onFinished(false);
+//    }
 }
 
 void LoadJob::onFinished(bool result)
