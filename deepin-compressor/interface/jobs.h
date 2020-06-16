@@ -391,4 +391,22 @@ private:
 };
 
 
+class UpdateJob : public Job
+{
+    Q_OBJECT
+
+public:
+    explicit UpdateJob(const QVector<Archive::Entry *> &files, ReadWriteArchiveInterface *interface);
+public Q_SLOTS:
+    void doWork() override;
+    Archive::Entry *getWorkEntry();
+protected:
+    bool doKill() override;
+
+private:
+    AddJob *m_addJob = nullptr;
+    QVector<Archive::Entry *> m_entries;
+
+};
+
 #endif // JOBS_H

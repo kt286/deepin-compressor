@@ -54,7 +54,8 @@ public:
         MOVEJOB,
         COPYJOB,
         COMMENTJOB,
-        TESTJOB
+        TESTJOB,
+        UPDATEJOB
     };
 //    Q_ENUM(ENUM_JOBTYPE)
 

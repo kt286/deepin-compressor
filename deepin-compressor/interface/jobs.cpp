@@ -1037,5 +1037,43 @@ bool TestJob::testSucceeded()
     return m_testSuccess;
 }
 
+UpdateJob::UpdateJob(const QVector<Archive::Entry *> &entries, ReadWriteArchiveInterface *interface)
+    : Job(interface)
+    , m_entries(entries)
+{
+    mType = Job::ENUM_JOBTYPE::UPDATEJOB;
+    qDebug() << "updateJob instance";
+}
+
+void UpdateJob::doWork()
+{
+    QString desc = QString("Updating %1 files").arg(m_entries.count());
+    emit description(this, desc, qMakePair(QString("Archive"), archiveInterface()->filename()));
+
+    ReadWriteArchiveInterface *m_writeInterface = dynamic_cast<ReadWriteArchiveInterface *>(archiveInterface());
+    connect(m_writeInterface, &ReadOnlyArchiveInterface::progress, this, &UpdateJob::onProgress);
+    Q_ASSERT(m_writeInterface);
+
+    connectToArchiveInterfaceSignals();
+    bool ret = m_writeInterface->deleteFiles(m_entries);
+
+    if (!archiveInterface()->waitForFinishedSignal()) {
+        onFinished(ret);
+    }
+}
+
+Archive::Entry *UpdateJob::getWorkEntry()
+{
+    if (this->m_entries.length() == 0) {
+        return nullptr;
+    }
+    return this->m_entries[0];
+}
+
+bool UpdateJob::doKill()
+{
+    return m_addJob && m_addJob->kill();
+}
+
 
 #include "jobs.moc"

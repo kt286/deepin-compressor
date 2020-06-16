@@ -136,10 +136,10 @@ LibzipPlugin::LibzipPlugin(QObject *parent, const QVariantList &args)
 
 LibzipPlugin::~LibzipPlugin()
 {
-    for (const auto e : qAsConst(m_emittedEntries)) {
-        // Entries might be passed to pending slots, so we just schedule their deletion.
-        e->deleteLater();
-    }
+//    for (const auto e : qAsConst(m_emittedEntries)) {
+//        // Entries might be passed to pending slots, so we just schedule their deletion.
+//        e->deleteLater();
+//    }
 }
 
 bool LibzipPlugin::list(bool /*isbatch*/)
@@ -490,6 +490,17 @@ bool LibzipPlugin::writeEntry(zip_t *archive, const QString &file, const Archive
     return true;
 }
 
+//void test()
+//{
+//    EntryFactory<Archive::Entry> fac;
+//    for (size_t i = 1; i <= 10; i++) {
+//        auto pa = fac.create();
+//        pa->name();
+//    }
+//    //free memory
+//    fac.cleanup();
+//}
+
 bool LibzipPlugin::emitEntryForIndex(zip_t *archive, qlonglong index)
 {
     Q_ASSERT(archive);
@@ -500,6 +511,7 @@ bool LibzipPlugin::emitEntryForIndex(zip_t *archive, qlonglong index)
     }
 
     auto e = new Archive::Entry();
+//    auto e = mFactory.create();
 
     if (statBuffer.valid & ZIP_STAT_NAME) {
         e->setFullPath(trans2uft8(statBuffer.name));

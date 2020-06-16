@@ -91,14 +91,12 @@ MainWindow::MainWindow(QWidget *parent) : DMainWindow(parent)
 
 MainWindow::~MainWindow()
 {
-
     if (m_windowcount == 0) {
-
         if (this->pMapGlobalWnd != nullptr) {
             this->pMapGlobalWnd->mMapGlobal.clear();
         }
         if (this->pCurAuxInfo != nullptr) {
-            this->pMapGlobalWnd->mMapGlobal.clear();
+            this->pCurAuxInfo->information.clear();
         }
     }
     saveWindowState();
@@ -132,7 +130,6 @@ bool MainWindow::applicationQuit()
     }
 
     if (m_Progess->getType() == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
-
         return true;
     }
 
@@ -140,21 +137,11 @@ bool MainWindow::applicationQuit()
         if (1 != m_Progess->showConfirmDialog()) {
             return false;
         }
-
-        deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
-//        deleteDecompressFile();
+        deleteCompressFile();
         QString destDirName;
-//        if (m_encryptionjob) {
-//            m_encryptionjob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
-//            destDirName = m_encryptionjob->archiveInterface()->destDirName;
-//            m_encryptionjob->Killjob();
-//            m_encryptionjob = nullptr;
-//        }
         deleteDecompressFile(destDirName);
-
-
     } else if (7 == m_mainLayout->currentIndex()) {
-        deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
+        deleteCompressFile();
     }
 
     return true;
@@ -220,60 +207,93 @@ int MainWindow::queryDialogForClose()
     return mode;
 }
 
+void MainWindow::closeClean(QCloseEvent *event)
+{
+    if (m_pJob) {
+        if (m_pJob->mType == KJob::ENUM_JOBTYPE::EXTRACTJOB) {
+            this->closeExtractJobSafe();
+        } else {
+            m_pJob->deleteLater();
+            m_pJob = nullptr;
+        }
+    }
+
+    event->accept();
+    if (m_windowcount == 1) {
+        return;
+    }
+    Archive::Entry *pRootEntry = m_model->getRootEntry();
+    if (pRootEntry) {
+        pRootEntry->clean();
+    }
+    SAFE_DELETE_ELE(pRootEntry);
+    SAFE_DELETE_ELE(m_fileManager);
+    SAFE_DELETE_ELE(pEventloop);
+    SAFE_DELETE_ELE(m_spinner);
+    SAFE_DELETE_ELE(m_pWatcher);
+//    SAFE_DELETE_ELE(m_model);
+//    SAFE_DELETE_ELE(m_logo);
+//    SAFE_DELETE_ELE(m_titleFrame);
+//    SAFE_DELETE_ELE(m_titlelabel);
+    SAFE_DELETE_ELE(m_UnCompressPage);
+    SAFE_DELETE_ELE(m_CompressPage);
+//    SAFE_DELETE_ELE(m_mainLayout);
+    SAFE_DELETE_ELE(m_homePage);
+    SAFE_DELETE_ELE(m_CompressSetting);
+//    SAFE_DELETE_ELE(m_Progess);
+    SAFE_DELETE_ELE(m_CompressSuccess);
+    SAFE_DELETE_ELE(m_CompressFail);
+    SAFE_DELETE_ELE(m_encryptionpage);
+    SAFE_DELETE_ELE(m_progressdialog);
+    SAFE_DELETE_ELE(m_settingsDialog);
+    SAFE_DELETE_ELE(m_pOpenLoadingPage);
+    SAFE_DELETE_ELE(m_encodingpage);
+    SAFE_DELETE_ELE(m_settings);
+    SAFE_DELETE_ELE(m_mainWidget);
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     char options = OpenInfo::CLOSE;
     if (this->pCurAuxInfo != nullptr) {
         MainWindow_AuxInfo *curAuxInfo = this->pCurAuxInfo;
         QMap<QString, OpenInfo *>::iterator it = curAuxInfo->information.begin();
+        if (this->pMapGlobalWnd != nullptr) {
+            while (it != curAuxInfo->information.end()) {
+                OpenInfo *pInfo = it.value();
+                it++;
 
-        while (it != curAuxInfo->information.end()) {
-            OpenInfo *pInfo = it.value();
-            it++;
+                MainWindow *p = this->pMapGlobalWnd->getOne(pInfo->strWinId);
+                if (p != nullptr) {
+                    p->close();//close all children mainwindow
+                } else {
+                    continue;
+                }
 
-            MainWindow *p = this->pMapGlobalWnd->getOne(pInfo->strWinId);
-            if (p != nullptr) {
-                p->close();//close all children mainwindow
-            } else {
-                continue;
-            }
-            //pInfo->isHidden = p->isHidden();
-//            if (p->isHidden() == true) {
-//                pInfo->option = OpenInfo::CLOSE;
-//            }
-            if (p->option == OpenInfo::CLOSE) {
-                options |= p->option;
-            } else if (p->option == OpenInfo::OPEN) {
-                options |= p->option;
-            } else if (p->option == OpenInfo::QUERY_CLOSE_CANCEL) {
-                options |= p->option;
+                if (p->option == OpenInfo::CLOSE) {
+                    options |= p->option;
+                } else if (p->option == OpenInfo::OPEN) {
+                    options |= p->option;
+                } else if (p->option == OpenInfo::QUERY_CLOSE_CANCEL) {
+                    options |= p->option;
+                }
             }
         }
+
 
         QMap<QString, OpenInfo *>::iterator iter;
         QString key;
         for (iter = curAuxInfo->information.begin(); iter != curAuxInfo->information.end();) {
-            //先存key
             key = iter.key();
-            //指针移至下一个位置
-            iter++;
+            iter++;             //指针移至下一个位置
             if (curAuxInfo->information[key]->option == OpenInfo::CLOSE) {
-                //删除当前位置数据
                 OpenInfo *p = curAuxInfo->information.take(key);
-                delete p;
-                p = nullptr;
+                SAFE_DELETE_ELE(p);
             }
         }
-
-        curAuxInfo->information;
-        //如果存在子面板未成功关闭，则event.ignore();
-//        curAuxInfo->information.clear();
-//        delete curAuxInfo;
-//        curAuxInfo = nullptr;
     }
 
     qDebug() << "子窗口开始关闭";
-//    if (this->pMapGlobalWnd != nullptr) {
     //判断m_pJob是否结束
     if (m_pJob == nullptr) {
         if (options == OpenInfo::QUERY_CLOSE_CANCEL) {//如果子面板取消关闭
@@ -281,8 +301,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
             this->option = OpenInfo::QUERY_CLOSE_CANCEL;
             return;
         } else if (options == OpenInfo::CLOSE) {//如果子面板那正常关闭
-            event->accept();
+            //event->accept();
+            closeClean(event);
             this->option = OpenInfo::CLOSE;
+            removeFromParentInfo(this);
             if (this->pMapGlobalWnd != nullptr) {
                 this->pMapGlobalWnd->remove(QString::number(this->winId()));
             }
@@ -300,7 +322,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
                 this->option = OpenInfo::QUERY_CLOSE_CANCEL;
                 return;
             } else if (mode == 1) {
-                event->accept();
+//                if (m_pJob) {
+//                    ExtractJob *pJob = dynamic_cast<ExtractJob *>(m_pJob);
+//                    m_pJob->doKill();
+//                    m_pJob = nullptr;
+//                }
+
+                closeClean(event);
+                removeFromParentInfo(this);
+
                 this->option = OpenInfo::CLOSE;
                 if (this->pMapGlobalWnd != nullptr) {
                     this->pMapGlobalWnd->remove(QString::number(this->winId()));
@@ -310,7 +340,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
 
     }
-//    }
 
     if (m_Progess->getType() == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
         if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::ADDJOB) {
@@ -332,10 +361,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
         deleteCompressFile();
         deleteDecompressFile();
 
-//        event->accept();
-
         if (m_pJob) {
-            if (m_pJob->mType == JOB_EXTRACT) {
+            if (m_pJob->mType == KJob::ENUM_JOBTYPE::EXTRACTJOB) {
                 QString destDirName;
                 ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
                 destDirName = pExtractJob->archiveInterface()->destDirName;
@@ -346,16 +373,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
         emit sigquitApp();
     } else if (7 == m_mainLayout->currentIndex()) {
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
-//        event->accept();
         slotquitApp();
     } else {
-//        event->accept();
         slotquitApp();
-    }
-
-    if (m_pJob) {
-        m_pJob->deleteLater();
-        m_pJob = nullptr;
     }
 }
 
@@ -420,7 +440,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
                     m_CompressPage->setRootPathIndex();
                     refreshPage();
                 }
-                delete dialog;
+                SAFE_DELETE_ELE(dialog);
             }
         }
     }
@@ -772,7 +792,7 @@ bool MainWindow::popUpChangedDialog(const qint64 &pid)
 
 bool MainWindow::createSubWindow(const QStringList &urls)
 {
-    int len = urls.length();
+
     QString filePath = urls[0];
     QFileInfo fileInfo(filePath);
 
@@ -818,7 +838,8 @@ bool MainWindow::createSubWindow(const QStringList &urls)
 //            pInfo->isHidden = false;
             pInfo->option = OpenInfo::OPEN;
             pInfo->strWinId = QString::number(subWindow->winId());
-            subWindow->move(pParentWnd->x() + 130, pParentWnd->y() + 92);
+            int childCount = pParentWnd->pCurAuxInfo->information.size();
+            subWindow->move(pParentWnd->x() + childCount * 130, pParentWnd->y() + childCount * 92);
             connect(subWindow, &MainWindow::sigTipsWindowPopUp, pParentWnd->m_UnCompressPage, &UnCompressPage::slotSubWindowTipsPopSig);
 
             subWindow->m_pageid = PAGE_ZIP;
@@ -863,8 +884,7 @@ void MainWindow::refreshPage()
     case PAGE_HOME:
 
         if (m_fileManager) {
-            delete m_fileManager;
-            m_fileManager = nullptr;
+            SAFE_DELETE_ELE(m_fileManager);
         }
         m_Progess->resetProgress();
         m_openAction->setEnabled(true);
@@ -970,8 +990,7 @@ void MainWindow::refreshPage()
     case PAGE_UNZIP_SUCCESS:
         if (m_fileManager) {
             m_fileManager->stopWatcher();
-            delete m_fileManager;
-            m_fileManager = nullptr;
+            SAFE_DELETE_ELE(m_fileManager);
         }
         titlebar()->setTitle("");
         m_CompressSuccess->setCompressPath(m_decompressfilepath);
@@ -1125,8 +1144,7 @@ void MainWindow::onSelected(const QStringList &files)
             if (this->m_model != nullptr) {
                 Archive::Entry *parentEntry = this->m_model->getParentEntry();
                 if (parentEntry) {
-                    delete parentEntry;
-                    parentEntry = nullptr;
+                    SAFE_DELETE_ELE(parentEntry);
                 }
                 this->m_model->resetmparent();
             }
@@ -1171,7 +1189,7 @@ void MainWindow::onSelected(const QStringList &files)
             dialog->getButton(2)->setGraphicsEffect(effect);
 
             const int mode = dialog->exec();
-            delete dialog;
+            SAFE_DELETE_ELE(dialog);
             qDebug() << mode;
             if (1 == mode) {
                 emit sigZipSelectedFiles(files);
@@ -1493,10 +1511,7 @@ void MainWindow::loadArchive(const QString &files)
 
 void MainWindow::WatcherFile(const QString &files)
 {
-    if (m_fileManager) {
-        delete m_fileManager;
-        m_fileManager = nullptr;
-    }
+    SAFE_DELETE_ELE(m_fileManager);
 
     m_fileManager = new DFileWatcher(files, this);
     m_fileManager->startWatcher();
@@ -1515,10 +1530,9 @@ void MainWindow::WatcherFile(const QString &files)
         dialog->getButton(0)->setFixedWidth(340);
         //        dialog->getButton(0)->setGraphicsEffect(effect);
         dialog->exec();
-        delete dialog;
+        SAFE_DELETE_ELE(dialog);
 
-        delete m_fileManager;
-        m_fileManager = nullptr;
+        SAFE_DELETE_ELE(m_fileManager);
 
         m_pageid = PAGE_HOME;
         m_UnCompressPage->setRootPathIndex();
@@ -1671,6 +1685,30 @@ void MainWindow::slotBatchExtractError(const QString &name)
     refreshPage();
 }
 
+void MainWindow::removeFromParentInfo(MainWindow *CurMainWnd)
+{
+    if (CurMainWnd->pCurAuxInfo != nullptr) {
+        MainWindow_AuxInfo *parentInfo = CurMainWnd->pCurAuxInfo->parentAuxInfo;
+        QString strWId = QString::number(CurMainWnd->winId());
+        if (parentInfo) {
+            QMap<QString, OpenInfo *>::iterator iter;
+            QString key;
+            for (iter = parentInfo->information.begin(); iter != parentInfo->information.end();) {
+                //先存key
+                key = iter.key();
+                //指针移至下一个位置
+                iter++;
+                if (parentInfo->information[key]->strWinId == strWId) {
+                    //删除当前位置数据
+                    OpenInfo *p = parentInfo->information.take(key);
+                    SAFE_DELETE_ELE(p);
+                }
+            }
+        }
+
+    }
+}
+
 void MainWindow::slotExtractionDone(KJob *job)
 {
     m_workstatus = WorkNone;
@@ -1683,40 +1721,21 @@ void MainWindow::slotExtractionDone(KJob *job)
         if (this->m_pWatcher != nullptr) {
             this->m_pWatcher->finishWork();
             disconnect(this->m_pWatcher, &TimerWatcher::sigBindFuncDone, pExtractJob, &ExtractJob::slotWorkTimeOut);
-            delete this->m_pWatcher;
-            this->m_pWatcher = nullptr;
+            SAFE_DELETE_ELE(m_pWatcher);
         }
-//        m_pJob->deleteLater();
-//        m_pJob = nullptr;
+
         int errcode = this->m_pJob->error();
 
         m_pJob->deleteLater();
         m_pJob = nullptr;
+
         if (errcode == 0 && m_encryptiontype != Encryption_SingleExtract) {  // 解压成功后关闭独立窗口,提取单个不关闭界面
             if (this->pCurAuxInfo == nullptr || this->pCurAuxInfo->information.size() == 0) {
                 m_pageid = PAGE_UNZIP_SUCCESS;
                 refreshPage();
                 this->close();
                 if (this->pCurAuxInfo != nullptr) {
-                    MainWindow_AuxInfo *parentInfo = this->pCurAuxInfo->parentAuxInfo;
-                    QString strWId = QString::number(this->winId());
-                    if (parentInfo) {
-                        QMap<QString, OpenInfo *>::iterator iter;
-                        QString key;
-                        for (iter = parentInfo->information.begin(); iter != parentInfo->information.end();) {
-                            //先存key
-                            key = iter.key();
-                            //指针移至下一个位置
-                            iter++;
-                            if (parentInfo->information[key]->strWinId == strWId) {
-                                //删除当前位置数据
-                                OpenInfo *p = parentInfo->information.take(key);
-                                delete p;
-                                p = nullptr;
-                            }
-                        }
-                    }
-
+                    removeFromParentInfo(this);
                 }
                 return;
             }
@@ -1794,7 +1813,9 @@ void MainWindow::slotExtractionDone(KJob *job)
                 }
                 pMapGlobalWnd->insert(QString::number(this->winId()), this);
                 arguments << HEADBUS + QString::number(this->winId());//the second arg
-
+                if (pExtractWorkEntry == nullptr) {
+                    return;
+                }
                 QModelIndex index = this->m_model->indexForEntry(pExtractWorkEntry);
                 QString strIndex = modelIndexToStr(index);
                 arguments << strIndex;  //the third arg
@@ -1842,6 +1863,8 @@ void MainWindow::slotExtractionDone(KJob *job)
 
         m_pageid = PAGE_UNZIP;
         refreshPage();
+    } else if (Encryption_NULL == m_encryptiontype) {
+        qDebug() << "do nothing";
     } else {
         m_pageid = PAGE_UNZIP_SUCCESS;
         if (errorCode == KJob::UserSkiped) {
@@ -2172,6 +2195,7 @@ void MainWindow::addArchiveEntry(QMap<QString, QString> &Args, Archive::Entry *p
             QHash<QString, QIcon> *map = new QHash<QString, QIcon>();
             Archive::CreateEntry(fi.absoluteFilePath(), entry, externalPath, map);
             m_model->appendEntryIcons(*map);
+            map->clear();
             delete map;
             map = nullptr;
         } else {
@@ -2316,6 +2340,7 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
             QHash<QString, QIcon> *map = new QHash<QString, QIcon>();
             Archive::CreateEntryNew(fi.filePath(), entry, externalPath, map);
             m_model->appendEntryIcons(*map);
+            map->clear();
             delete map;
             map = nullptr;
         } else {
@@ -2427,7 +2452,7 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool is
         m_jobState = JOB_DELETE;
     }
 
-    //重置進度條
+    //重置进度条
     m_Progess->pInfo()->resetProgress();
     DeleteJob *pDeleteJob = dynamic_cast<DeleteJob *>(m_pJob);
     if (pDeleteJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_READWRITE_LIBARCHIVE) {//该插件(tar格式)，计算总大小时，需要减去待删除的文件的大小
@@ -2805,7 +2830,7 @@ bool MainWindow::startCmd(const QString &executeName, QStringList arguments)
         if (cmdprocess != nullptr)
         {
             QObject::disconnect(cmdprocess);
-            delete cmdprocess; //防止内存泄露，结束之后一定要delete
+            delete cmdprocess;
         }
     };
 
@@ -3035,8 +3060,6 @@ void MainWindow::slotJobFinished(KJob *job)
         QString filename =   m_model->archive()->fileName();
         QStringList ArchivePath = QStringList() << filename;
         if (m_pJob->mType == Job::ENUM_JOBTYPE::DELETEJOB) {
-//            DeleteJob *pDeleteJob = nullptr;
-//            pDeleteJob = dynamic_cast<DeleteJob *>(m_pJob);
             this->m_UnCompressPage->getFileViewer()->getTableView()->clearSelection();// delete 后清除选中
             m_pJob->deleteLater();
             m_pJob = nullptr;
@@ -3123,7 +3146,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
                 }
             }
 
-            delete pCurAuxInfo->information[key];
+            SAFE_DELETE_ELE(pCurAuxInfo->information[key]);
             pCurAuxInfo->information.remove(key);
             pNewInfo = new OpenInfo;
         }
@@ -3344,6 +3367,31 @@ void MainWindow::deleteFromArchive(const QStringList &files, const QString &arch
 
     m_pJob->start();
     m_workstatus = WorkProcess;
+}
+
+void MainWindow::closeExtractJobSafe()
+{
+    slotResetPercentAndTime();
+    m_isrightmenu = false;
+    if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::EXTRACTJOB) { // 解压取消
+        if (pEventloop == nullptr) {
+            pEventloop = new QEventLoop(this->m_Progess);
+        }
+        m_encryptiontype = Encryption_NULL;
+        ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
+        pExtractJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
+        if (pEventloop->isRunning() == false) {
+            connect(pExtractJob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
+            m_pJob->kill();
+            m_pJob = nullptr;
+            pEventloop->exec(QEventLoop::ExcludeUserInputEvents);
+        } else {
+            m_pJob->kill();
+            m_pJob = nullptr;
+        }
+    }
+
+    deleteDecompressFile();
 }
 
 //void MainWindow::addToArchive(const QStringList &files, const QString &archive)
@@ -3669,7 +3717,7 @@ int MainWindow::promptDialog()
     widget->setLayout(mainlayout);
     dialog->addContent(widget);
     int res = dialog->exec();
-    delete dialog;
+    SAFE_DELETE_ELE(dialog);
 
     return res;
 }

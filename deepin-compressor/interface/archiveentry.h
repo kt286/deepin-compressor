@@ -33,6 +33,55 @@ enum PathFormat {
     WithTrailingSlash
 };
 
+//#include <iostream>
+//#include <vector>
+
+//// Factory
+//template<typename T>
+//class EntryFactory
+//{
+//public:
+//    T *create();
+//    void load(T *);
+//    void cleanup();
+//    EntryFactory();
+//private:
+//    std::vector<T *> objs_;
+//};
+
+//template<typename T>
+//EntryFactory<T>::EntryFactory()
+//{
+//}
+
+//template<typename T>
+//void EntryFactory<T>::cleanup()
+//{
+//    foreach (T *pOjb, objs_) {
+//        if (pOjb) {
+//            std::cout << "release " << pOjb << std::endl;
+//            delete pOjb;
+//            pOjb = nullptr;
+//        }
+//    }
+//    objs_.clear();
+//}
+
+//template<typename T>
+//T *EntryFactory<T>::create()
+//{
+//    T *obj = new T;
+//    objs_.push_back(obj);
+
+//    return obj;
+//}
+
+//template<typename T>
+//void EntryFactory<T>::load(T *obj)
+//{
+//    objs_.push_back(obj);
+//}
+
 class Archive::Entry : public QObject
 {
     Q_OBJECT
@@ -55,7 +104,7 @@ class Archive::Entry : public QObject
     Q_PROPERTY(bool isPasswordProtected MEMBER m_isPasswordProtected)
 
 public:
-
+    static int count;
     explicit Entry(QObject *parent = nullptr, const QString &fullPath = {}, const QString &rootNode = {});
     ~Entry() override;
 
@@ -101,7 +150,11 @@ public:
     void getAllNodesFullPath(QStringList &pList);
     void getFilesCount(Archive::Entry *pEntry, int &count);
     bool operator==(const Archive::Entry &right) const;
-
+    /**
+     * @brief clean
+     * @see 释放内存
+     */
+    void clean();
 public:
     QString rootNode;
     bool compressedSizeIsSet;

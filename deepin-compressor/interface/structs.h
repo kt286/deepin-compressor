@@ -6,6 +6,7 @@
 /**
  * @brief The ProgressAssistant struct
  * @see 进度条助手
+ * @author added by hsw 20200610
  */
 class ProgressAssistant: public QObject
 {

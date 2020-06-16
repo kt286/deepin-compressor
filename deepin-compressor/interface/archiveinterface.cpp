@@ -53,6 +53,7 @@ ReadOnlyArchiveInterface::ReadOnlyArchiveInterface(QObject *parent, const QVaria
 
 ReadOnlyArchiveInterface::~ReadOnlyArchiveInterface()
 {
+    qDebug() << "destructor";
 }
 
 void ReadOnlyArchiveInterface::onEntry(Archive::Entry *archiveEntry)

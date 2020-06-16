@@ -152,7 +152,7 @@ public:
      * @ key: winId
      * @ value: pointer of mainWindow
      */
-    QMap<QString, MainWindow *> mMapGlobal;
+    QMap<QString, MainWindow *> mMapGlobal = {};
 };
 
 struct OpenInfo {
@@ -203,7 +203,12 @@ public:
     static int m_windowcount;
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
-
+    /**
+     * @brief closeClean
+     * @param event
+     * @see 每次关闭窗口尽量手动释放更多的内存，因为我们的窗口close()实际上执行的是hide();
+     */
+    void closeClean(QCloseEvent *event);
     void closeEvent(QCloseEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
 
@@ -320,6 +325,7 @@ private slots:
     void slotWorkTimeOut();
 
     void deleteFromArchive(const QStringList &files, const QString &archive);
+    void closeExtractJobSafe();
 //    void addToArchive(const QStringList &files, const QString &archive);//废弃，added by hsw 20200528
 
 signals:
@@ -358,11 +364,12 @@ private:
      * @see 启动一个命令，完成后自动销毁
      */
     bool startCmd(const QString &executeName, QStringList arguments);
+    void removeFromParentInfo(MainWindow *);
 private:
-    DLabel *m_logo;
+//    DLabel *m_logo;
     QPixmap m_logoicon;
-    QFrame *m_titleFrame;
-    DLabel *m_titlelabel;
+//    QFrame *m_titleFrame;
+//    DLabel *m_titlelabel;
     DWidget *m_mainWidget;
     QStackedLayout *m_mainLayout;
     HomePage *m_homePage;

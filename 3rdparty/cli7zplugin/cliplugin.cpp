@@ -28,6 +28,7 @@ CliPlugin::CliPlugin(QObject *parent, const QVariantList &args)
 
 CliPlugin::~CliPlugin()
 {
+    qDebug() << "destructor";
 }
 
 void CliPlugin::resetParsing()

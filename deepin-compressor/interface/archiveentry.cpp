@@ -21,6 +21,7 @@
  */
 #include "archiveentry.h"
 
+int Archive::Entry::count = 0;
 
 Archive::Entry::Entry(QObject *parent, const QString &fullPath, const QString &rootNode)
     : QObject(parent)
@@ -32,6 +33,8 @@ Archive::Entry::Entry(QObject *parent, const QString &fullPath, const QString &r
     , m_isDirectory(false)
     , m_isPasswordProtected(false)
 {
+    count++;
+    qDebug() << "自增后count:" << count;
     m_mapIndex.clear();
     if (!fullPath.isEmpty())
         setFullPath(fullPath);
@@ -40,7 +43,8 @@ Archive::Entry::Entry(QObject *parent, const QString &fullPath, const QString &r
 
 Archive::Entry::~Entry()
 {
-
+    count--;
+    qDebug() << "自减后count:" << count;
 }
 
 void Archive::Entry::copyMetaData(const Archive::Entry *sourceEntry)
@@ -312,6 +316,25 @@ void Archive::Entry::checkLeavesNode(Entry *pE, QVector<Archive::Entry *> *pV)
 bool Archive::Entry::operator==(const Archive::Entry &right) const
 {
     return m_fullPath == right.m_fullPath;
+}
+
+void Archive::Entry::clean()
+{
+    Archive::Entry *p = this;
+    if (p->isDir() == false) {
+        delete p;
+        p = nullptr;
+    }
+    const auto archiveEntries = this->entries();
+    for (auto entry : archiveEntries) {
+        if (entry->isDir() == true && entry != nullptr) {
+            entry->clean();
+        }
+        if (entry) {
+            delete entry;
+            entry = nullptr;
+        }
+    }
 }
 
 QDebug operator<<(QDebug d, const Archive::Entry &entry)

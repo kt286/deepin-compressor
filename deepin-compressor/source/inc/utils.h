@@ -26,6 +26,32 @@
 #include <QObject>
 
 
+#define SAFE_DELETE_ELE( ptr ) \
+    if (ptr != NULL)      \
+    {                     \
+        delete ptr;       \
+        ptr = NULL;       \
+    }
+
+#define SAFE_DELETE_ARRAY( ptr ) \
+    if (ptr != NULL)            \
+    {                           \
+        delete[] ptr;           \
+        ptr = NULL;             \
+    }
+
+#define SAFE_DELETE_TABLE( ptr ) \
+    if (ptr != NULL)            \
+    {                           \
+        for (i = 0; i < row; i++)\
+        {\
+            SAFE_DELETE_ARRAY(ptr[i])\
+            delete [] ptr;\
+        }\
+        ptr = NULL; \
+    }
+
+
 class Utils : public QObject
 {
     Q_OBJECT
