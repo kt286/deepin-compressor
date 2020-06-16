@@ -34,7 +34,7 @@ Archive::Entry::Entry(QObject *parent, const QString &fullPath, const QString &r
     , m_isPasswordProtected(false)
 {
     count++;
-    qDebug() << "自增后count:" << count;
+    //qDebug() << "自增后count:" << count;
     m_mapIndex.clear();
     if (!fullPath.isEmpty())
         setFullPath(fullPath);
@@ -44,7 +44,7 @@ Archive::Entry::Entry(QObject *parent, const QString &fullPath, const QString &r
 Archive::Entry::~Entry()
 {
     count--;
-    qDebug() << "自减后count:" << count;
+    //qDebug() << "自减后count:" << count;
 }
 
 void Archive::Entry::copyMetaData(const Archive::Entry *sourceEntry)

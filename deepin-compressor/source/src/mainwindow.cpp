@@ -1623,6 +1623,12 @@ void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
         }
         return;
     }*/
+//    resetMainwindow();
+//    calSelectedTotalEntrySize(all_entries);
+//    sourceEntry->calAllSize(m_Progess->pInfo()->getTotalSize());//added by hsw for valid total size
+    //重置进度条
+//    m_Progess->pInfo()->resetProgress();
+    m_Progess->pInfo()->startTimer();
     pExtractJob->archiveInterface()->destDirName = "";
     m_pJob->start();
 }

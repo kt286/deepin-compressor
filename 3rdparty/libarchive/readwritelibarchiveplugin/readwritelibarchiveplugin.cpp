@@ -100,7 +100,7 @@ bool ReadWriteLibarchivePlugin::addFiles(const QVector<Archive::Entry *> &files,
 
         addedEntries++;
         emit progress(float(addedEntries) / float(totalCount));
-        qDebug() << "front========" << "addedEntries:" << addedEntries << "totalCount:" << totalCount;
+        //qDebug() << "front========" << "addedEntries:" << addedEntries << "totalCount:" << totalCount;
         // For directories, write all subfiles/folders.
         const QString &fullPath = selectedFile->fullPath();
         if (QFileInfo(fullPath).isDir()) {
@@ -140,11 +140,11 @@ bool ReadWriteLibarchivePlugin::addFiles(const QVector<Archive::Entry *> &files,
 
                 if (bInternalDuty == false) {//如果不启动内部进度细分分析
                     double percent = float(addedEntries) / totalCount;
-                    qDebug() << "back=======percent:" << percent;
+                    //qDebug() << "back=======percent:" << percent;
                     emit progress(percent);
                 }
             }
-            qDebug() << "back========" << "addedEntries:" << addedEntries << "totalCount:" << totalCount;
+            //qDebug() << "back========" << "addedEntries:" << addedEntries << "totalCount:" << totalCount;
         }
 
     }
