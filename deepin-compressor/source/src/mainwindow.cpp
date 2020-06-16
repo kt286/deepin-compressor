@@ -317,7 +317,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
             return;
         } else {//如果子面板正常关闭；并且当前面板job完成
             int mode = queryDialogForClose();
-            if (mode == 0) {
+            if (mode == 0 || mode == -1) {
                 event->ignore();
                 this->option = OpenInfo::QUERY_CLOSE_CANCEL;
                 return;
@@ -1142,9 +1142,9 @@ void MainWindow::onSelected(const QStringList &files)
         m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DECOMPRESSING);
         if (0 == m_CompressPage->getCompressFilelist().count()) {
             if (this->m_model != nullptr) {
-                Archive::Entry *parentEntry = this->m_model->getParentEntry();
-                if (parentEntry) {
-                    SAFE_DELETE_ELE(parentEntry);
+                Archive::Entry *pRootEntry = m_model->getRootEntry();
+                if (pRootEntry) {
+                    pRootEntry->clean();
                 }
                 this->m_model->resetmparent();
             }
@@ -1623,11 +1623,6 @@ void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
         }
         return;
     }*/
-//    resetMainwindow();
-//    calSelectedTotalEntrySize(all_entries);
-//    sourceEntry->calAllSize(m_Progess->pInfo()->getTotalSize());//added by hsw for valid total size
-    //重置进度条
-//    m_Progess->pInfo()->resetProgress();
     m_Progess->pInfo()->startTimer();
     pExtractJob->archiveInterface()->destDirName = "";
     m_pJob->start();
@@ -1750,6 +1745,9 @@ void MainWindow::slotExtractionDone(KJob *job)
 
     int errorCode = job->error();
 
+    if (m_pageid == PAGE_LOADING) {
+        m_pOpenLoadingPage->stop();
+    }
 
     if ((PAGE_ENCRYPTION == m_pageid) && (errorCode && (errorCode != KJob::KilledJobError && errorCode != KJob::UserSkiped)))   {
 
@@ -3131,6 +3129,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     if (type == EXTRACT_TEMP) {
         m_encryptiontype = Encryption_TempExtract;
         m_pageid = Page_ID::PAGE_LOADING;
+
         // m_openType = true;
         m_Progess->setopentype(true);
         if (pCurAuxInfo == nullptr) {
@@ -3184,6 +3183,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     //m_compressDirFiles = CheckAllFiles(path);
 
 
+
     Archive::Entry *pDestEntry = fileList[0];
     if (destinationDirectory.right(1) == QDir::separator() == false) {
         destinationDirectory = destinationDirectory + QDir::separator();
@@ -3208,6 +3208,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
             }
             pMapGlobalWnd->insert(QString::number(this->winId()), this);
             if (isCompressedFile == true) {
+
                 programName = "deepin-compressor";
                 arguments << HEADBUS + QString::number(this->winId());//the second arg
                 QModelIndex index = this->m_model->indexForEntry(pDestEntry);
@@ -3222,7 +3223,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         }
 
     }
-
+    refreshPage();
     m_pJob = m_model->extractFiles(fileList, destinationDirectory, options);
     if (m_pJob == nullptr || m_pJob->mType != Job::ENUM_JOBTYPE::EXTRACTJOB) {
         qDebug() << "ExtractJob new failed.";

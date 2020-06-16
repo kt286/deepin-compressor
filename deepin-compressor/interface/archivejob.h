@@ -25,7 +25,6 @@
 #include <QObject>
 #include <QPair>
 
-
 class KJobPrivate;
 
 class  KJob : public QObject

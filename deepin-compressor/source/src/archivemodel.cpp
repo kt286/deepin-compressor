@@ -452,6 +452,7 @@ QString ArchiveModel::cleanFileName(const QString &fileName)
 void ArchiveModel::initRootEntry()
 {
     m_rootEntry.reset(new Archive::Entry());
+
     m_rootEntry->setProperty("isDirectory", true);
 }
 
