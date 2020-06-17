@@ -70,7 +70,7 @@ qint64 ProgressAssistant::getLeftTime(unsigned long percent)
     //qDebug() << "m_sizeLeft" << sizeLeft;
     //qDebug() << "m_compressSpeed" << speed;
     //qDebug() << "m_timeLeft" << timeLeft;
-
+    //qDebug() << "timeLeft:" << timeLeft;
     if (timeLeft != 100 && timeLeft == 0) {
         timeLeft = 1;
     }

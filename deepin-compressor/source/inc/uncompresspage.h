@@ -56,7 +56,7 @@ public:
     void getMainWindowWidth(int windowWidth);
     void slotCompressedAddFile();
     fileViewer *getFileViewer();
-    int showReplaceDialog(QString name);
+    int showReplaceDialog(QString name, int &responseValue);
     void resizeEvent(QResizeEvent *event) override;
 
 signals:

@@ -234,13 +234,14 @@ void UnCompressPage::slotCompressedAddFile()
     QVector<Archive::Entry *> vectorEntry;
     m_inputlist.clear();
     ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
-
+    int responseValue = 0;
     foreach (QString strPath, dialog.selectedFiles()) {
 
         Archive::Entry *entry = pModel->isExists(strPath);
 
         if (entry != nullptr) {
-            int mode = showReplaceDialog(strPath);
+
+            int mode = showReplaceDialog(strPath, responseValue);
             if (1 == mode) {
                 vectorEntry.push_back(entry);
                 m_inputlist.push_back(strPath);
@@ -360,16 +361,25 @@ void UnCompressPage::onAutoCompress(const QStringList &path, Archive::Entry *pWo
 
     ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
     QVector<Archive::Entry *> vectorEntry;
+    int mode = 0;
+    int responseValue = Result_Cancel;
     foreach (QString strPath, path) {
 
         Archive::Entry *entry = pModel->isExists(strPath);
 
         if (entry != nullptr) {
-            int mode = showReplaceDialog(strPath);
-            if (1 == mode) {
+            if (mode == 1 && responseValue == Result_OverwriteAll) {
                 vectorEntry.push_back(entry);
                 m_inputlist.push_back(strPath);
+            } else {
+                mode = showReplaceDialog(strPath, responseValue);
             }
+            qDebug() << responseValue;
+//            int ret = showReplaceDialog(strPath);
+//            if (1 == mode) {
+//                vectorEntry.push_back(entry);
+//                m_inputlist.push_back(strPath);
+//            }
         } else {
             m_inputlist.push_back(strPath);
         }
@@ -406,9 +416,10 @@ void UnCompressPage::slotDeleteJobFinished(Archive::Entry *pWorkEntry)
     emit sigDeleteJobFinished(pWorkEntry);
 }
 
-int UnCompressPage::showReplaceDialog(QString name)
+int UnCompressPage::showReplaceDialog(QString name, int &responseValue)
 {
     OverwriteQuery query(name);
     query.execute();
+    responseValue = query.response().toInt();
     return query.getExecuteReturn();
 }

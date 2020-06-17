@@ -199,8 +199,15 @@ void Progress::setprogress(double percent)
 void Progress::setSpeedAndTime(double speed, qint64 timeLeft)
 {
     m_speed = speed;
-    lastTimeLeft = timeLeft;
-    displaySpeedAndTime(speed, timeLeft);
+    qint64 gap = timeLeft - lastTimeLeft;
+
+    if (timeLeft) {
+        if (gap > 20 || gap < -20) {
+            lastTimeLeft = timeLeft;
+        }
+    }
+
+    displaySpeedAndTime(speed, lastTimeLeft);
 
     if (lastTimeLeft > 2) {
         m_timerTime->start();
@@ -335,6 +342,8 @@ int Progress::showConfirmDialog()
     if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING) {
         //strlabel->setText(tr("Stop compressing "));
         strlabel2->setText(tr("Are you sure you want to stop the compression?"));
+    } else if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_DELETEING) {
+        strlabel2->setText(tr("Are you sure you want to stop the updating?"));
     } else {
         //strlabel->setText(tr("Stop extracting "));
         if (m_openType) {

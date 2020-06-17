@@ -51,9 +51,9 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("filename", "File path.", "file [file..]");
     parser.process(app);
 
-    QStringList fileList = parser.positionalArguments();
-    fileList.append("/home/hushiwei/Desktop/iso.7z");
-    fileList.append("extract");
+    const QStringList fileList = parser.positionalArguments();
+//    fileList.append("/home/hushiwei/Desktop/parent.zip");
+//    fileList.append("extract_here");//m_UnCompressPage->getExtractType() != EXTRACT_HEAR
     QStringList newfilelist;
     foreach (QString file, fileList) {
         if (file.contains("file://")) {

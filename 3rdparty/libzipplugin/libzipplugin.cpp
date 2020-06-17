@@ -643,6 +643,10 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
     }
 
     //qDebug() << "" << timer.elapsed() << "milliseconds";
+    if (this->extractPsdStatus == ReadOnlyArchiveInterface::Canceled) {
+        qDebug() << "canceled";
+        return false;
+    }
     if (zip_close(archive)) {
         emit error(tr("Failed to write archive."));
         return false;

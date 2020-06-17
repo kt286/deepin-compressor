@@ -212,6 +212,9 @@ void MainWindow::closeClean(QCloseEvent *event)
     if (m_pJob) {
         if (m_pJob->mType == KJob::ENUM_JOBTYPE::EXTRACTJOB) {
             this->closeExtractJobSafe();
+        } else if (m_pJob->mType == KJob::ENUM_JOBTYPE::DELETEJOB) {
+            DeleteJob *pJob = dynamic_cast<DeleteJob *>(m_pJob);
+            pJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
         } else {
             m_pJob->deleteLater();
             m_pJob = nullptr;
@@ -219,6 +222,7 @@ void MainWindow::closeClean(QCloseEvent *event)
     }
 
     event->accept();
+
     if (m_windowcount == 1) {
         return;
     }
@@ -250,6 +254,7 @@ void MainWindow::closeClean(QCloseEvent *event)
     SAFE_DELETE_ELE(m_encodingpage);
     SAFE_DELETE_ELE(m_settings);
     SAFE_DELETE_ELE(m_mainWidget);
+
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -349,6 +354,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
 
         deleteCompressFile();
+        slotquitApp();
         return;
     }
 
@@ -1010,14 +1016,13 @@ void MainWindow::refreshPage()
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
-//        if (m_settingsDialog->isAutoOpen()) {
-//            DDesktopServices::showFolder(QUrl(m_decompressfilepath, QUrl::TolerantMode));
-//        }
         if (m_isrightmenu) {
-            m_CompressSuccess->showfiledirSlot(false);
+            if ("" != m_settingsDialog->getCurExtractPath() && m_UnCompressPage->getExtractType() != EXTRACT_HEAR) {
+                m_CompressSuccess->showfiledirSlot(false);
+            }
+            //如果是解压到本地，则不弹出文管窗口
+//            m_CompressSuccess->showfiledirSlot(false);
 //            DDesktopServices::showFolder(m_decompressfilepath);
-            slotquitApp();
-            return;
         } else {
             if (m_settingsDialog->isAutoOpen() && m_encryptiontype != Encryption_NULL) {
                 m_CompressSuccess->showfiledirSlot();
@@ -1746,10 +1751,10 @@ void MainWindow::slotExtractionDone(KJob *job)
             if (this->pCurAuxInfo == nullptr || this->pCurAuxInfo->information.size() == 0) {
                 m_pageid = PAGE_UNZIP_SUCCESS;
                 refreshPage();
-                this->close();
-                if (this->pCurAuxInfo != nullptr) {
-                    removeFromParentInfo(this);
-                }
+//                this->close();
+//                if (this->pCurAuxInfo != nullptr) {
+//                    removeFromParentInfo(this);
+//                }
                 return;
             }
         }
@@ -2273,7 +2278,11 @@ void MainWindow::addArchiveEntry(QMap<QString, QString> &Args, Archive::Entry *p
     }
 
     resetMainwindow();
-    calSelectedTotalEntrySize(all_entries);
+//    calSelectedTotalEntrySize(all_entries);
+    qint64 size = 0;
+    sourceEntry->calAllSize(size);
+//    m_ProgressIns += size;
+    m_Progess->pInfo()->getTotalSize() += size;
 
     m_pJob = m_model->addFiles(all_entries, sourceEntry, pIface, options);//this added by hsw
     if (!m_pJob) {
@@ -3138,6 +3147,30 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     m_workstatus = WorkProcess;
     m_pathstore = path;
 
+    m_progressdialog->clearprocess();
+    if (!m_model) {
+        return;
+    }
+
+    if (m_pJob) {
+        m_pJob->deleteLater();
+        m_pJob = nullptr;
+    }
+
+    ExtractionOptions options;
+    options.setDragAndDropEnabled(true);
+    m_extractSimpleFiles = fileList;
+    QString destinationDirectory = path;
+    //m_compressDirFiles = CheckAllFiles(path);
+
+    Archive::Entry *pDestEntry = fileList[0];
+    if (destinationDirectory.right(1) == QDir::separator() == false) {
+        destinationDirectory = destinationDirectory + QDir::separator();
+    }
+    QString destEntryPath = destinationDirectory + pDestEntry->name();
+    QFileInfo fileInfo(destEntryPath);
+    QString programName = "";
+
     if (type == EXTRACT_TEMP) {
         m_encryptiontype = Encryption_TempExtract;
         m_pageid = Page_ID::PAGE_LOADING;
@@ -3174,36 +3207,19 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         m_Progess->setopentype(true);
     } else if (type == EXTRACT_DRAG) {
         m_encryptiontype =  Encryption_DRAG;
+    } else if (type == EXTRACT_HEAR) {
+        programName = "deepin-compressor";
+        m_pageid = PAGE_UNZIPPROGRESS;
+    } else if (type == EXTRACT_TO) {
+        programName = "deepin-compressor";
+        m_pageid = PAGE_UNZIPPROGRESS;
     } else {
         m_encryptiontype = Encryption_SingleExtract;
     }
-    m_progressdialog->clearprocess();
-    if (!m_model) {
-        return;
-    }
-
-    if (m_pJob) {
-        m_pJob->deleteLater();
-        m_pJob = nullptr;
-    }
-
-    ExtractionOptions options;
-    options.setDragAndDropEnabled(true);
-    m_extractSimpleFiles = fileList;
-    QString destinationDirectory = path;
-
-    //m_compressDirFiles = CheckAllFiles(path);
 
 
 
-    Archive::Entry *pDestEntry = fileList[0];
-    if (destinationDirectory.right(1) == QDir::separator() == false) {
-        destinationDirectory = destinationDirectory + QDir::separator();
-    }
-    QString destEntryPath = destinationDirectory + pDestEntry->name();
-    QFileInfo fileInfo(destEntryPath);
-
-    if (fileInfo.exists()) {//判断解压文件是否已经在目标路径下已经解压出来，如果解压出来，则不再解压
+    if (fileInfo.exists() && programName == "") { //判断解压文件是否已经在目标路径下已经解压出来，如果解压出来，则不再解压
         qint64 size = pDestEntry->getSize();
         qint64 size1 = calFileSize(destEntryPath);
         if (size == size1) {
@@ -3254,7 +3270,7 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
 
     connect(pExtractJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)));
     connect(pExtractJob, &KJob::result, this, &MainWindow::slotExtractionDone);
-    //
+//
     connect(pExtractJob, &ExtractJob::sigExtractJobPwdCheckDown, this, &MainWindow::slotShowPageUnzipProgress);
     connect(
         pExtractJob, &ExtractJob::sigExtractJobPassword, this, &MainWindow::SlotNeedPassword, Qt::QueuedConnection);
