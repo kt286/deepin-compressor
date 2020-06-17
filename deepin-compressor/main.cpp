@@ -51,23 +51,9 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("filename", "File path.", "file [file..]");
     parser.process(app);
 
-//    QString tipArgv = "";
-//    for (int i = 0; i < argc; i++) {
-//        char *cArgv = nullptr;
-//        size_t length = strlen(argv[i]);
-//        cArgv = (char *)malloc((length + 1) * sizeof(char));
-//        strcpy(cArgv, argv[i]);
-//        QString str(cArgv);
-//        str += ",";
-//        tipArgv += str;
-//    }
-//    QMessageBox::information(NULL, "argv", tipArgv,
-//                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-
-    //char *path = fullpath.toUtf8().data();
-
-    const QStringList fileList = parser.positionalArguments();
-
+    QStringList fileList = parser.positionalArguments();
+    fileList.append("/home/hushiwei/Desktop/iso.7z");
+    fileList.append("extract");
     QStringList newfilelist;
     foreach (QString file, fileList) {
         if (file.contains("file://")) {
@@ -75,12 +61,6 @@ int main(int argc, char *argv[])
         }
         newfilelist.append(file);
     }
-    QString tip = "";
-    for (int i = 0; i < fileList.length(); i++) {
-        tip += fileList[i];
-    }
-//    QMessageBox::information(NULL, "Title", tip,
-//                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
     QDBusConnection bus = QDBusConnection::sessionBus();
     bool busRegistered = bus.registerService("com.archive.mainwindow.monitor");
@@ -126,8 +106,6 @@ int main(int argc, char *argv[])
     app.setWindowIcon(appIcon);
     //w.titlebar()->setIcon(appIcon);
 
-
-
     QStringList multilist;
     if (newfilelist.count() > 0 && ((newfilelist.last() == QStringLiteral("extract_here_split_multi") || newfilelist.last() == QStringLiteral("extract_split_multi")))) {
         multilist.append(newfilelist.at(0));
@@ -140,7 +118,6 @@ int main(int argc, char *argv[])
         return  0;
     }
     w.bindAdapter();
-
 
     if (busRegistered == true) {
 

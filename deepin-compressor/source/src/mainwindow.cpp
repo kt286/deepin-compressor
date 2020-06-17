@@ -397,6 +397,10 @@ void MainWindow::timerEvent(QTimerEvent *event)
         killTimer(m_startTimer);
         m_startTimer = 0;
     } else if (m_watchTimer == event->timerId()) {
+        if (m_CompressPage == nullptr) {
+            return;
+        }
+
         QStringList filelist = m_CompressPage->getCompressFilelist();
         for (int i = 0; i < filelist.count(); i++) {
             QFileInfo filein(filelist.at(i));
@@ -792,7 +796,14 @@ bool MainWindow::popUpChangedDialog(const qint64 &pid)
 
 bool MainWindow::createSubWindow(const QStringList &urls)
 {
+    if (urls.length() == 0) {
+        MainWindow *subWindow = new MainWindow();
+        subWindow->pMapGlobalWnd = this->pMapGlobalWnd;//获取deepin-compressor进程中的全局窗口map
+        ++m_windowcount;
+        subWindow->show();
 
+        return true;
+    }
     QString filePath = urls[0];
     QFileInfo fileInfo(filePath);
 
@@ -1496,6 +1507,7 @@ void MainWindow::loadArchive(const QString &files)
     m_loadfile = transFile;
     m_UnCompressPage->getFileViewer()->setLoadFilePath(m_loadfile);
     m_encryptiontype = Encryption_Load;
+    m_pageid = PAGE_LOADING;
     m_pJob = m_model->loadArchive(transFile, "", m_model);
     if (m_pJob == nullptr) {
         return;
