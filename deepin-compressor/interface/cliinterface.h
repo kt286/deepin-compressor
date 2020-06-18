@@ -153,7 +153,6 @@ protected:
 
     bool m_abortingOperation = false;
     bool ischeckdown = false; //是否验证密码通过
-
 private:
     void init();
     bool handleFileExistsMessage(const QString &filename);
@@ -206,6 +205,8 @@ private:
 
     void watchDestFilesBegin();
     void watchDestFilesEnd();
+
+    QString getFileName(int percent);
 private:
 
     QByteArray m_stdOutData;
@@ -213,6 +214,8 @@ private:
     QHash<int, QList<QRegularExpression> > m_patternCache;
 
     QVector<Archive::Entry *> m_removedFiles;
+    QVector<Archive::Entry *> m_extractedFiles;
+    QVector<Archive::Entry *> m_addFiles;
     QVector<Archive::Entry *> m_newMovedFiles;
     int m_exitCode = 0;
     bool m_listEmptyLines = false;
@@ -222,7 +225,7 @@ private:
     QString m_extractDestDir;
     QScopedPointer<QTemporaryDir> m_extractTempDir;
     QScopedPointer<QTemporaryFile> m_commentTempFile;
-    QVector<Archive::Entry *> m_extractedFiles;
+
     qulonglong m_archiveSizeOnDisk = 0;
     qulonglong m_listedSize = 0;
     bool m_isbatchlist = false;

@@ -83,6 +83,11 @@ QStringList CliProperties::deleteArgs(const QString &archive, const QVector<Arch
 {
     QStringList args;
     args << m_deleteSwitch;
+
+    if (!m_progressarg.isEmpty()) {
+        args << m_progressarg;
+    }
+
     if (!password.isEmpty()) {
         args << substitutePasswordSwitch(password);
     }

@@ -60,6 +60,15 @@ ArchiveModel::ArchiveModel(QObject *parent)
     };
 }
 
+ArchiveModel::~ArchiveModel()
+{
+    Archive::Entry *pRootEntry = this->getRootEntry();
+    if (pRootEntry) {
+        pRootEntry->clean();
+    }
+    m_archive.reset(nullptr);
+}
+
 QVariant ArchiveModel::data(const QModelIndex &index, int role) const
 {
     if ((1 == index.row() || 0 == index.row()) && 0 == index.column()) {

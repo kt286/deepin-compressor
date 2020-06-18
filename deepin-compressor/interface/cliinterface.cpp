@@ -216,7 +216,7 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
     Q_UNUSED(numberOfEntriesToAdd)
 
     m_operationMode = Add;
-
+    m_addFiles = files;
     QVector< Archive::Entry * > filesToPass = QVector< Archive::Entry * >();
     // If destination path is specified, we have recreate its structure inside the temp directory
     // and then place symlinks of targeted files there.
@@ -1042,12 +1042,37 @@ void CliInterface::emitFileName(QString name)
     }
 }
 
+QString CliInterface::getFileName(int percent)
+{
+    if (percent > 100) {
+        percent = 100;
+    }
+    if (percent <= 0) {
+        percent = 0;
+    }
+
+    if (m_operationMode == ReadWriteArchiveInterface::Delete) {
+        int lenV = m_removedFiles.length();
+        double cell = 100 * 1.0 / lenV;
+        int index = static_cast<int>(percent / cell);
+        index = index > (lenV - 1)  ? (lenV - 1) : index;
+        return m_removedFiles[index]->name();
+    } else if (m_operationMode == ReadWriteArchiveInterface::Add) {
+        int lenV = m_addFiles.length();
+        double cell = 100 * 1.0 / lenV;
+        int index = static_cast<int>(percent / cell);
+        index = index > (lenV - 1) ? (lenV - 1) : index;
+        return m_addFiles[index]->name();
+    }
+    return "";
+}
+
 bool CliInterface::handleLine(const QString &line)
 {
     // TODO: This should be implemented by each plugin; the way progress is
     //       shown by each CLI application is subject to a lot of variation.
 
-//    qDebug() << "#####" << line;
+    //qDebug() << "#####" << line;
 
     if (pAnalyseHelp != nullptr) {
         pAnalyseHelp->analyseLine(line);
@@ -1097,20 +1122,51 @@ bool CliInterface::handleLine(const QString &line)
             if (percentage > 0 && percentage != 46) {
                 if (line.contains(OneBBBB) == true) {
                     QStringRef strfilename;
-                    int count = line.indexOf("+");
-                    if (-1 == count) {
-                        count = line.indexOf("-");
-                    }
-                    if (count > 0) {
-                        strfilename = line.midRef(count + 2);
-                    }
+                    if (m_operationMode == ReadWriteArchiveInterface::Delete) {//如果是删除
+//                        int count = line.indexOf("R");
+//                        if (-1 == count) {
+//                            count = line.indexOf("=");
+//                        }
+//                        if (count > 0) {
+//                            strfilename = line.midRef(count + 2);
+//                        }
+//                        m_removedFiles;
 
-                    if (!strfilename.toString().contains("Wrong password")) {
-                        if (percentage > 0) {
-                            emitProgress(float(percentage) / 100);
-                            emitFileName(strfilename.toString());
+                        QString filename = getFileName(percentage);
+                        if (!strfilename.toString().contains("Wrong password")) {
+                            if (percentage > 0) {
+                                emitProgress(float(percentage) / 100);
+                                //qDebug() << "delete..." << filename;
+                                emitFileName(filename);
+                            }
+                        }
+                    } else if (m_operationMode == ReadWriteArchiveInterface::Add) {
+                        QString filename = getFileName(percentage);
+                        if (!strfilename.toString().contains("Wrong password")) {
+                            if (percentage > 0) {
+                                emitProgress(float(percentage) / 100);
+                                //qDebug() << "add..." << filename;
+                                emitFileName(filename);
+                            }
+                        }
+                    } else {
+                        int count = line.indexOf("+");
+                        if (-1 == count) {
+                            count = line.indexOf("-");
+                        }
+                        if (count > 0) {
+                            strfilename = line.midRef(count + 2);
+                        }
+                        if (!strfilename.toString().contains("Wrong password")) {
+                            if (percentage > 0) {
+                                emitProgress(float(percentage) / 100);
+                                emitFileName(strfilename.toString());
+                            }
                         }
                     }
+
+
+
                 }
             }
         }

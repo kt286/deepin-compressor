@@ -199,15 +199,15 @@ void Progress::setprogress(double percent)
 void Progress::setSpeedAndTime(double speed, qint64 timeLeft)
 {
     m_speed = speed;
-    qint64 gap = timeLeft - lastTimeLeft;
+//    qint64 gap = timeLeft - lastTimeLeft;
 
-    if (timeLeft) {
-        if (gap > 20 || gap < -20) {
-            lastTimeLeft = timeLeft;
-        }
-    }
+//    if (timeLeft) {
+//        if (gap > 20 || gap < -20) {
+//            lastTimeLeft = timeLeft;
+//        }
+//    }
 
-    displaySpeedAndTime(speed, lastTimeLeft);
+    displaySpeedAndTime(speed, timeLeft);
 
     if (lastTimeLeft > 2) {
         m_timerTime->start();
@@ -236,7 +236,12 @@ void Progress::displaySpeedAndTime(double speed, qint64 timeLeft)
             m_speedLabel->setText(tr("Speed", "compress") + ": " + ">300MB/S");
         }
     } else if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_DELETEING) {
-        m_speedLabel->setText(tr("Speed", "delete") + ": " + QString::number((speed / 1024), 'f', 2) + "MB/S");
+        if (speed < 1024) {
+            m_speedLabel->setText(tr("Speed", "delete") + ": " + QString::number(speed, 'f', 2) + "KB/S");
+        } else {
+            m_speedLabel->setText(tr("Speed", "delete") + ": " + QString::number((speed / 1024), 'f', 2) + "MB/S");
+        }
+
     } else if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
 //        m_speedLabel->setText(tr("Speed", "compress") + ": " + tr("Calculating..."));
         if (speed < 1024) {
@@ -282,7 +287,8 @@ void Progress::setProgressFilename(QString filename)
     QFontMetrics elideFont(m_progressfilelabel->font());
     if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING || m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSDRAGADD) {
         m_progressfilelabel->setText(elideFont.elidedText(tr("Compressing") + ": " + filename, Qt::ElideMiddle, 520));
-
+    } else if (m_ProgressType == Progress::ENUM_PROGRESS_TYPE::OP_DELETEING) {
+        m_progressfilelabel->setText(elideFont.elidedText(tr("Deleteing") + ": " + filename, Qt::ElideMiddle, 520));
     } else {
         if (m_openType) {
             m_progressfilelabel->setText(elideFont.elidedText(tr("Opening") + ": " + filename, Qt::ElideMiddle, 520));

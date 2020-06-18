@@ -2428,13 +2428,18 @@ void MainWindow::addArchive(QMap<QString, QString> &Args)
     }
 
     resetMainwindow();
-    calSelectedTotalEntrySize(all_entries);
-    sourceEntry->calAllSize(m_Progess->pInfo()->getTotalSize());//added by hsw for valid total size
-    qint64 ccount = 0;
-    all_entries[0]->calEntriesCount(ccount);
+
     m_pJob = m_model->addFiles(all_entries, sourceEntry, pIface, options);//this added by hsw
     if (!m_pJob) {
         return;
+    }
+
+    AddJob *pAddJob = dynamic_cast<AddJob *>(m_pJob);
+    if (pAddJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE) {//7z的计算目标大小
+        calSelectedTotalEntrySize(all_entries);
+    } else {
+        calSelectedTotalEntrySize(all_entries);
+        sourceEntry->calAllSize(m_Progess->pInfo()->getTotalSize());
     }
 
     connect(m_pJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)), Qt::ConnectionType::UniqueConnection);
@@ -2464,11 +2469,12 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool is
     }
 
     connect(m_pJob, &KJob::result, this, &MainWindow::slotJobFinished, Qt::ConnectionType::UniqueConnection);
+    connect(m_pJob, &DeleteJob::percentfilename, this, &MainWindow::SlotProgressFile, Qt::ConnectionType::UniqueConnection);
     connect(m_pJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)), Qt::ConnectionType::UniqueConnection);
 
     m_pageid = PAGE_DELETEPROGRESS;
     m_Progess->settype(Progress::ENUM_PROGRESS_TYPE::OP_DELETEING);
-    refreshPage();
+
 
     //m_Progess->settype(DECOMPRESSING);
     if (isManual) {
@@ -2478,7 +2484,8 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool is
     }
 
     //重置进度条
-    m_Progess->pInfo()->resetProgress();
+    resetMainwindow();
+
     DeleteJob *pDeleteJob = dynamic_cast<DeleteJob *>(m_pJob);
     if (pDeleteJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_READWRITE_LIBARCHIVE) {//该插件(tar格式)，计算总大小时，需要减去待删除的文件的大小
         //Archive::Entry *pRootEntry = this->m_model->getRootEntry();
@@ -2489,6 +2496,8 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool is
         qint64 sizeCountWillDel = 0;
         pFirstEntry->calAllSize(sizeCountWillDel);
         m_Progess->pInfo()->getTotalSize() -= sizeCountWillDel;
+    } else if (pDeleteJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE) {//7z的
+        calSelectedTotalEntrySize(vectorDel);
     } else { //其他格式的是否需要减去，删除子项的大小，还待调试优化。
         //Archive::Entry *pRootEntry = this->m_model->getRootEntry();
         qint64 size = 0;
@@ -2496,7 +2505,7 @@ void MainWindow::removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool is
         m_Progess->pInfo()->setTotalSize(size);//设置总大小
     }
 
-    //refreshPage();
+    refreshPage();
     qDebug() << "delete job start";
     m_pJob->start();
     m_workstatus = WorkProcess;
@@ -3503,6 +3512,12 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
             m_pJob = nullptr;
         }
         m_pageid = PAGE_UNZIP;
+    } else if (compressType == Progress::ENUM_PROGRESS_TYPE::OP_DELETEING) {
+        if (m_pJob) {
+            m_pJob->kill();
+            m_pJob = nullptr;
+        }
+        m_pageid = PAGE_UNZIP;
     }
     refreshPage();
     // emit sigquitApp();
@@ -3583,6 +3598,8 @@ void MainWindow::resetMainwindow()
 //    maxFileSize_ = 0;
 //#endif
     m_Progess->pInfo()->resetProgress();
+    m_Progess->setprogress(0);
+    m_progressdialog->setProcess(0);
 }
 
 void MainWindow::slotBackButtonClicked()
