@@ -316,6 +316,11 @@ bool ReadOnlyArchiveInterface::isUserCancel() const
     return userCancel;
 }
 
+bool ReadOnlyArchiveInterface::isCheckPsw() const
+{
+    return m_isckeckpsd;
+}
+
 bool ReadOnlyArchiveInterface::isAnyFileExtracted() const
 {
     return bAnyFileExtracted;
