@@ -108,6 +108,9 @@ public:
         UserFilenameLong = 4,
         /*** open file error */
         OpenFailedError,
+        /***Have not entered the password***/
+        NopasswordError,
+
         UserDefinedError = 100
     };
 

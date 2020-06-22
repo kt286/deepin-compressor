@@ -453,7 +453,7 @@ void CliInterface::processFinished(int exitCode, QProcess::ExitStatus exitStatus
 
 void CliInterface::cleanIfCanceled()
 {
-
+    qDebug() << "取消操作！";
 }
 
 void CliInterface::watchDestFilesBegin()

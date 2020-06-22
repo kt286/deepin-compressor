@@ -112,7 +112,7 @@ enum JobState {
 };
 
 class MainWindow;
-
+class Settings_Extract_Info;
 /**
  * this can help us to get the map of all mainwindow created.
  * @brief The GlobalMainWindowMap struct
@@ -424,6 +424,7 @@ private:
      * @see 当前面板辅助信息
      */
     MainWindow_AuxInfo *pCurAuxInfo = nullptr;//added by hsw 20200525
+    Settings_Extract_Info *pSettingInfo = nullptr;//added by hsw 20200619
 
 private:
     void calSelectedTotalFileSize(const QStringList &files);

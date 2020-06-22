@@ -219,6 +219,8 @@ void Job::onFinished(bool result)
     qDebug() << "Job finished, result:" << result << ", time:" << jobTimer.elapsed() << "ms";
     if (m_archiveInterface && m_archiveInterface->isUserCancel()) {
         setError(KJob::KilledJobError);
+    } else if (m_archiveInterface && !m_archiveInterface->isCheckPsw()) {
+        setError(KJob::NopasswordError); //阻止解压zip加密包出现解压失败界面再出现输入密码界面
     } else if ((archive() && !archive()->isValid())  || false == result) {
         if (KJob::UserFilenameLong == error()) {
         } else {
@@ -303,7 +305,7 @@ void LoadJob::doWork()
         ret = pTool->list(m_isbatch);
     }
 
-    if (!archiveInterface()->waitForFinishedSignal() && archiveInterface()->m_isckeckpsd) {
+    if (!archiveInterface()->waitForFinishedSignal()) {
         // onFinished() needs to be called after onNewEntry(), because the former reads members set in the latter.
         // So we need to put it in the event queue, just like the single-thread case does by emitting finished().
         QTimer::singleShot(0, this, [ = ]() {
@@ -610,12 +612,35 @@ void ExtractJob::doWork()
 
 void ExtractJob::cleanIfCanceled()
 {
+    if (this->archiveInterface()->extractPsdStatus != ReadOnlyArchiveInterface::Canceled) {
+        return;
+    }
+
     this->archiveInterface()->waitForFinishedSignal();
+    Settings_Extract_Info *pSettingInfo = this->m_options.pSettingInfo;
+    if (pSettingInfo != nullptr) {
+        if (pSettingInfo->str_CreateFolder == "") {
+            return;
+        }
+
+        QString fullPath = pSettingInfo->str_defaultPath;
+        if (fullPath.right(1) != QDir::separator()) {
+            fullPath += QDir::separator() ;
+        }
+        fullPath += pSettingInfo->str_CreateFolder;
+        qDebug() << "取消删除：" << fullPath;
+        QFileInfo fileInfo(fullPath);
+        if (fileInfo.exists()) {
+            ReadWriteArchiveInterface::clearPath(fullPath);
+        }
+    }
+    qDebug() << "do nothing";
 }
 
 void ExtractJob::onFinished(bool result)
 {
-    this->archiveInterface()->cleanIfCanceled();
+//    this->archiveInterface()->cleanIfCanceled();
+    cleanIfCanceled();
     emit sigExtractSpinnerFinished();
     Job::onFinished(result);
 }
