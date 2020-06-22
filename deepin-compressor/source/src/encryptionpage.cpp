@@ -103,7 +103,7 @@ void EncryptionPage::nextbuttonClicked()
     emit sigExtractPassword(m_password->text());
     //pwdCheckDown:to solve the 7z flash retreat when password is too long and wrong
     //if pwdCheckDown is true,t indicates that the work of determining the password has been done
-//        pwdCheckDown = false;
+//    pwdCheckDown = false;
 //    }
 }
 

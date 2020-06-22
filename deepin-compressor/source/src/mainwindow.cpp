@@ -377,7 +377,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
 
         emit sigquitApp();
-    } else if (7 == m_mainLayout->currentIndex()) {
+    } else if (PAGE_ZIP_FAIL == m_mainLayout->currentIndex()) {
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
         slotquitApp();
     } else {
@@ -896,7 +896,7 @@ void MainWindow::setDisable()
 void MainWindow::refreshPage()
 {
     m_encryptionpage->resetPage();
-
+    qDebug() << "m_pageid: " << m_pageid;
     switch (m_pageid) {
     case PAGE_HOME:
 
@@ -1997,9 +1997,7 @@ void MainWindow::ExtractSinglePassword(QString password)
 void MainWindow::ExtractPassword(QString password)
 {
     m_workstatus = WorkProcess;
-    if (m_pJob == nullptr) {
-        return;
-    }
+
     ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
     if (pExtractJob) {
         // first  time to extract
@@ -2028,6 +2026,7 @@ void MainWindow::ExtractPassword(QString password)
         connect(pExtractJob, &ExtractJob::sigCancelled, this, &MainWindow::slotClearTempfile);
         connect(pExtractJob, &ExtractJob::updateDestFile, this, &MainWindow::onUpdateDestFile);
 
+        m_pJob = pExtractJob;
         m_pJob->start();
     }
 }
@@ -3546,10 +3545,11 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
     } else if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::DELETEJOB) {
 
     } else {
-        m_pJob->kill();
-        m_pJob = nullptr;
-        m_pageid = PAGE_UNZIP;
-
+        if (m_pJob) {
+            m_pJob->kill();
+            m_pJob = nullptr;
+            m_pageid = PAGE_UNZIP;
+        }
     }
 
     deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);

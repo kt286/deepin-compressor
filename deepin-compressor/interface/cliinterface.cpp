@@ -100,13 +100,7 @@ bool CliInterface::list(bool isbatch)
         setPassword("temp");
     }
 
-    //用个标志位ischeckdown判断是否有密码，是否验证密码
-    //7z t 用来检测是否有密码、密码是否正确
-    if (ischeckdown) {
-        return runProcess(m_cliProps->property("listProgram").toString(), m_cliProps->listArgs(filename(), password()));
-    } else {
-        return runProcess(m_cliProps->property("testProgram").toString(), m_cliProps->testArgs(filename(), password()));
-    }
+    return runProcess(m_cliProps->property("listProgram").toString(), m_cliProps->listArgs(filename(), password()));
 }
 
 bool CliInterface::extractFiles(const QVector< Archive::Entry * > &files, const QString &destinationDirectory,
@@ -168,20 +162,23 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
     }
 
 
-//    //get user input password
-//    QString psdd = password();
-//    if (!m_cliProps->property("passwordSwitch").toStringList().isEmpty() && ifNeedPsd
-//            && psdd.isEmpty()) {
-//        qDebug() << "Password hint enabled, querying user";
-//        if (m_extractionOptions.isBatchExtract()) {
-//            if (!passwordQuery()) {
-//                return false;
-//            }
-//        } else {
-//            emit sigExtractNeedPassword();
-//            return false;
-//        }
-//    }
+    //get user input password
+    QString psdd = password();
+    if (!m_cliProps->property("passwordSwitch").toStringList().isEmpty() && ifNeedPsd
+            && psdd.isEmpty()) {
+        qDebug() << "Password hint enabled, querying user";
+        if (m_extractionOptions.isBatchExtract()) {
+            if (!passwordQuery()) {
+                return false;
+            }
+        } else {
+            m_isckeckpsd = false;
+            emit finished(false);
+            emit sigExtractNeedPassword();
+            return false;
+        }
+    }
+    m_isckeckpsd = true;
 
     QUrl destDir = QUrl(destPath);
     m_oldWorkingDirExtraction = QDir::currentPath();
@@ -260,13 +257,13 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
         filesToPass = files;
     }
 
-//    if (!m_cliProps->property("passwordSwitch").toString().isEmpty() && options.encryptedArchiveHint()
-//            && password().isEmpty()) {
-//        qDebug() << "Password hint enabled, querying user";
-//        if (!passwordQuery()) {
-//            return false;
-//        }
-//    }
+    if (!m_cliProps->property("passwordSwitch").toString().isEmpty() && options.encryptedArchiveHint()
+            && password().isEmpty()) {
+        qDebug() << "Password hint enabled, querying user";
+        if (!passwordQuery()) {
+            return false;
+        }
+    }
 
     QStringList arguments = m_cliProps->addArgs(filename(),
                                                 entryFullPaths(filesToPass, NoTrailingSlash),
@@ -441,13 +438,8 @@ void CliInterface::processFinished(int exitCode, QProcess::ExitStatus exitStatus
         setPassword(QString());
         return;
     } else {
-        if (m_operationMode == List && ischeckdown == false) { //test通过后再list
-            ischeckdown = true;
-            list(m_isbatchlist);
-        } else {
-            emit progress(1.0);
-            emit finished(true);
-        }
+        emit progress(1.0);
+        emit finished(true);
     }
 }
 
@@ -590,6 +582,7 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
         //emit error(tr("wrong password"));
         emit error("wrong password");
         setPassword(QString());
+        emit finished(false);
         return;
     }
 
@@ -951,7 +944,9 @@ void CliInterface::readStdout(bool handleAll)
     m_stdOutData += dd;
 
     QList< QByteArray > lines = m_stdOutData.split('\n');
-
+    // for (const QByteArray &line : qAsConst(lines)) {
+    //     qDebug() << line;
+    // }
     // The reason for this check is that archivers often do not end
     // queries (such as file exists, wrong password) on a new line, but
     // freeze waiting for input. So we check for errors on the last line in
@@ -1249,10 +1244,13 @@ bool CliInterface::handleLine(const QString &line)
                 const QString response(password() + QLatin1Char('\n'));
                 writeToProcess(response.toLocal8Bit());
             } else {
+                m_isckeckpsd = false;
+                setWaitForFinishedSignal(false);
                 emit sigExtractNeedPassword();
                 emit error("nopassword");
                 return false;
             }
+            m_isckeckpsd = true;
         }
 
         if (isWrongPasswordMsg(line)) {

@@ -1718,28 +1718,28 @@ QByteArray LibzipPlugin::textCodecDetect(const QByteArray &data, const QString &
 
 void LibzipPlugin::cleanIfCanceled()
 {
-    qDebug() << "cleanIfCanceled";
-    if (this->ifReplaceTip == false) {
-        if (this->extractPsdStatus == ReadOnlyArchiveInterface::Canceled) {
-//            qDebug()<<"可以删除解压文件夹";
-//            qDebug()<<"$$$"<<this->destDirName;
-//            qDebug()<<"$$$"<<this->m_extractDestDir;
-            if (this->destDirName == "" || this->m_extractDestDir == "") {
-                return;
-            }
-            QString fullPath = m_extractDestDir + QDir::separator() + this->destDirName;
-            QFileInfo fileInfo(fullPath);
-            if (fileInfo.exists()) {
-                ReadWriteArchiveInterface::clearPath(fullPath);
-            }
-        }
-    }
+//    qDebug() << "cleanIfCanceled";
+//    if (this->ifReplaceTip == false) {
+//        if (this->extractPsdStatus == ReadOnlyArchiveInterface::Canceled) {
+////            qDebug()<<"可以删除解压文件夹";
+////            qDebug()<<"$$$"<<this->destDirName;
+////            qDebug()<<"$$$"<<this->m_extractDestDir;
+//            if (this->destDirName == "" || this->m_extractDestDir == "") {
+//                return;
+//            }
+//            QString fullPath = m_extractDestDir + QDir::separator() + this->destDirName;
+//            QFileInfo fileInfo(fullPath);
+//            if (fileInfo.exists()) {
+//                ReadWriteArchiveInterface::clearPath(fullPath);
+//            }
+//        }
+//    }
 
-    QDir dir;
-    dir.setPath(m_extractDestDir + "/.extractCache");
-    if (dir.exists()) {
-        qDebug() << dir.removeRecursively();
-    }
+//    QDir dir;
+//    dir.setPath(m_extractDestDir + "/.extractCache");
+//    if (dir.exists()) {
+//        qDebug() << dir.removeRecursively();
+//    }
 }
 
 void LibzipPlugin::watchFileList(QStringList *strList)
