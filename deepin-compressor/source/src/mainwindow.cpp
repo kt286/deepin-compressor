@@ -377,7 +377,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
 
         emit sigquitApp();
-    } else if (7 == m_mainLayout->currentIndex()) {
+    } else if (PAGE_ZIP_FAIL == m_mainLayout->currentIndex()) {
         deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
         slotquitApp();
     } else {
@@ -1971,9 +1971,7 @@ void MainWindow::ExtractSinglePassword(QString password)
 void MainWindow::ExtractPassword(QString password)
 {
     m_workstatus = WorkProcess;
-    if (m_pJob == nullptr) {
-        return;
-    }
+    
     ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
     if (pExtractJob) {
         // first  time to extract
@@ -2002,6 +2000,7 @@ void MainWindow::ExtractPassword(QString password)
         connect(pExtractJob, &ExtractJob::sigCancelled, this, &MainWindow::slotClearTempfile);
         connect(pExtractJob, &ExtractJob::updateDestFile, this, &MainWindow::onUpdateDestFile);
 
+        m_pJob = pExtractJob;
         m_pJob->start();
     }
 }
@@ -2830,20 +2829,20 @@ void MainWindow::deleteDecompressFile(QString destDirName)
     if (!m_decompressfilepath.isEmpty()) {
         if (m_UnCompressPage->getDeFileCount() > 1) {
             QDir fi(m_decompressfilepath);  //若m_decompressfilepath为空字符串，则使用（"."）构造目录
-//            qDebug() << fi.exists();
+            // qDebug() << m_decompressfilepath << fi.path() << fi.exists();
             if (fi.exists() && bAutoCreatDir) {
                 fi.removeRecursively();
             }
         } else if (m_UnCompressPage->getDeFileCount() == 1) {
             if (!m_model->archive()->isSingleFile()) { //单个文件还是文件夹
                 QDir fi(m_decompressfilepath + QDir::separator() + m_model->archive()->subfolderName());
-//                qDebug() << fi.dirName() << fi.exists();
+                // qDebug() << fi.path() << fi.exists();
                 if (fi.exists()) {
                     fi.removeRecursively();
                 }
             } else {
                 QFile fi(m_decompressfilepath + QDir::separator() + destDirName);
-//                qDebug() << fi.fileName() << fi.exists();
+                // qDebug() << fi.fileName() << fi.exists();
                 if (fi.exists()) {
                     fi.remove();
                 }

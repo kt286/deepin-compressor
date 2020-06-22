@@ -655,7 +655,6 @@ AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive:
     if (pIface == nullptr) {
         pIface = m_iface;
     }
-   pIface->setPassword(m_iface->password());
 
     Q_ASSERT(!pIface->isReadOnly());
     if (pIface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_LIBZIP) {

@@ -152,7 +152,7 @@ protected:
     KProcess *m_process = nullptr;
 
     bool m_abortingOperation = false;
-    bool ischeckdown = false; //是否验证密码通过
+
 private:
     void init();
     bool handleFileExistsMessage(const QString &filename);
