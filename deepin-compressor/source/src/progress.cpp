@@ -199,15 +199,18 @@ void Progress::setprogress(double percent)
 void Progress::setSpeedAndTime(double speed, qint64 timeLeft)
 {
     m_speed = speed;
-//    qint64 gap = timeLeft - lastTimeLeft;
+    qint64 gap = timeLeft - lastTimeLeft;
 
-//    if (timeLeft) {
-//        if (gap > 20 || gap < -20) {
-//            lastTimeLeft = timeLeft;
-//        }
-//    }
+    if (timeLeft > 2) {
+        if (gap > 59 || gap < -59) { //时间差大于1分钟，会实时刷新
+            lastTimeLeft = timeLeft;
+        }
+    }
+    if (timeLeft < 30) {//剩余时间小于30s，会实时刷新
+        lastTimeLeft = timeLeft;
+    }
 
-    displaySpeedAndTime(speed, timeLeft);
+    displaySpeedAndTime(speed, lastTimeLeft);
 
     if (lastTimeLeft > 2) {
         m_timerTime->start();
