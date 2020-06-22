@@ -1222,9 +1222,7 @@ bool CliInterface::handleLine(const QString &line)
         }
 
         return readExtractLine(line);
-    }
-
-    if (m_operationMode == List) {
+    } else if (m_operationMode == List) {
         if (isPasswordPrompt(line)) {
             qDebug() << "Found a password prompt" << m_isbatchlist;
 
