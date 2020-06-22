@@ -3543,6 +3543,12 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
         }
 
     } else if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::DELETEJOB) {
+        DeleteJob *pDeleteJob = dynamic_cast<DeleteJob *>(m_pJob);
+        if (pDeleteJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE) {
+            m_pJob->kill();
+            m_pJob = nullptr;
+            m_pageid = PAGE_UNZIP;
+        }
 
     } else {
         if (m_pJob) {
