@@ -41,6 +41,7 @@
 
 CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWriteArchiveInterface(parent, args)
 {
+    // qDebug() << __FUNCTION__;
     mType = ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE;
     // because this interface uses the event loop
     setWaitForFinishedSignal(true);
@@ -257,6 +258,7 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
         filesToPass = files;
     }
 
+    // qDebug() << m_cliProps->property("passwordSwitch").toString() << options.encryptedArchiveHint() << password();
     if (!m_cliProps->property("passwordSwitch").toString().isEmpty() && options.encryptedArchiveHint()
             && password().isEmpty()) {
         qDebug() << "Password hint enabled, querying user";

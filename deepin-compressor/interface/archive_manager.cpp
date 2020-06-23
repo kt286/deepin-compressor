@@ -647,6 +647,7 @@ AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive:
     }
 
     CompressionOptions newOptions = options;
+    // qDebug() << encryptionType();
     if (encryptionType() != Unencrypted) {
         newOptions.setEncryptedArchiveHint(true);
     }
@@ -654,6 +655,10 @@ AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive:
 
     if (pIface == nullptr) {
         pIface = m_iface;
+    }
+
+    if (encryptionType() == HeaderEncrypted) {
+        pIface->setPassword(m_iface->password());
     }
 
     Q_ASSERT(!pIface->isReadOnly());

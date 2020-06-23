@@ -216,7 +216,7 @@ void MainWindow::closeClean(QCloseEvent *event)
             DeleteJob *pJob = dynamic_cast<DeleteJob *>(m_pJob);
             pJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
         } else {
-            m_pJob->deleteLater();
+           m_pJob->deleteLater();
             m_pJob = nullptr;
         }
     }
@@ -1963,9 +1963,9 @@ void MainWindow::SlotExtractPassword(QString password)
 void MainWindow::ExtractSinglePassword(QString password)
 {
     m_workstatus = WorkProcess;
-    if (m_pJob == nullptr) {
-        return;
-    }
+//    if (m_pJob == nullptr) {
+//        return;
+//    }
 
     ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
     if (pExtractJob) {
@@ -1992,6 +1992,7 @@ void MainWindow::ExtractSinglePassword(QString password)
                 SLOT(SlotProgressFile(KJob *, const QString &)));
         connect(pExtractJob, &ExtractJob::updateDestFile, this, &MainWindow::onUpdateDestFile);
 
+        m_pJob = pExtractJob;
         m_pJob->start();
     }
 }
