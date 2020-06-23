@@ -628,13 +628,13 @@ bool LibzipPlugin::deleteFiles(const QVector<Archive::Entry *> &files)
     m_addarchive = nullptr;
     zip_register_progress_callback_with_state(archive, 0.001, progressCallback, nullptr, this);
     for (Archive::Entry *pCurEntry : files) {
-        int i = 0;
-        qint64 count = 0;
-        pCurEntry->calEntriesCount(count);
+//        int i = 0;
+//        qint64 count = 0;
+//        pCurEntry->calEntriesCount(count);
         bool status = this->deleteEntry(pCurEntry, archive/*, i, count*/);  //delete from archive
         if (status == true) {
-//            emit entryRemoved(pCurEntry->fullPath());                   //delete from model
-            //emit progress(float(++i) / files.size());
+            emit entryRemoved(pCurEntry->fullPath());                   //delete from model
+//            emit progress(float(++i) / files.size());
         }
     }
 
@@ -945,17 +945,33 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
             if (i == 0) {
                 destDirName = entryName;
             }
-            if (!extractEntry(archive,
-                              entryName,
-                              QString(),
-                              destinationDirectory,
-                              options.preservePaths(),
-                              removeRootNode, pi)) {
+            enum_extractEntryStatus enumRes = extractEntry(archive,
+                                                           entryName,
+                                                           QString(),
+                                                           destinationDirectory,
+                                                           options.preservePaths(),
+                                                           removeRootNode, pi);
+            if (enumRes == enum_extractEntryStatus::FAIL) {
                 zip_close(archive);
                 return false;
-            }
+            } else if (enumRes == enum_extractEntryStatus::SUCCESS) {
+                emit progress(float(i + 1) / nofEntries);
+            } else if (enumRes == enum_extractEntryStatus::PSD_NEED) {// need input psd and extractEntry again, added by hsw 20200613
+                PasswordNeededQuery query(entryName);
+                emit userQuery(&query);
+                query.waitForResponse();
 
-            emit progress(float(i + 1) / nofEntries);
+                if (query.responseCancelled()) {
+                    setPassword(QString());
+                    zip_close(archive);
+                    emit error("Wrong password.");
+                    return false;
+                } else {
+                    setPassword(query.password());
+                    zip_set_default_password(archive, password().toUtf8().constData());
+                    i--;
+                }
+            }
         }
 
         if (extractDst.isEmpty() == false) {
@@ -1010,7 +1026,7 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
     return true;
 }
 
-bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QString &rootNode, const QString &destDir, bool preservePaths, bool removeRootNode, FileProgressInfo &pi)
+enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QString &rootNode, const QString &destDir, bool preservePaths, bool removeRootNode, FileProgressInfo &pi)
 {
     //extract = false;
 
@@ -1036,7 +1052,7 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         }
     } else {
         if (isDirectory) {
-            return true;
+            return enum_extractEntryStatus::SUCCESS;
         }
         destination = destDirCorrected + QFileInfo(entry).fileName();
     }
@@ -1064,7 +1080,7 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         //extract = true;
         if (!QDir().mkpath(fileInfo.path())) {
             emit error(tr("Failed to create directory: %1"));
-            return false;
+            return enum_extractEntryStatus::FAIL;
         }
         bAnyFileExtracted = true;
     }
@@ -1088,20 +1104,21 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         name = entry.toLocal8Bit();
     }
 
+    int errcode2 = ZIP_ER_OK;
+    errcode2 = zip_error_code_zip(zip_get_error(archive));
     if (zip_stat(archive, name.constData(), 0, &statBuffer) != 0) {
-        if (isDirectory && zip_error_code_zip(zip_get_error(archive)) == ZIP_ER_NOENT) {
-            return true;
+        if (isDirectory && errcode2 == ZIP_ER_NOENT) {
+            return enum_extractEntryStatus::SUCCESS;
         }
-        return false;
+        return enum_extractEntryStatus::FAIL;
     }
 
     if (!isDirectory) {
-
         // Handle existing destination files.
         QString renamedEntry = entry;
         while (!m_overwriteAll && QFileInfo::exists(destination)) {
             if (m_skipAll) {
-                return true;
+                return enum_extractEntryStatus::SUCCESS;
             } else {
                 OverwriteQuery query(renamedEntry);
                 emit userQuery(&query);
@@ -1111,12 +1128,12 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
                 if (query.responseCancelled()) {
                     userCancel = true;
                     emit cancelled();
-                    return false;
+                    return enum_extractEntryStatus::FAIL;
                 } else if (query.responseSkip()) {
-                    return true;
+                    return enum_extractEntryStatus::SUCCESS;
                 } else if (query.responseAutoSkip()) {
                     m_skipAll = true;
-                    return true;
+                    return enum_extractEntryStatus::SUCCESS;
                 } else if (query.responseRename()) {
                     const QString newName(query.newFilename());
                     destination = QFileInfo(destination).path() + QDir::separator() + QFileInfo(newName).fileName();
@@ -1209,7 +1226,7 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         int i = strtmp.lastIndexOf(QDir::separator());
         if (strtmp.mid(i + 1).toUtf8().length() > NAME_MAX) { //Is the file name too long
             emit error("Filename is too long");
-            return false;
+            return enum_extractEntryStatus::FAIL;
         }
         QFile file(destination);
         if (file.exists() && !file.isWritable()) {
@@ -1217,36 +1234,46 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         }
         if (file.open(QIODevice::WriteOnly) == false) {
             emit error(tr("Failed to open file for writing: %1"));
-            return false;
+            return enum_extractEntryStatus::FAIL;
         }
 
         QDataStream out(&file);
 
         // Write archive entry to file. We use a read/write buffer of 1024 chars.
-        int kb = 1024;
         qulonglong sum = 0;
-        char buf[kb];
+        char buf[1024];
 
         if (pi.fileProgressProportion > 0) {
             emit progress(pi.fileProgressStart + pi.fileProgressProportion * 0.01);
         }
 
-        zip_file *zipFile = zip_fopen(archive, name.constData(), 0);
+        // check entry psd begin : 1st clean error, 2nd fopen, 3rd get error
+        zip_error_clear(archive);
+        zip_file_t *zipFile = zip_fopen(archive, name.constData(), 0);
+        int iErr = zip_error_code_zip(zip_get_error(archive));
+        if (iErr == ZIP_ER_WRONGPASSWD) {
+            if (file.exists()) {
+                file.remove();
+            }
+            return enum_extractEntryStatus::PSD_NEED;
+        }
+        // check entry psd end .
+
         int writeSize = 0;
         while (sum != statBuffer.size) {
             if (this->extractPsdStatus == ReadOnlyArchiveInterface::Canceled) { //if have canceled the extraction,so break.
                 break;
             }
-            const auto readBytes = zip_fread(zipFile, buf, kb);
+            const auto readBytes = zip_fread(zipFile, buf, 1024);
             if (readBytes < 0) {
                 emit error(tr("Failed to read data for entry: %1"));
                 file.close();
-                return false;
+                return enum_extractEntryStatus::FAIL;
             }
             if (out.writeRawData(buf, readBytes) != readBytes) {
                 emit error(tr("Failed to write data for entry: %1"));
                 file.close();
-                return false;
+                return enum_extractEntryStatus::FAIL;
             }
 
             sum += readBytes;
@@ -1265,7 +1292,7 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         if (index == -1) {
             emit error(tr("Failed to locate entry: %1"));
             file.close();
-            return false;
+            return enum_extractEntryStatus::FAIL;
         }
 
         zip_uint8_t opsys;
@@ -1273,7 +1300,7 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         if (zip_file_get_external_attributes(archive, index, ZIP_FL_UNCHANGED, &opsys, &attributes) == -1) {
             emit error(tr("Failed to read metadata for entry: %1"));
             file.close();
-            return false;
+            return enum_extractEntryStatus::FAIL;
         }
 
         // Inspired by fuse-zip source code: fuse-zip/lib/fileNode.cpp
@@ -1295,13 +1322,13 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         const auto index = zip_name_locate(archive, name.constData(), ZIP_FL_ENC_RAW);
         if (index == -1) {
             emit error(tr("Failed to locate entry: %1"));
-            return false;
+            return enum_extractEntryStatus::FAIL;
         }
         zip_uint8_t opsys;
         zip_uint32_t attributes;
         if (zip_file_get_external_attributes(archive, index, ZIP_FL_UNCHANGED, &opsys, &attributes) == -1) {
             emit error(tr("Failed to read metadata for entry: %1"));
-            return false;
+            return enum_extractEntryStatus::FAIL;
         }
         QFile::setPermissions(destination, getPermissions(attributes >> 16));
     }
@@ -1319,7 +1346,7 @@ bool LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QStr
         }
     }
 
-    return true;
+    return enum_extractEntryStatus::SUCCESS;
 }
 
 bool LibzipPlugin::moveFiles(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options)

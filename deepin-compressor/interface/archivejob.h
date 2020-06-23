@@ -110,7 +110,8 @@ public:
         OpenFailedError,
         /***Have not entered the password***/
         NopasswordError,
-
+        /***Wrong password */
+        WrongPsdError,
         UserDefinedError = 100
     };
 

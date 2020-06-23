@@ -420,7 +420,7 @@
     <message>
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="924"/>
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="934"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2047"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2077"/>
         <source>Create New Archive</source>
         <translation>新建归档文件</translation>
     </message>
@@ -446,33 +446,38 @@
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1465"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1788"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1814"/>
         <source>Failed to open archive: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1786"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1812"/>
         <source>Filename is too long, unable to extract</source>
         <translation>文件名过长，解压失败</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1878"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1816"/>
+        <source>unable to extract</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1909"/>
         <source>Choose default programma</source>
         <translation>选择默认程序</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3738"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3819"/>
         <source>Please open the Archive Manager and set the file association type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1859"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1893"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1890"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1924"/>
         <source>Skip all files</source>
         <translation>跳过所有文件</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1895"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1926"/>
         <source>Extraction successful</source>
         <translation>解压成功</translation>
     </message>
@@ -510,7 +515,7 @@
     <message>
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="421"/>
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1542"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3736"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3817"/>
         <source>OK</source>
         <translation>确定</translation>
     </message>
@@ -550,7 +555,8 @@
         <translation>解压到目录</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1701"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1725"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1816"/>
         <source>Wrong password</source>
         <translation>密码错误</translation>
     </message>
@@ -558,7 +564,7 @@
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1396"/>
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1417"/>
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1471"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1783"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1809"/>
         <source>Damaged file, unable to extract</source>
         <translation>文件损坏，无法解压</translation>
     </message>
@@ -568,20 +574,20 @@
         <translation>当前压缩文件已经发生变化，请重新导入文件。</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1779"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1781"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2961"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2967"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2994"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3000"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1805"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="1807"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2996"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3002"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3029"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3035"/>
         <source>Insufficient space, please clear and retry</source>
         <translation>空间不足，请清理后重试</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2963"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2969"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2996"/>
-        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3002"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="2998"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3004"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3031"/>
+        <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="3037"/>
         <source>Damaged file</source>
         <translation>原始文件已损坏</translation>
     </message>
@@ -722,7 +728,7 @@
     <name>Progress</name>
     <message>
         <location filename="../deepin-compressor/source/src/progress.cpp" line="86"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="357"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="365"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -733,87 +739,88 @@
         <location filename="../deepin-compressor/source/src/progress.cpp" line="142"/>
         <location filename="../deepin-compressor/source/src/progress.cpp" line="144"/>
         <location filename="../deepin-compressor/source/src/progress.cpp" line="146"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="384"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="392"/>
         <source>Calculating...</source>
         <translation>计算中...</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/progress.cpp" line="142"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="239"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="243"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="245"/>
         <source>Speed</source>
         <comment>delete</comment>
         <translation>删除速度</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="286"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="294"/>
         <source>Deleteing</source>
         <translation type="unfinished">正在删除</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="289"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="297"/>
         <source>Opening</source>
         <translation>打开</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="345"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="353"/>
         <source>Are you sure you want to stop the compression?</source>
         <translation>您确定要停止压缩文件吗？</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="347"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="355"/>
         <source>Are you sure you want to stop the updating?</source>
         <translation>您确定要停止更新压缩包吗？</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="351"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="359"/>
         <source>Are you sure you want to stop open the file?</source>
         <translation>您确定要停止打开该文件？</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="358"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="366"/>
         <source>Confirm</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="353"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="361"/>
         <source>Are you sure you want to stop the extraction?</source>
         <translation>您确定要停止解压文件吗？</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/progress.cpp" line="138"/>
         <location filename="../deepin-compressor/source/src/progress.cpp" line="144"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="232"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="234"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="236"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="243"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="245"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="247"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="235"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="237"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="239"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="251"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="253"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="255"/>
         <source>Speed</source>
         <comment>compress</comment>
         <translation>压缩速度</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/progress.cpp" line="146"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="258"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="266"/>
         <source>Time left</source>
         <translation>剩余时间</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/progress.cpp" line="140"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="251"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="253"/>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="255"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="259"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="261"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="263"/>
         <source>Speed</source>
         <comment>uncompress</comment>
         <translation>解压速度</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="284"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="292"/>
         <source>Compressing</source>
         <translation>正在压缩</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/source/src/progress.cpp" line="291"/>
+        <location filename="../deepin-compressor/source/src/progress.cpp" line="299"/>
         <source>Extracting</source>
         <translation>正在解压</translation>
     </message>
@@ -905,38 +912,38 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../deepin-compressor/interface/queries.cpp" line="168"/>
+        <location filename="../deepin-compressor/interface/queries.cpp" line="177"/>
         <source>Skip</source>
         <translation>跳过</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/interface/queries.cpp" line="166"/>
+        <location filename="../deepin-compressor/interface/queries.cpp" line="175"/>
         <source>Another file with the same name already exists, replace it?</source>
         <translation>文件已存在，是否替换？</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/interface/queries.cpp" line="169"/>
+        <location filename="../deepin-compressor/interface/queries.cpp" line="178"/>
         <source>Replace</source>
         <translation>替换</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/interface/queries.cpp" line="174"/>
+        <location filename="../deepin-compressor/interface/queries.cpp" line="183"/>
         <source>Apply to all</source>
         <translation>应用到全部文件</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/interface/queries.cpp" line="323"/>
+        <location filename="../deepin-compressor/interface/queries.cpp" line="333"/>
         <source>Encrypted file, please enter the password</source>
         <translation>此文件已加密，请输入解压密码</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/interface/queries.cpp" line="396"/>
+        <location filename="../deepin-compressor/interface/queries.cpp" line="406"/>
         <source>Wrong password</source>
         <translation>密码错误</translation>
     </message>
     <message>
-        <location filename="../deepin-compressor/interface/queries.cpp" line="328"/>
-        <location filename="../deepin-compressor/interface/queries.cpp" line="398"/>
+        <location filename="../deepin-compressor/interface/queries.cpp" line="338"/>
+        <location filename="../deepin-compressor/interface/queries.cpp" line="408"/>
         <location filename="../deepin-compressor/source/src/compresspage.cpp" line="115"/>
         <location filename="../deepin-compressor/source/src/mainwindow.cpp" line="197"/>
         <source>OK</source>

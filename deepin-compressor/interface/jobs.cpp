@@ -183,6 +183,11 @@ void Job::onError(const QString &message, const QString &details)
         setError(KJob::OpenFailedError);
         setErrorText(message);
         emitResult();
+    } else if (message == "Wrong password.") {
+        setError(KJob::WrongPsdError);
+        setErrorText(message);
+        emitResult();
+        return;
     }
     setError(KJob::UserDefinedError);
     setErrorText(message);
@@ -223,6 +228,7 @@ void Job::onFinished(bool result)
         setError(KJob::NopasswordError); //阻止解压zip加密包出现解压失败界面再出现输入密码界面
     } else if ((archive() && !archive()->isValid())  || false == result) {
         if (KJob::UserFilenameLong == error()) {
+        } else if (KJob::WrongPsdError == error()) {
         } else {
             setError(KJob::UserDefinedError);
         }

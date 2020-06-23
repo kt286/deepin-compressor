@@ -69,6 +69,9 @@ typedef QHash<QString, QVariant> QueryData;
 class  Query
 {
 public:
+
+    static QString toShortString(QString strSrc, int limitCounts = 16, int left = 8);
+
     virtual void execute() = 0;
     void waitForResponse();
     void setResponse(const QVariant &response);

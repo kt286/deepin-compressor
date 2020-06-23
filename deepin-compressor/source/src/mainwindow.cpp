@@ -1812,6 +1812,8 @@ void MainWindow::slotExtractionDone(KJob *job)
             m_CompressFail->setFailStrDetail(tr("Filename is too long, unable to extract"));
         } else if (KJob::OpenFailedError == errorCode) {
             m_CompressFail->setFailStrDetail(tr("Failed to open archive: %1"));
+        } else if (KJob::WrongPsdError == errorCode) {
+            m_CompressFail->setFailStrDetail(tr("Wrong password") + "," + tr("unable to extract"));
         }
 
         m_pageid = PAGE_UNZIP_FAIL;

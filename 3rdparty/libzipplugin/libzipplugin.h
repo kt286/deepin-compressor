@@ -15,6 +15,16 @@ struct FileProgressInfo {
     QString fileName;
 };
 
+/**
+ * @brief The enum_extractEntryStatus enum
+ * @see 解压单个entry的三种可能结果
+ */
+enum enum_extractEntryStatus {
+    FAIL,//解压失败
+    SUCCESS,//解压成功
+    PSD_NEED//需要密码
+};
+
 class LibzipPluginFactory : public KPluginFactory
 {
     Q_OBJECT
@@ -53,7 +63,7 @@ private Q_SLOTS:
 private:
     bool deleteEntry(Archive::Entry *pEntry, zip_t *archive/*, int &curNo, int count = -1*/);
 //    bool delEntry(Archive::Entry *pEntry, zip_t *archive);
-    bool extractEntry(zip_t *archive, const QString &entry, const QString &rootNode, const QString &destDir, bool preservePaths, bool removeRootNode, FileProgressInfo &pi);
+    enum_extractEntryStatus extractEntry(zip_t *archive, const QString &entry, const QString &rootNode, const QString &destDir, bool preservePaths, bool removeRootNode, FileProgressInfo &pi);
     bool writeEntry(zip_t *archive, const QString &entry, const Archive::Entry *destination, const CompressionOptions &options, bool isDir = false);
     bool emitEntryForIndex(zip_t *archive, qlonglong index);
     void emitProgress(double percentage);
