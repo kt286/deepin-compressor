@@ -240,6 +240,8 @@ private:
     int popUpDialog(const QString &desc);
     void openTempFile(QString path);
     int showWarningDialog(const QString &msg);
+    QVector<Archive::Entry *> selectedEntriesVector();
+
 private:
     QLineEdit *pLineEditDir;
     MyTableView *pTableViewFile;

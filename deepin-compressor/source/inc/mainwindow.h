@@ -80,7 +80,7 @@ enum EncryptionType {
     Encryption_NULL,
     Encryption_Load,
     Encryption_Extract,
-    Encryption_SingleExtract,//提取单个
+    Encryption_SingleExtract,// “提取”
     Encryption_ExtractHere,
     Encryption_TempExtract,
     Encryption_TempExtract_Open,

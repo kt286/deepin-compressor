@@ -216,7 +216,7 @@ void MainWindow::closeClean(QCloseEvent *event)
             DeleteJob *pJob = dynamic_cast<DeleteJob *>(m_pJob);
             pJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
         } else {
-           m_pJob->deleteLater();
+            m_pJob->deleteLater();
             m_pJob = nullptr;
         }
     }
@@ -1771,14 +1771,17 @@ void MainWindow::slotExtractionDone(KJob *job)
         m_pJob->deleteLater();
         m_pJob = nullptr;
 
-        if (errcode == 0 && m_encryptiontype != Encryption_SingleExtract) {  // 解压成功后关闭独立窗口,提取单个不关闭界面
+        if (errcode == KJob::NopasswordError) { //如果需要输入密码
+            m_pageid = PAGE_ENCRYPTION;
+            refreshPage();
+            return;
+        }
+
+
+        if (errcode == 0 && m_encryptiontype != Encryption_SingleExtract) {
             if (this->pCurAuxInfo == nullptr || this->pCurAuxInfo->information.size() == 0) {
                 m_pageid = PAGE_UNZIP_SUCCESS;
                 refreshPage();
-//                this->close();
-//                if (this->pCurAuxInfo != nullptr) {
-//                    removeFromParentInfo(this);
-//                }
                 return;
             }
         }
@@ -1789,8 +1792,21 @@ void MainWindow::slotExtractionDone(KJob *job)
     if (m_pageid == PAGE_LOADING) {
         m_pOpenLoadingPage->stop();
     }
-    if (m_pageid == PAGE_UNZIP) {
-        //如果是解压界面，则返回
+    if (m_pageid == PAGE_UNZIP) { // 如果是解压界面，则返回
+        if (m_progressdialog->isshown()) {
+            m_progressdialog->hide();
+            // m_progressdialog->reject();
+        }
+
+        if (m_encryptiontype == Encryption_SingleExtract) {
+            if (errorCode == KJob::UserSkiped) {
+                m_CompressSuccess->setstringinfo(tr("Skip all files"));
+            } else {
+                m_progressdialog->setFinished(m_decompressfilepath);
+            }
+        }
+
+
         return;
     } else if ((PAGE_ENCRYPTION == m_pageid) && (errorCode && (errorCode != KJob::KilledJobError && errorCode != KJob::UserSkiped)))   {
 
@@ -1817,10 +1833,10 @@ void MainWindow::slotExtractionDone(KJob *job)
         }
 
         m_pageid = PAGE_UNZIP_FAIL;
-        if (KJob::NopasswordError == errorCode) {
-            m_pageid = PAGE_ENCRYPTION;
-        }
-        refreshPage();
+//        if (KJob::NopasswordError == errorCode) {
+//            m_pageid = PAGE_ENCRYPTION;
+//        }
+//        refreshPage();
         return;
     } else if (Encryption_TempExtract == m_encryptiontype) {
 
@@ -1963,21 +1979,24 @@ void MainWindow::SlotExtractPassword(QString password)
 void MainWindow::ExtractSinglePassword(QString password)
 {
     m_workstatus = WorkProcess;
-//    if (m_pJob == nullptr) {
-//        return;
-//    }
+    if (m_pJob != nullptr) {
+        m_pJob->deleteLater();
+        m_pJob = nullptr;
+    }
 
-    ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
-    if (pExtractJob) {
+
+
+    if (m_pJob) {
         // first  time to extract
+        ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
         pExtractJob->archiveInterface()->setPassword(password);
         pExtractJob->start();
     } else {
         // second or more  time to extract
         ExtractionOptions options;
         options.setDragAndDropEnabled(true);
-
-        pExtractJob = m_model->extractFiles(m_extractSimpleFiles, m_decompressfilepath, options);
+        m_pJob = m_model->extractFiles(m_extractSimpleFiles, m_decompressfilepath, options);
+        ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
         pExtractJob->archiveInterface()->setPassword(password);
         connect(pExtractJob, SIGNAL(percent(KJob *, ulong)), this, SLOT(SlotProgress(KJob *, ulong)));
         connect(pExtractJob, &KJob::result, this, &MainWindow::slotExtractionDone);
@@ -3173,11 +3192,18 @@ QString MainWindow::modelIndexToStr(const QModelIndex &index)
 void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QString path, EXTRACT_TYPE type)
 {
     m_Progess->pInfo()->startTimer();
-    QStringList m_tempFileList;
-    m_tempFileList.insert(0, path);
 
     resetMainwindow();
-    calSelectedTotalFileSize(m_tempFileList);
+    if (type == EXTRACT_TO) {// 传递的是顶节点
+        foreach (Archive::Entry *p, fileList) {
+            p->calAllSize(m_Progess->pInfo()->getTotalSize());
+        }
+    } else {// 传递的是所有节点
+        foreach (Archive::Entry *p, fileList) {
+            m_Progess->pInfo()->getTotalSize() += p->getSize();
+        }
+    }
+
     m_progressdialog->setProcess(0);
     m_Progess->setprogress(0);
 
@@ -3247,10 +3273,13 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
     } else if (type == EXTRACT_HEAR) {
         programName = "deepin-compressor";
         m_pageid = PAGE_UNZIPPROGRESS;
+        m_encryptiontype = Encryption_SingleExtract;
     } else if (type == EXTRACT_TO) {
         programName = "deepin-compressor";
         m_pageid = PAGE_UNZIPPROGRESS;
+        m_encryptiontype = Encryption_SingleExtract;
     } else {
+        programName = "deepin-compressor";
         m_encryptiontype = Encryption_SingleExtract;
     }
 

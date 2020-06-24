@@ -254,20 +254,6 @@ void Archive::Entry::countChildren(uint &dirs, uint &files) const
     }
 }
 
-QVector<Archive::Entry *> *Archive::Entry::getAllLeavesNode()
-{
-    QVector<Archive::Entry *> *pV = new QVector<Archive::Entry *>();
-    const auto archiveEntries = entries();
-    for (auto entry : archiveEntries) {
-        if (entry->isDir() == true) {
-            this->checkLeavesNode(entry, pV);
-        } else {
-            pV->append(entry);
-        }
-    }
-    return pV;
-}
-
 void Archive::Entry::getAllNodesFullPath(QStringList &pList)
 {
     pList.append(this->fullPath());
@@ -301,16 +287,21 @@ void Archive::Entry::getFilesCount(Archive::Entry *pEntry, int &count)
     }
 }
 
-void Archive::Entry::checkLeavesNode(Entry *pE, QVector<Archive::Entry *> *pV)
+void Archive::Entry::getVector(Entry *pE, QVector<Archive::Entry *> &vector)
 {
-    const auto archiveEntries = pE->entries();
-    for (auto entry : archiveEntries) {
-        if (entry->isDir() == true) {
-            this->checkLeavesNode(entry, pV);
-        } else {
-            pV->append(entry);
+    if (pE->isDir()) {
+        const auto archiveEntries = pE->entries();
+        for (auto entry : archiveEntries) {
+            if (entry->isDir() == true) {
+                this->getVector(entry, vector);
+            } else {
+                vector.append(entry);
+            }
         }
+
     }
+    vector.append(pE);
+
 }
 
 bool Archive::Entry::operator==(const Archive::Entry &right) const

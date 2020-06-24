@@ -794,56 +794,16 @@ bool LibzipPlugin::doKill()
     return false;
 }
 
-bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QString &destinationDirectory, const ExtractionOptions &options)
+bool LibzipPlugin::checkArchivePsd(zip_t *archive)
 {
-    this->extractPsdStatus = ReadOnlyArchiveInterface::NotChecked;
-//    if(options.encryptedArchiveHint() == true){
-//        if(password().isEmpty() == true){
-//            emit sigExtractNeedPassword();//tip user input psd
-//            return false;
-//        }
-//    }
-    //reset member variable ifReplace;
-    ifReplaceTip = false;
-    m_extractDestDir = destinationDirectory;
-    destDirName = extractTopFolderName;
-
-    bAnyFileExtracted = false;
-
-    const bool extractAll = files.isEmpty();
-    const bool removeRootNode = options.isDragAndDropEnabled();
-    m_extractionOptions = options;
-
-    int errcode = 0;
-    zip_error_t err;
-
-    // Open archive.
-    zip_t *archive = zip_open(QFile::encodeName(filename()).constData(), ZIP_RDONLY, &errcode);
-    zip_error_init_with_code(&err, errcode);
-    if (archive == nullptr) {
-        emit error(tr("Failed to open archive: %1"));
-        return false;
-    }
-
-    // Set password if known.
-    if (!password().isEmpty()) {
-        zip_set_default_password(archive, passwordUnicode(password()));
-    }
-
-    // Get number of archive entries.
-    const qlonglong nofEntries = extractAll ? zip_get_num_entries(archive, 0) : files.size();
+    const qlonglong nofEntries =  zip_get_num_entries(archive, 0);
     //check password
     for (qlonglong i = 0; i < nofEntries; i++) {
         if (QThread::currentThread()->isInterruptionRequested()) {
             break;
         }
         QString entry;
-        if (extractAll) {
-            entry = QDir::fromNativeSeparators(trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW)));
-        } else {
-            trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW));
-            entry = files.at(i)->fullPath();
-        }
+        entry = QDir::fromNativeSeparators(trans2uft8(zip_get_name(archive, i, ZIP_FL_ENC_RAW)));
         const bool isDirectory = entry.endsWith(QDir::separator());
         if (isDirectory) {
             continue;
@@ -868,7 +828,7 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
                 break;
             } else if (zip_error_code_zip(zip_get_error(archive)) == ZIP_ER_NOPASSWD) {
                 m_isckeckpsd = false; //阻止解压zip加密包出现解压失败界面再出现输入密码界面
-                if (m_extractionOptions.isBatchExtract()) {
+                if (m_extractionOptions.isBatchExtract()) {//批量提取
                     PasswordNeededQuery query(filename());
                     emit userQuery(&query);
                     query.waitForResponse();
@@ -900,14 +860,146 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
                 setPassword(QString());
                 zip_set_default_password(archive, passwordUnicode(password()));
                 return false;
-            } /*else {
-                emit error(tr("Failed to open '%1':<nl/>%2"));
-                return false;
-            }*/
+            }
 
         }
     }
-    //psd checked over,if psd right or no need psd,emit signal to show progress view.
+    return true;
+}
+
+void LibzipPlugin::checkEntryPsd(zip_t *archive, Archive::Entry *pCur, enum_checkEntryPsd &status)
+{
+    if (QThread::currentThread()->isInterruptionRequested()) {
+        return;
+    }
+
+    if (status != enum_checkEntryPsd::NOTCHECK) {
+        return;
+    }
+
+    if (pCur->isDir()) {
+        foreach (Archive::Entry *p, pCur->entries()) {
+            checkEntryPsd(archive, p, status);
+            if (status != enum_checkEntryPsd::NOTCHECK) {
+                break;
+            }
+        }
+    } else {
+        QString entry = pCur->fullPath();
+        if (((QString)m_codecstr).contains("windows", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("IBM", Qt::CaseInsensitive)
+                || ((QString)m_codecstr).contains("x-mac", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("Big5", Qt::CaseInsensitive)) {
+            m_codecstr = "GBK";
+        }
+
+        QByteArray  name;
+
+        QTextCodec *codec = QTextCodec::codecForName(m_codecstr);
+        //qDebug() << m_codecstr;
+        if (codec) {
+            name = codec->fromUnicode(entry.toLocal8Bit());
+        } else {
+            name = entry.toLocal8Bit();
+        }
+        zip_file *zipFile = zip_fopen(archive, name.constData(), 0);
+        //if zipFile return not 0,it sees normal，so break，then done extract; else，check why failed.
+        if (zipFile) {
+            zip_fclose(zipFile);
+            status = enum_checkEntryPsd::RIGHT;
+            return;
+        } else if (zip_error_code_zip(zip_get_error(archive)) == ZIP_ER_NOPASSWD) {
+            m_isckeckpsd = false; //阻止解压zip加密包出现解压失败界面再出现输入密码界面
+            if (m_extractionOptions.isBatchExtract()) {//批量提取
+                PasswordNeededQuery query(filename());
+                emit userQuery(&query);
+                query.waitForResponse();
+                if (query.responseCancelled()) {
+                    setPassword(QString());
+                    emit cancelled();
+                }
+                setPassword(query.password());
+                zip_set_default_password(archive, passwordUnicode(password()));
+            } else {
+                emit sigExtractNeedPassword();
+                setPassword(QString());
+                zip_set_default_password(archive, passwordUnicode(password()));
+
+            }
+            status = enum_checkEntryPsd::PSDNEED;
+        } else if (zip_error_code_zip(zip_get_error(archive)) == ZIP_ER_WRONGPASSWD) {
+            m_isckeckpsd = true;
+            if (m_extractionOptions.isBatchExtract()) {
+                setPassword(QString());
+                emit cancelled();
+            } else {
+                emit sigExtractNeedPassword();
+            }
+            setPassword(QString());
+            zip_set_default_password(archive, passwordUnicode(password()));
+            status = enum_checkEntryPsd::PSDWRONG;
+        }
+    }
+}
+
+bool LibzipPlugin::checkEntriesPsd(zip_t *archive, const QVector<Archive::Entry *> &selectedEnV)
+{
+    //遍历树，去检索有无密码
+    const qlonglong nofEntries = selectedEnV.size();
+    enum_checkEntryPsd status = enum_checkEntryPsd::NOTCHECK;
+    foreach (Archive::Entry *pE, selectedEnV) {
+        checkEntryPsd(archive, pE, status);
+        if (status == enum_checkEntryPsd::RIGHT) {
+            break;
+        } else if (status != enum_checkEntryPsd::NOTCHECK) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QString &destinationDirectory, const ExtractionOptions &options)
+{
+    this->extractPsdStatus = ReadOnlyArchiveInterface::NotChecked;
+    //reset member variable ifReplace;
+    ifReplaceTip = false;
+    m_extractDestDir = destinationDirectory;
+    destDirName = extractTopFolderName;
+
+    bAnyFileExtracted = false;
+
+    const bool extractAll = files.isEmpty();    // true:"解压"; false:"提取"
+    const bool removeRootNode = options.isDragAndDropEnabled();
+    m_extractionOptions = options;
+
+    int errcode = 0;
+    zip_error_t err;
+
+    // Open archive.
+    zip_t *archive = zip_open(QFile::encodeName(filename()).constData(), ZIP_RDONLY, &errcode);
+    zip_error_init_with_code(&err, errcode);
+    if (archive == nullptr) {
+        emit error(tr("Failed to open archive: %1"));
+        return false;
+    }
+
+    // Set password if known.
+    if (!password().isEmpty()) {
+        zip_set_default_password(archive, passwordUnicode(password()));
+    }
+
+    // Get number of archive entries.
+    const qlonglong nofEntries = extractAll ? zip_get_num_entries(archive, 0) : files.size();
+    //首次检测密码
+    bool status = true;
+    if (extractAll == true) {
+        status = checkArchivePsd(archive);
+    } else {
+        status = checkEntriesPsd(archive, files);
+    }
+    if (status == false) {
+        return false;
+    }
+    //检测完毕,if psd right or no need psd,emit signal to show progress view.
+
     emit sigExtractPwdCheckDown();
     m_isckeckpsd = true;
     // Extract entries.
@@ -980,22 +1072,17 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
 
     } else {
         // We extract only the entries in files.
+        QVector<Archive::Entry *> vector = {};
+        foreach (Archive::Entry *pE, files) {
+            pE->getVector(pE, vector);
+        }
+
         qulonglong i = 0;
-        for (const Archive::Entry *e : files) {
+        for (int index = 0; index < vector.length(); index++) {
             if (QThread::currentThread()->isInterruptionRequested()) {
                 break;
             }
-
-//            std::function<void(LibzipPlugin*, double)> notifyProgressFunc = nullptr;
-
-//            if( nofEntries < 5 )
-//            {
-//                notifyProgressFunc = [this](double progress)
-//                {
-//                    this->emit progress(float(++i) / nofEntries);
-//                    emit progress_filename(e->name());
-//                };
-//            }
+            Archive::Entry *e = vector[index];
             FileProgressInfo pi;
 
             emit progress_filename(e->name());
@@ -1008,17 +1095,33 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
 
             QString entryName = e->fullPath();
 
-            if (!extractEntry(archive,
-                              entryName,
-                              e->rootNode,
-                              destinationDirectory,
-                              options.preservePaths(),
-                              removeRootNode, pi)) {
+            enum_extractEntryStatus enumRes = extractEntry(archive,
+                                                           entryName,
+                                                           QString(),
+                                                           destinationDirectory,
+                                                           options.preservePaths(),
+                                                           removeRootNode, pi);
+            if (enumRes == enum_extractEntryStatus::FAIL) {
                 zip_close(archive);
                 return false;
-            }
+            } else if (enumRes == enum_extractEntryStatus::SUCCESS) {
+                emit progress(float(i + 1) / nofEntries);
+            } else if (enumRes == enum_extractEntryStatus::PSD_NEED) {// need input psd and extractEntry again, added by hsw 20200613
+                PasswordNeededQuery query(entryName);
+                emit userQuery(&query);
+                query.waitForResponse();
 
-            emit progress(float(++i) / nofEntries);
+                if (query.responseCancelled()) {
+                    setPassword(QString());
+                    zip_close(archive);
+                    emit error("Wrong password.");
+                    return false;
+                } else {
+                    setPassword(query.password());
+                    zip_set_default_password(archive, password().toUtf8().constData());
+                    index--;
+                }
+            }
         }
     }
 

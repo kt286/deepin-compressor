@@ -1039,6 +1039,23 @@ int fileViewer::showWarningDialog(const QString &msg)
     return res;
 }
 
+QVector<Archive::Entry *> fileViewer::selectedEntriesVector()
+{
+    QVector<Archive::Entry *> vectorEntry;
+    QItemSelectionModel *selectedModel = pTableViewFile->selectionModel();
+    if (pTableViewFile && selectedModel) {
+        for (const QModelIndex &iter :  selectedModel->selectedRows()) {
+
+            QModelIndex delegateIndex = m_sortmodel->index(iter.row(), iter.column(), iter.parent());//get delegate index
+            QVariant var = m_sortmodel->data(delegateIndex);
+            QModelIndex sourceIndex = m_sortmodel->mapToSource(delegateIndex);                      //get source index
+            Archive::Entry *entry = m_decompressmodel->entryForIndex(sourceIndex);                  //get entry by sourceindex
+            vectorEntry.push_back(entry);
+        }
+    }
+    return vectorEntry;
+}
+
 //void fileViewer::slotDecompressRowDelete()
 //{
 //    QStringList filelist;
@@ -1391,8 +1408,11 @@ void fileViewer::onRightMenuClicked(QAction *action)
 {
     if (PAGE_UNCOMPRESS == m_pagetype) {
         QVector<Archive::Entry *> fileList = filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows()));
-        if (action->text() == tr("Extract") || action->text() == tr("Extract", "slotDecompressRowDoubleClicked")) {
-            emit sigextractfiles(fileList, EXTRACT_TO);
+
+
+        if (action->text() == tr("Extract") || action->text() == tr("Extract", "slotDecompressRowDoubleClicked")) {//菜单“提取”
+            QVector<Archive::Entry *> newFileList = selectedEntriesVector();
+            emit sigextractfiles(newFileList, EXTRACT_TO);
         } else if (action->text() == tr("Extract to current directory")) {
 //            QString nam = fileList.at(0)->name();
 //            qDebug() << fileList.at(0)->fullPath();

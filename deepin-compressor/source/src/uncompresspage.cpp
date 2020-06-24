@@ -285,7 +285,7 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
     // get extract type
     extractType = type;
 
-    if (EXTRACT_TO == type) {
+    if (EXTRACT_TO == type) {//菜单“提取”
         DFileDialog dialog(this);
         dialog.setAcceptMode(DFileDialog::AcceptOpen);
         dialog.setFileMode(DFileDialog::Directory);

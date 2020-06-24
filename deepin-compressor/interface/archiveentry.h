@@ -140,7 +140,7 @@ public:
     Entry *find(const QString &name) const;
     Entry *findByPath(const QStringList &pieces, int index = 0) const;
     void countChildren(uint &dirs, uint &files) const;
-    QVector<Archive::Entry *> *getAllLeavesNode();
+    void getVector(Entry *pE, QVector<Archive::Entry *> &vector);
     /**
      * @brief getAllNodesFullPath
      * @param pE
@@ -158,8 +158,8 @@ public:
 public:
     QString rootNode;
     bool compressedSizeIsSet;
-private:
-    void checkLeavesNode(Archive::Entry *pE, QVector<Archive::Entry *> *pV);
+
+
 private:
     QVector<Entry *> m_entries;
     QMap<QString, int> m_mapIndex;
