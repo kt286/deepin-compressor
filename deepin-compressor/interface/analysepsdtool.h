@@ -16,19 +16,17 @@ enum ENUMLINEINFO {
 #define EVERYOK "Everything is Ok"
 #define WRONGPSD7Z ". Wrong password? "
 
-typedef struct lineInfo {
-    lineInfo(QString l, bool b);
+typedef struct lineInfo{
+    lineInfo(QString l,bool b);
     QString line;
     bool read;
-} LineInfo;
+}LineInfo;
 
-class AnalyseTool
-{
+class AnalyseTool{
 public:
     AnalyseTool();
 
-    virtual ~AnalyseTool()
-    {
+    virtual ~AnalyseTool() {
 
     }
 
@@ -42,8 +40,7 @@ public:
 };
 
 
-class AnalyseToolRar4: public AnalyseTool
-{
+class AnalyseToolRar4:public AnalyseTool{
 public:
     explicit AnalyseToolRar4();
 
@@ -67,8 +64,7 @@ private:
 };
 
 
-class AnalyseTool7Z: public AnalyseTool
-{
+class AnalyseTool7Z:public AnalyseTool{
 public:
     explicit AnalyseTool7Z();
 
@@ -91,8 +87,7 @@ private:
     int lineCount = 0;
 };
 
-class AnalyseHelp
-{
+class AnalyseHelp{
 public:
     explicit AnalyseHelp(QString destPath, QString subFolderName);
 

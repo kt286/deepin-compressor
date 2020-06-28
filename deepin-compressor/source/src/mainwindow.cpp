@@ -1781,6 +1781,7 @@ void MainWindow::slotExtractionDone(KJob *job)
         if (errcode == 0 && m_encryptiontype != Encryption_SingleExtract) {
             if (this->pCurAuxInfo == nullptr || this->pCurAuxInfo->information.size() == 0) {
                 m_pageid = PAGE_UNZIP_SUCCESS;
+                m_CompressSuccess->setstringinfo(tr("Extraction successful"));
                 refreshPage();
                 return;
             }

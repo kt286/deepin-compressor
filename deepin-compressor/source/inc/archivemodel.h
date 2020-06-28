@@ -133,7 +133,7 @@ public:
 
     QMap<QString, Archive::Entry *> filesToMove;
     QMap<QString, Archive::Entry *> filesToCopy;
-    //store the map what key is path,value is entryChild. If open a new view to see the entryChild,you need to store it.
+    //store the map what key is path,value is entryChild. 如果双击查看一个entryChild,需要这个map去建立映射.
     QMap<QString, Archive::Entry *> mapFilesUpdate;
 //    QList<Archive::Entry *> *getLeavesList();
 Q_SIGNALS:

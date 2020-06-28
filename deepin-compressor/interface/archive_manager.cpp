@@ -677,24 +677,6 @@ AddJob *Archive::addFiles(const QVector<Archive::Entry *> &files, const Archive:
     return newJob;
 }
 
-//AddJob *Archive::addFilesOld(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options)
-//{
-//    if (!isValid()) {
-//        return nullptr;
-//    }
-
-//    CompressionOptions newOptions = options;
-//    if (encryptionType() != Unencrypted) {
-//        newOptions.setEncryptedArchiveHint(true);
-//    }
-
-//    Q_ASSERT(!m_iface->isReadOnly());
-
-//    AddJob *newJob = new AddJob(files, destination, newOptions, static_cast<ReadWriteArchiveInterface *>(m_iface));
-//    connect(newJob, &AddJob::result, this, &Archive::onAddFinished);
-//    return newJob;
-//}
-
 MoveJob *Archive::moveFiles(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options)
 {
     if (!isValid()) {
