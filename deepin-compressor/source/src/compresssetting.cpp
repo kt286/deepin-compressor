@@ -203,6 +203,8 @@ void CompressSetting::InitUI()
     m_password->setEnabled(true);
     m_file_secret->setEnabled(false);
 
+    m_password->lineEdit()->setAttribute(Qt::WA_InputMethodEnabled, false);
+
     setBackgroundRole(DPalette::Base);
 }
 
@@ -211,6 +213,7 @@ void CompressSetting::InitConnection()
     connect(m_nextbutton, &DPushButton::clicked, this, &CompressSetting::onNextButoonClicked);
     connect(m_moresetbutton, &DSwitchButton::toggled, this, &CompressSetting::onAdvanceButtonClicked);
     connect(m_splitcompress, &DCheckBox::stateChanged, this, &CompressSetting::onSplitChanged);
+    connect(m_password, &DPasswordEdit::echoModeChanged, this, &CompressSetting::slotEchoModeChanged);
 
     connect(
         DApplicationHelper::instance(), &DApplicationHelper::themeTypeChanged, this, &CompressSetting::onThemeChanged);
@@ -349,7 +352,7 @@ void CompressSetting::onNextButoonClicked()
     if ("application/x-tar" == fixedMimeType || "application/x-tarz" == fixedMimeType) {
         m_openArgs[QStringLiteral("compressionLevel")] = "-1";  //-1 is unuseful
     } else if ("application/zip" == fixedMimeType) {
-        m_openArgs[QStringLiteral("compressionLevel")] = "3";  // 1:Extreme 3:Fast 4:Standard
+        m_openArgs[QStringLiteral("compressionLevel")] = "3";  // 1:Extreme 3:Fast 5:Standard
 
         if (password.contains(QRegExp("[\\x4e00-\\x9fa5]+"))) {
             showWarningDialog(tr("The zip format does not support Chinese characters as compressed passwords"));
@@ -361,7 +364,7 @@ void CompressSetting::onNextButoonClicked()
     }
 
     qDebug() << m_splitnumedit->value();
-    if (m_splitnumedit->value() > 0) {
+    if (m_splitnumedit->value() > 0 && m_splitcompress->isChecked()) {
         m_openArgs[QStringLiteral("volumeSize")] = QString::number(static_cast< int >(m_splitnumedit->value() * 1024));
     }
     //    if (!dialog.data()->compressionMethod().isEmpty()) {
@@ -617,6 +620,7 @@ void CompressSetting::onSplitChanged(int /*status*/)
         isSplitChecked = true;
     } else {
         m_splitnumedit->setEnabled(false);
+        m_splitnumedit->clear();
     }
 }
 
@@ -683,6 +687,12 @@ void CompressSetting::onThemeChanged()
 bool CompressSetting::onSplitChecked()
 {
     return isSplitChecked;
+}
+
+void CompressSetting::slotEchoModeChanged(bool echoOn)
+{
+    qDebug() << echoOn;
+    m_password->lineEdit()->setAttribute(Qt::WA_InputMethodEnabled, echoOn);
 }
 
 void CompressSetting::autoCompressEntry(const QString &compresspath, const QStringList &path, Archive::Entry *pWorkEntry)

@@ -309,7 +309,7 @@ private slots:
     void onCompressPageFilelistIsEmpty();
 
     void slotCalDeleteRefreshTotalFileSize(const QStringList &files);
-//    void slotUncompressCalDeleteRefreshTotalFileSize(const QStringList &files);
+
     /**
      * @brief slotUncompressCalDeleteRefreshTotoalSize
      * @param vectorDel
@@ -431,13 +431,10 @@ private:
     void calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel);
     qint64 calFileSize(const QString &path);
     void calSpeedAndTime(unsigned long compressPercent);
+
     QString getDefaultApp(QString mimetype);
     void setDefaultApp(QString mimetype, QString desktop);
     int promptDialog();
-//    QElapsedTimer m_timer;
-//    unsigned long lastPercent = 0;
-//    qint64 selectedTotalFileSize = 0;//选中的总大小
-//    qint64 compressTime = 0;
     QReadWriteLock m_lock;
     QString program;
     QMap<qint64, QStringList> m_subWinDragFiles;
@@ -447,6 +444,7 @@ private:
 #ifdef __aarch64__
     qint64 maxFileSize_ = 0;
 #endif
+
 };
 
 

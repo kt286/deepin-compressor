@@ -127,6 +127,10 @@ bool Utils::isCompressed_file(const QString &filePath)
         ret = false;
     }
 
+    if (filePath.endsWith(".crx")) {
+        ret = true;
+    }
+
     return ret;
 
 //    if (filetype.compare("application/x-7z-compressedr") && filetype.compare("application/zip") && filetype.compare("application/vnd.rar") && filetype.compare("application/x-rar")
@@ -153,7 +157,7 @@ bool Utils::isCompressed_file(const QString &filePath)
 //        ret = true;
 //    }
 //    qDebug() << ret;
-    return ret;
+//    return ret;
 }
 
 QString Utils::humanReadableSize(const qint64 &size, int precision)
@@ -563,9 +567,12 @@ bool Utils::existMimeType(QString mimetype)
     QString conf = readConf();
     QStringList confList = conf.split("\n", QString::SkipEmptyParts);
 
+    for (int i = 0; i < confList.count(); i++) {
+        qDebug() << confList.at(i);
+    }
     bool exist = false;
     for (int i = 0; i < confList.count(); i++) {
-        if (confList.at(i).contains("." + mimetype)) {
+        if (confList.at(i).contains("." + mimetype + ":")) {
             if (confList.at(i).contains("true")) {
                 exist = true;
                 break;
@@ -581,7 +588,7 @@ bool Utils::existMimeType(QString mimetype)
 
 QString Utils::judgeFileMime(QString file)
 {
-    QString type;
+    QString type = "";
     if (file.endsWith(".7z") || file.contains(".7z.0")) {
         type = "x-7z-compressed";
     } else if (file.endsWith(".cpio.gz")) {

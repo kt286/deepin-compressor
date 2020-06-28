@@ -442,7 +442,6 @@ void fileViewer::refreshTableview()
         return;
     }
 
-
     curFileListModified = false;
 
     MyFileItem *item = nullptr;
@@ -678,7 +677,6 @@ void fileViewer::resizeEvent(QResizeEvent */*size*/)
     resizecolumn();
 }
 
-
 void fileViewer::keyPressEvent(QKeyEvent *event)
 {
     DWidget::keyPressEvent(event);
@@ -700,8 +698,6 @@ void fileViewer::keyPressEvent(QKeyEvent *event)
 
         }
     }
-
-
 }
 
 void fileViewer::openTempFile(QString path)
@@ -1352,15 +1348,10 @@ void fileViewer::showRightMenu(const QPoint &pos)
         return;
     }
     if (m_pagetype == PAGE_COMPRESS) {
-        if (m_pathindex > 0) {
-            m_pRightMenu->removeAction(deleteAction);
-        } else {
-            m_pRightMenu->addAction(deleteAction);
-        }
+        m_pRightMenu->addAction(deleteAction);
     }
 
     openWithDialogMenu->clear();
-    //updateAction(pTableViewFile->indexAt(pos).data().toString());
 
     if (m_pagetype == PAGE_COMPRESS) {
         if (0 == m_pathindex) {
@@ -1408,8 +1399,6 @@ void fileViewer::onRightMenuClicked(QAction *action)
 {
     if (PAGE_UNCOMPRESS == m_pagetype) {
         QVector<Archive::Entry *> fileList = filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows()));
-
-
         if (action->text() == tr("Extract") || action->text() == tr("Extract", "slotDecompressRowDoubleClicked")) {//菜单“提取”
             QVector<Archive::Entry *> newFileList = selectedEntriesVector();
             emit sigextractfiles(newFileList, EXTRACT_TO);
@@ -1464,7 +1453,6 @@ void fileViewer::onRightMenuOpenWithClicked(QAction *action)
         } else {
             emit sigOpenWith(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), action->text());
         }
-        //emit sigOpenWith(filesAndRootNodesForIndexes(addChildren(pTableViewFile->selectionModel()->selectedRows())), action->text());
     } else {
         if (action->text() != tr("Choose default programma")) {
             openWithDialog(pTableViewFile->currentIndex(), action->text());

@@ -591,7 +591,11 @@ void MainWindow::InitConnection()
             qDebug() << fullpath;
             QFileInfo fileinfo(fullpath);
             if (fileinfo.exists()) {
-                DDesktopServices::showFileItem(fullpath);
+                if (fileinfo.isDir()) {
+                    DDesktopServices::showFolder(fullpath);
+                } else if (fileinfo.isFile()) {
+                    DDesktopServices::showFileItem(fullpath);
+                }
             }
         }
     });
@@ -1125,27 +1129,6 @@ qint64 MainWindow::calFileSize(const QString &path)
 
 void MainWindow::calSpeedAndTime(unsigned long compressPercent)
 {
-//    qDebug() << "size" << selectedTotalFileSize;
-//    compressTime += m_timer.elapsed();
-//    qDebug() << "compresstime" << compressTime;
-//    //处理速度
-//    double m_compressSpeed = ((selectedTotalFileSize / 1024.0) * (compressPercent / 100.0)) / compressTime * 1000;
-//    //剩余大小
-//    double m_sizeLeft = (selectedTotalFileSize / 1024.0) * (100 - compressPercent) / 100;
-//    //剩余时间
-//    qint64 m_timeLeft = (qint64)(m_sizeLeft / m_compressSpeed);
-
-//    qDebug() << "m_sizeLeft" << m_sizeLeft;
-//    qDebug() << "m_compressSpeed" << m_compressSpeed;
-//    qDebug() << "m_timeLeft" << m_timeLeft;
-
-//    if (lastPercent != 100 && m_timeLeft == 0) {
-//        m_timeLeft = 1;
-//    }
-
-//    m_Progess->setSpeedAndTime(m_compressSpeed, m_timeLeft);
-//    m_timer.restart();
-//    m_ProgressIns->refreshSpeedAndTime(compressPercent);
     m_Progess->refreshSpeedAndTime(compressPercent);
 }
 
@@ -1183,7 +1166,6 @@ void MainWindow::onSelected(const QStringList &files)
             if ("" != m_settingsDialog->getCurExtractPath() && m_UnCompressPage->getExtractType() != EXTRACT_HEAR) {
                 m_UnCompressPage->setdefaultpath(m_settingsDialog->getCurExtractPath());
             } else {
-//                m_UnCompressPage->setdefaultpath(fileinfo.path());
                 m_UnCompressPage->setdefaultpath(*strChildMndExtractPath);
             }
             m_UnCompressPage->getFileViewer()->setRootPathIndex();//added by hsw 20200612 重置m_pathindex
@@ -1214,10 +1196,6 @@ void MainWindow::onSelected(const QStringList &files)
                 QStringList arguments;
                 arguments << files.at(0);
                 qDebug() << arguments;
-//                cmdprocess->setOutputChannelMode(KProcess::MergedChannels);
-//                cmdprocess->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
-//                cmdprocess->setProgram(programPath, arguments);
-//                cmdprocess->start();
                 startCmd("deepin-compressor", arguments);
             }
         }
@@ -1506,6 +1484,7 @@ void MainWindow::loadArchive(const QString &files)
 {
     QString transFile = files;
     transSplitFileName(transFile);
+
     WatcherFile(transFile);
 
     m_workstatus = WorkProcess;
@@ -1533,6 +1512,7 @@ void MainWindow::WatcherFile(const QString &files)
     m_fileManager = new DFileWatcher(files, this);
     m_fileManager->startWatcher();
     qDebug() << m_fileManager->startWatcher() << "=" << files;
+    m_UnCompressPage->setRootPathIndex(); //解决解压后再次打开压缩包出现返回上一级
     connect(m_fileManager, &DFileWatcher::fileMoved, this, [ = ]() { //监控压缩包，重命名时提示
         DDialog *dialog = new DDialog(this);
         dialog->setFixedWidth(440);
@@ -1555,6 +1535,7 @@ void MainWindow::WatcherFile(const QString &files)
         m_UnCompressPage->setRootPathIndex();
         this->refreshPage();
     });
+
 }
 
 void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
@@ -3793,7 +3774,13 @@ bool MainWindow::checkSettings(QString file)
     QString fileMime = Utils::judgeFileMime(file);
     bool hasSetting = true;
 
-    bool existMime = Utils::existMimeType(fileMime);
+    bool existMime;
+    if (fileMime.size() == 0) {
+        existMime = true;
+    } else {
+        existMime = Utils::existMimeType(fileMime);
+    }
+
     if (existMime) {
         QString defaultCompress = getDefaultApp(fileMime);
 
@@ -3834,7 +3821,6 @@ void MainWindow::setDefaultApp(QString mimetype, QString desktop)
     p.start(command3.arg(desktop).arg("application/" + mimetype));
     p.waitForFinished();
 }
-
 
 int MainWindow::promptDialog()
 {

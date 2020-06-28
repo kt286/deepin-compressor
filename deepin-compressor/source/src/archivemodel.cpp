@@ -461,7 +461,6 @@ QString ArchiveModel::cleanFileName(const QString &fileName)
 void ArchiveModel::initRootEntry()
 {
     m_rootEntry.reset(new Archive::Entry());
-
     m_rootEntry->setProperty("isDirectory", true);
 }
 
@@ -940,6 +939,7 @@ OpenWithJob *ArchiveModel::openWith(Archive::Entry *file) const
     connect(job, &Job::userQuery, this, &ArchiveModel::slotUserQuery);
     return job;
 }
+
 AddJob *ArchiveModel::addFiles(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, ReadOnlyArchiveInterface *pIface, const CompressionOptions &options)
 {
     if (!m_archive) {
@@ -956,23 +956,6 @@ AddJob *ArchiveModel::addFiles(QVector<Archive::Entry *> &entries, const Archive
     }
     return nullptr;
 }
-
-//AddJob *ArchiveModel::addFilesOld(QVector<Archive::Entry *> &entries, const Archive::Entry *destination, const CompressionOptions &options)
-//{
-//    if (!m_archive) {
-//        return nullptr;
-//    }
-
-//    if (!m_archive->isReadOnly()) {
-//        AddJob *job = m_archive->addFilesOld(entries, destination, options);
-//        connect(job, &AddJob::newEntry, this, &ArchiveModel::slotNewEntry);
-//        connect(job, &AddJob::userQuery, this, &ArchiveModel::slotUserQuery);
-
-
-//        return job;
-//    }
-//    return nullptr;
-//}
 
 MoveJob *ArchiveModel::moveFiles(QVector<Archive::Entry *> &entries, Archive::Entry *destination, const CompressionOptions &options)
 {

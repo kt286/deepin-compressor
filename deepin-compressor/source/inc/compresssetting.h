@@ -94,8 +94,9 @@ public slots:
     void showRightMenu(QMouseEvent *e);
 
     void onThemeChanged();
+    
     bool onSplitChecked();
-
+    void slotEchoModeChanged(bool echoOn);
     void autoCompress(const QString &compresspath, const QStringList &path);
     void autoCompressEntry(const QString &compresspath, const QStringList &path, Archive::Entry *pWorkEntry); //added by hsw 20200525
     void autoMoveToArchive(const QStringList &files, const QString &archive);
