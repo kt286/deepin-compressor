@@ -61,7 +61,6 @@ private:
     void setupCliProperties();
     void handleMethods(const QStringList &methods);
     void fixDirectoryFullName();
-    KProcess *m_process = nullptr;
 
     int m_linesComment;
     Archive::Entry *m_currentArchiveEntry;

@@ -1836,7 +1836,7 @@ void MainWindow::slotExtractionDone(KJob *job)
 //        if (KJob::NopasswordError == errorCode) {
 //            m_pageid = PAGE_ENCRYPTION;
 //        }
-//        refreshPage();
+        refreshPage();
         return;
     } else if (Encryption_TempExtract == m_encryptiontype) {
 

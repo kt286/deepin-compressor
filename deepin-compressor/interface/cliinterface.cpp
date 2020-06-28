@@ -172,13 +172,10 @@ bool CliInterface::extractFF(const QVector<Archive::Entry *> &files, const QStri
                 return false;
             }
         } else {
-            m_isckeckpsd = false;
-            emit finished(false);
             emit sigExtractNeedPassword();
             return false;
         }
     }
-    m_isckeckpsd = true;
 
     QUrl destDir = QUrl(destPath);
     m_oldWorkingDirExtraction = QDir::currentPath();
@@ -273,18 +270,9 @@ bool CliInterface::addFiles(const QVector< Archive::Entry * > &files, const Arch
                                                 options.compressionMethod(),
                                                 options.encryptionMethod(),
                                                 options.volumeSize());
-
-//    7z u -t7z dst.7z "src\*"
     if (destinationPath.isEmpty()) {//如果不是追加，需要去除-l
         arguments.removeOne("-l");
     }
-
-//    QString message = "@info";
-//    size_t length = strlen(message.toUtf8().data());
-//    char *cMsg = static_cast<char *>(malloc((length + 1) * sizeof(char)));
-//    strcpy(cMsg, message.toUtf8().data());
-//    emit error(cMsg, "Extraction failed because the disk is full.");
-//    free(cMsg);
 
     bool ret = runProcess(m_cliProps->property("addProgram").toString(), arguments);
     if (ret == true) {
@@ -362,7 +350,6 @@ bool CliInterface::runProcess(const QString &programName, const QStringList &arg
     m_process->setOutputChannelMode(KProcess::MergedChannels);
     m_process->setNextOpenMode(QIODevice::ReadWrite | QIODevice::Unbuffered | QIODevice::Text);
     m_process->setProgram(programPath, arguments);
-    // qDebug() << programPath << arguments;
 
     connect(m_process, &QProcess::readyReadStandardOutput, this, [ = ]() {
         readStdout();
@@ -393,13 +380,15 @@ void CliInterface::processFinished(int exitCode, QProcess::ExitStatus exitStatus
     m_exitCode = exitCode;
     qDebug() << "Process finished, exitcode:" << exitCode << "exitstatus:" << exitStatus;
 
-    if (m_process) {
-        // handle all the remaining data in the process
-        readStdout(true);
+//    if (m_process) {
+//        // handle all the remaining data in the process
+//        readStdout(true);
 
-        delete m_process;
-        m_process = nullptr;
-    }
+//        delete m_process;
+//        m_process = nullptr;
+//    }
+
+    deleteProcess();
 
     // #193908 - #222392
     // Don't emit finished() if the job was killed quietly.
@@ -432,10 +421,10 @@ void CliInterface::processFinished(int exitCode, QProcess::ExitStatus exitStatus
             emit finished(true);
         }
     } else if (m_operationMode == List && (isWrongPassword() || 9 == exitCode || 2 == exitCode)) {
-        qDebug() << "wrong password";
-        //emit error(tr("wrong password"));
-        emit error("wrong password");
-        setPassword(QString());
+        if (m_isPasswordPrompt || password().size() > 0) {
+            emit error("wrong password");
+            setPassword(QString());
+        }
         return;
     } else {
         emit progress(1.0);
@@ -445,7 +434,7 @@ void CliInterface::processFinished(int exitCode, QProcess::ExitStatus exitStatus
 
 void CliInterface::cleanIfCanceled()
 {
-    qDebug() << "取消操作！";
+    //qDebug() << "取消操作！";
 }
 
 void CliInterface::watchDestFilesBegin()
@@ -582,7 +571,6 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
         //emit error(tr("wrong password"));
         emit error("wrong password");
         setPassword(QString());
-        emit finished(false);
         return;
     }
 
@@ -920,6 +908,18 @@ void CliInterface::cleanUp()
     m_tempAddDir.reset();
 }
 
+void CliInterface::deleteProcess()
+{
+    if (m_process) {
+        //handle all the remaining data in the process
+        readStdout(true);
+
+        delete m_process;
+        m_process = nullptr;
+    }
+
+}
+
 void CliInterface::readStdout(bool handleAll)
 {
     // when hacking this function, please remember the following:
@@ -944,9 +944,7 @@ void CliInterface::readStdout(bool handleAll)
     m_stdOutData += dd;
 
     QList< QByteArray > lines = m_stdOutData.split('\n');
-    // for (const QByteArray &line : qAsConst(lines)) {
-    //     qDebug() << line;
-    // }
+
     // The reason for this check is that archivers often do not end
     // queries (such as file exists, wrong password) on a new line, but
     // freeze waiting for input. So we check for errors on the last line in
@@ -1095,6 +1093,7 @@ bool CliInterface::handleLine(const QString &line)
                 QStringRef strfilename = line.midRef(12, pos - 24);
                 emitFileName(strfilename.toString());
             }
+
             return true;
         }
     }
@@ -1118,14 +1117,6 @@ bool CliInterface::handleLine(const QString &line)
                 if (line.contains(OneBBBB) == true) {
                     QStringRef strfilename;
                     if (m_operationMode == ReadWriteArchiveInterface::Delete) {//如果是删除
-//                        int count = line.indexOf("R");
-//                        if (-1 == count) {
-//                            count = line.indexOf("=");
-//                        }
-//                        if (count > 0) {
-//                            strfilename = line.midRef(count + 2);
-//                        }
-//                        m_removedFiles;
 
                         QString filename = getFileName(percentage);
                         if (!strfilename.toString().contains("Wrong password")) {
@@ -1224,6 +1215,7 @@ bool CliInterface::handleLine(const QString &line)
         return readExtractLine(line);
     } else if (m_operationMode == List) {
         if (isPasswordPrompt(line)) {
+            m_isPasswordPrompt = true;
             qDebug() << "Found a password prompt" << m_isbatchlist;
 
             if (m_isbatchlist) {
@@ -1242,13 +1234,10 @@ bool CliInterface::handleLine(const QString &line)
                 const QString response(password() + QLatin1Char('\n'));
                 writeToProcess(response.toLocal8Bit());
             } else {
-                m_isckeckpsd = false;
-                setWaitForFinishedSignal(false);
                 emit sigExtractNeedPassword();
                 emit error("nopassword");
                 return false;
             }
-            m_isckeckpsd = true;
         }
 
         if (isWrongPasswordMsg(line)) {

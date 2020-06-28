@@ -28,7 +28,6 @@ CliPlugin::CliPlugin(QObject *parent, const QVariantList &args)
 
 CliPlugin::~CliPlugin()
 {
-    qDebug() << "destructor";
 }
 
 void CliPlugin::resetParsing()
@@ -115,10 +114,8 @@ bool CliPlugin::readListLine(const QString &line)
     static const QLatin1String archiveInfoDelimiter1("--"); // 7z 9.13+
     static const QLatin1String archiveInfoDelimiter2("----"); // 7z 9.04
     static const QLatin1String entryInfoDelimiter("----------");
-    if (line == QLatin1String("Open ERROR: Can not open the file as [7z] archive")) {
-        emit error(tr("Listing the archive failed."));
-        return false;
-    } else if (line.startsWith(QLatin1String("Open ERROR: Can not open the file as [7z] archive"))) {
+
+    if (line.startsWith(QLatin1String("Open ERROR: Can not open the file as [7z] archive"))) {
         //  7z l -slt -p123 1G压缩文件.7z.001
         //  Open ERROR: Can not open the file as [7z] archive means password error
         if (isPasswordList()) {

@@ -132,6 +132,7 @@ protected:
     bool passwordQuery();
 
     void cleanUp();
+    void deleteProcess();
 
 protected Q_SLOTS:
     virtual void readStdout(bool handleAll = false);
@@ -150,6 +151,7 @@ protected:
     CompressionOptions m_passedOptions;
 
     KProcess *m_process = nullptr;
+
 
     bool m_abortingOperation = false;
 
@@ -235,6 +237,7 @@ private:
 
     AnalyseHelp *pAnalyseHelp = nullptr;
     FileWatcher *pFileWatcherdd = nullptr;
+    bool m_isPasswordPrompt = false;
 
 private Q_SLOTS:
     void extractProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);

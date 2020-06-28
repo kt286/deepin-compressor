@@ -15,7 +15,7 @@
 #include "../common/common.h"
 #include "structs.h"
 
-static float codecConfidenceForData(const QTextCodec *codec, const QByteArray &data, const QLocale::Country &country)
+/*static float codecConfidenceForData(const QTextCodec *codec, const QByteArray &data, const QLocale::Country &country)
 {
     qreal hep_count = 0;
     int non_base_latin_count = 0;
@@ -98,7 +98,7 @@ static float codecConfidenceForData(const QTextCodec *codec, const QByteArray &d
     c -= qreal(unidentification_count) / non_base_latin_count;
 
     return qMax(0.0f, c);
-}
+}*/
 
 LibarchivePlugin::LibarchivePlugin(QObject *parent, const QVariantList &args)
     : ReadWriteArchiveInterface(parent, args)
@@ -150,11 +150,11 @@ bool LibarchivePlugin::list(bool /*isbatch*/)
         m_extractedFilesSize += (qlonglong)archive_entry_size(aentry);
 
         emit progress(float(archive_filter_bytes(m_archiveReader.data(), -1)) / float(compressedArchiveSize));
-        
+
         m_cachedArchiveEntryCount++;
         archive_read_data_skip(m_archiveReader.data());
     }
-    
+
     if (result != ARCHIVE_EOF) {
         return false;
     }
@@ -413,14 +413,13 @@ bool LibarchivePlugin::extractFiles(const QVector<Archive::Entry *> &files, cons
                 }
             }
 //            archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
-            this->extractPsdStatus;
+            //this->extractPsdStatus;
             // Write the entry header and check return value.
             const int returnCode = archive_write_header(writer.data(), entry);
             switch (returnCode) {
             case ARCHIVE_OK:
                 // If the whole archive is extracted and the total filesize is
                 // available, we use partial progress.
-//                copyDataFromSource(entryName, m_archiveReader.data(), writer.data(), (extractAll && m_extractedFilesSize));//这一句需要修改。
                 if (extractAll == false) {
                     copyDataFromSource_ArchiveEntry(files[0], m_archiveReader.data(), writer.data(), (m_extractedFilesSize));
                 } else {
@@ -778,7 +777,7 @@ void LibarchivePlugin::cleanIfCanceled()
 
 }
 
-void LibarchivePlugin::watchFileList(QStringList *strList)
+void LibarchivePlugin::watchFileList(QStringList */*strList*/)
 {
 
 }

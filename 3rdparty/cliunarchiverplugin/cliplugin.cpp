@@ -3,7 +3,7 @@
 #include <QJsonArray>
 #include <QJsonParseError>
 #include "../../deepin-compressor/interface/queries.h"
-#include "../../deepin-compressor/interface/kprocess.h"
+
 
 
 
@@ -149,12 +149,15 @@ bool CliPlugin::handleLine(const QString &line)
 void CliPlugin::processFinished(int exitCode, QProcess::ExitStatus /*exitStatus*/)
 {
 
-    if (m_process) {
-        //handle all the remaining data in the process
-        readStdout(true);
-        delete m_process;
-        m_process = nullptr;
-    }
+//    if (m_process) {
+//        //handle all the remaining data in the process
+//        readStdout(true);
+
+//        delete m_process;
+//        m_process = nullptr;
+//    }
+
+    deleteProcess();
 
     // #193908 - #222392
     // Don't emit finished() if the job was killed quietly.
