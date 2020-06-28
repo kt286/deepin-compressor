@@ -155,6 +155,11 @@ public:
      * @see 释放内存
      */
     void clean();
+
+    // 压缩包索引
+    void setCompressIndex(int iIndex);
+    int compressIndex();
+
 public:
     QString rootNode;
     bool compressedSizeIsSet;
@@ -182,6 +187,8 @@ private:
     QDateTime m_timestamp;
     bool m_isDirectory;
     bool m_isPasswordProtected;
+
+    int m_iCompressIndex =  0;
 };
 
 QDebug  operator<<(QDebug d, const Archive::Entry &entry);

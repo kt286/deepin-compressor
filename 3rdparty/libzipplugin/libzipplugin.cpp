@@ -507,7 +507,8 @@ bool LibzipPlugin::emitEntryForIndex(zip_t *archive, qlonglong index)
     }
 
     auto e = new Archive::Entry();
-//    auto e = mFactory.create();
+
+    e->setCompressIndex(index);
 
     if (statBuffer.valid & ZIP_STAT_NAME) {
         e->setFullPath(trans2uft8(statBuffer.name));
@@ -900,7 +901,11 @@ void LibzipPlugin::checkEntryPsd(zip_t *archive, Archive::Entry *pCur, enum_chec
         } else {
             name = entry.toLocal8Bit();
         }
-        zip_file *zipFile = zip_fopen(archive, name.constData(), 0);
+
+        int iIndex = pCur->compressIndex();
+
+        zip_file *zipFile = zip_fopen_index(archive, iIndex, 0);
+
         //if zipFile return not 0,it sees normal，so break，then done extract; else，check why failed.
         if (zipFile) {
             zip_fclose(zipFile);
@@ -1038,6 +1043,7 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
                 destDirName = entryName;
             }
             enum_extractEntryStatus enumRes = extractEntry(archive,
+                                                           i,
                                                            entryName,
                                                            QString(),
                                                            destinationDirectory,
@@ -1096,6 +1102,7 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
             QString entryName = e->fullPath();
 
             enum_extractEntryStatus enumRes = extractEntry(archive,
+                                                           e->compressIndex(),
                                                            entryName,
                                                            QString(),
                                                            destinationDirectory,
@@ -1129,7 +1136,7 @@ bool LibzipPlugin::extractFiles(const QVector<Archive::Entry *> &files, const QS
     return true;
 }
 
-enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString &entry, const QString &rootNode, const QString &destDir, bool preservePaths, bool removeRootNode, FileProgressInfo &pi)
+enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, int index,  const QString &entry, const QString &rootNode, const QString &destDir, bool preservePaths, bool removeRootNode, FileProgressInfo &pi)
 {
     //extract = false;
 
@@ -1191,25 +1198,25 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
     // Get statistic for entry. Used to get entry size and mtime.
     zip_stat_t statBuffer;
 
-    if (((QString)m_codecstr).contains("windows", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("IBM", Qt::CaseInsensitive)
-            || ((QString)m_codecstr).contains("x-mac", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("Big5", Qt::CaseInsensitive)
-            || ((QString)m_codecstr).contains("iso", Qt::CaseInsensitive))  {
-        m_codecstr = "GBK";
-    }
+//    if (((QString)m_codecstr).contains("windows", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("IBM", Qt::CaseInsensitive)
+//            || ((QString)m_codecstr).contains("x-mac", Qt::CaseInsensitive) || ((QString)m_codecstr).contains("Big5", Qt::CaseInsensitive)
+//            || ((QString)m_codecstr).contains("iso", Qt::CaseInsensitive))  {
+//        m_codecstr = "GBK";
+//    }
 
-    QByteArray  name;
+//    QByteArray  name;
 
-    QTextCodec *codec = QTextCodec::codecForName(m_codecstr);
-    //qDebug() << m_codecstr;
-    if (codec) {
-        name = codec->fromUnicode(entry.toLocal8Bit());
-    } else {
-        name = entry.toLocal8Bit();
-    }
+//    QTextCodec *codec = QTextCodec::codecForName(m_codecstr);
+//    //qDebug() << m_codecstr;
+//    if (codec) {
+//        name = codec->fromUnicode(entry.toLocal8Bit());
+//    } else {
+//        name = entry.toLocal8Bit();
+//    }
 
     int errcode2 = ZIP_ER_OK;
     errcode2 = zip_error_code_zip(zip_get_error(archive));
-    if (zip_stat(archive, name.constData(), 0, &statBuffer) != 0) {
+    if (zip_stat_index(archive, index, 0, &statBuffer) != 0) {
         if (isDirectory && errcode2 == ZIP_ER_NOENT) {
             return enum_extractEntryStatus::SUCCESS;
         }
@@ -1217,6 +1224,7 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
     }
 
     if (!isDirectory) {
+
         // Handle existing destination files.
         QString renamedEntry = entry;
         while (!m_overwriteAll && QFileInfo::exists(destination)) {
@@ -1333,6 +1341,8 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
         }
         QFile file(destination);
         if (file.exists() && !file.isWritable()) {
+            file.remove();
+            file.setFileName(destination);
             file.setPermissions(QFileDevice::WriteUser);
         }
         if (file.open(QIODevice::WriteOnly) == false) {
@@ -1352,12 +1362,19 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
 
         // check entry psd begin : 1st clean error, 2nd fopen, 3rd get error
         zip_error_clear(archive);
-        zip_file_t *zipFile = zip_fopen(archive, name.constData(), 0);
+        zip_file_t *zipFile = zip_fopen_index(archive, index, 0);
+        if (zipFile == nullptr) {
+            emit error(tr("Failed to read data for entry: %1"));
+            file.close();
+            return enum_extractEntryStatus::FAIL;
+        }
         int iErr = zip_error_code_zip(zip_get_error(archive));
         if (iErr == ZIP_ER_WRONGPASSWD) {
             if (file.exists()) {
                 file.remove();
             }
+            zip_fclose(zipFile);
+            file.close();
             return enum_extractEntryStatus::PSD_NEED;
         }
         // check entry psd end .
@@ -1371,18 +1388,20 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
             if (readBytes < 0) {
                 emit error(tr("Failed to read data for entry: %1"));
                 file.close();
+                zip_fclose(zipFile);
                 return enum_extractEntryStatus::FAIL;
             }
             if (out.writeRawData(buf, readBytes) != readBytes) {
                 emit error(tr("Failed to write data for entry: %1"));
                 file.close();
+                zip_fclose(zipFile);
                 return enum_extractEntryStatus::FAIL;
             }
 
             sum += readBytes;
             writeSize += readBytes;
 
-            if (pi.fileProgressProportion > 0 && writeSize > statBuffer.size / 5) {
+            if (pi.fileProgressProportion > 0 && writeSize > statBuffer.size * 0.2/* / 5*/) {
                 pi.fileProgressStart += pi.fileProgressProportion * 0.2;
                 emit progress(pi.fileProgressStart);
                 writeSize = 0;
@@ -1391,10 +1410,11 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
 
         slotRestoreWorkingDir();
 
-        const auto index = zip_name_locate(archive, name.constData(), ZIP_FL_ENC_RAW);
+        //const auto index = zip_name_locate(archive, name.constData(), ZIP_FL_ENC_RAW);
         if (index == -1) {
             emit error(tr("Failed to locate entry: %1"));
             file.close();
+            zip_fclose(zipFile);
             return enum_extractEntryStatus::FAIL;
         }
 
@@ -1403,6 +1423,7 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
         if (zip_file_get_external_attributes(archive, index, ZIP_FL_UNCHANGED, &opsys, &attributes) == -1) {
             emit error(tr("Failed to read metadata for entry: %1"));
             file.close();
+            zip_fclose(zipFile);
             return enum_extractEntryStatus::FAIL;
         }
 
@@ -1420,9 +1441,12 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
         file.setPermissions(getPermissions(attributes >> 16));
         //extract = true;
         bAnyFileExtracted = true;
+
+        file.close();
         zip_fclose(zipFile);
+
     } else {
-        const auto index = zip_name_locate(archive, name.constData(), ZIP_FL_ENC_RAW);
+        //const auto index = zip_name_locate(archive, name.constData(), ZIP_FL_ENC_RAW);
         if (index == -1) {
             emit error(tr("Failed to locate entry: %1"));
             return enum_extractEntryStatus::FAIL;
@@ -1433,7 +1457,11 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, const QString
             emit error(tr("Failed to read metadata for entry: %1"));
             return enum_extractEntryStatus::FAIL;
         }
-        QFile::setPermissions(destination, getPermissions(attributes >> 16));
+        mode_t value = attributes >> 16;
+        QFileDevice::Permissions per = getPermissions(value);
+        if (value == 0)
+            per = per | QFileDevice::ExeUser | QFileDevice::ExeOther | QFileDevice::ExeGroup;
+        QFile::setPermissions(destination, per);
     }
 
     // Set mtime for entry.
