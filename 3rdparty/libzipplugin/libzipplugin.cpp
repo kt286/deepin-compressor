@@ -1297,6 +1297,9 @@ enum_extractEntryStatus LibzipPlugin::extractEntry(zip_t *archive, int index,  c
                     }
                 }
 
+            } else if (iErr == ZIP_ER_NOPASSWD) {
+                file.close();
+                return enum_extractEntryStatus::PSD_NEED;
             } else {
                 emit error(tr("Failed to read data for entry: %1"));
                 file.close();
