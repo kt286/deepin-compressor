@@ -3,7 +3,7 @@
 #include <QTimerEvent>
 #include <QFileInfo>
 
-
+#define TIMER_TIMEOUT   (1000)
 
 FileWatcher::FileWatcher(QObject *parent)
     : QObject(parent)

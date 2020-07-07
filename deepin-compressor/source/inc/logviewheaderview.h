@@ -24,9 +24,9 @@
 #include <DLabel>
 #include <DHeaderView>
 
-#define SCROLLMARGIN 10
-
 class LogViewHeaderView;
+
+#define SCROLLMARGIN 10
 
 class MyLabel: public Dtk::Widget::DLabel
 {
@@ -58,7 +58,7 @@ signals:
     void doubleClickedSignal();
 
 private:
-    LogViewHeaderView* headerView_;
+    LogViewHeaderView *headerView_;
 
     bool focusIn_ = false;
 };
@@ -86,6 +86,6 @@ private:
     int m_spacing {1};
 
 public:
-    PreviousLabel* gotoPreviousLabel_;
+    PreviousLabel *gotoPreviousLabel_;
 };
 

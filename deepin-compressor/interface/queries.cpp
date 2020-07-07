@@ -81,6 +81,15 @@ int Query::execDialog()
     return 0;
 }
 
+QString Query::toShortString(QString strSrc, int limitCounts, int left)
+{
+    left = (left >= limitCounts || left <= 0) ? limitCounts / 2 : left;
+    int right = limitCounts - left;
+    QString displayName = "";
+    displayName = strSrc.length() > limitCounts ? strSrc.left(left) + "..." + strSrc.right(right) : strSrc;
+    return displayName;
+}
+
 void Query::waitForResponse()
 {
     QMutexLocker locker(&m_responseMutex);
@@ -316,11 +325,12 @@ void PasswordNeededQuery::execute()
     dialog->setIcon(pixmap);
 
     DLabel *strlabel = new DLabel(dialog);
-    strlabel->setFixedHeight(20);
+    strlabel->setFixedHeight(40);
     strlabel->setForegroundRole(DPalette::WindowText);
-
+    strlabel->setWordWrap(true);
     DFontSizeManager::instance()->bind(strlabel, DFontSizeManager::T6, QFont::Medium);
-    strlabel->setText(QObject::tr("Encrypted file, please enter the password"));
+    QString fileName = toShortString(m_data[QStringLiteral("archiveFilename")].toString());
+    strlabel->setText(fileName + "\n" + QObject::tr("Encrypted file, please enter the password"));
 
     DPasswordEdit *passwordedit = new DPasswordEdit(dialog);
     passwordedit->setFixedWidth(280);

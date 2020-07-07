@@ -1,3 +1,3 @@
-lrelease /home/archermind/Desktop/compressor20191221/compressor/deepin-compressor/translations/*.ts
+lrelease /data/home/hushiwei/workHS/jared777/compressor/translations/*.ts
 
-echo "19891230" | sudo -S cp /home/archermind/Desktop/compressor20191221/compressor/deepin-compressor/translations/*.qm /usr/share/deepin-compressor/translations
+echo "19891230" | sudo -S cp /data/home/hushiwei/workHS/jared777/compressor/translations/*.qm /usr/share/deepin-compressor/translations

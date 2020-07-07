@@ -22,6 +22,7 @@
 
 #include "utils.h"
 #include <QDir>
+#include <QDirIterator>
 #include <QFile>
 #include <QDebug>
 #include <QFileInfo>

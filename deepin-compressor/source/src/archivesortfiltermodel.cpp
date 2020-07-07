@@ -130,3 +130,17 @@ bool ArchiveSortFilterModel::lessThan(const QModelIndex &leftIndex,
     }
     return false;
 }
+
+bool ArchiveSortFilterModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    beginInsertRows(parent, row, row + count - 1);
+
+    endInsertRows();
+
+    return true;
+}
+
+void ArchiveSortFilterModel::refreshNow()
+{
+    emit insertRows(0, 0, this->index(0, 0));
+}

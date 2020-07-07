@@ -63,6 +63,7 @@ KJob::~KJob()
 
     delete d_ptr->speedTimer;
     delete d_ptr;
+    mType = ENUM_JOBTYPE::NONE;
 }
 
 

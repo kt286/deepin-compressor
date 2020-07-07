@@ -23,6 +23,7 @@
 #define COMPRESSSETTING_H
 
 #include <DWidget>
+#include <DDialog>
 #include <DPushButton>
 #include <DLabel>
 #include <DLineEdit>
@@ -35,6 +36,8 @@
 #include <DCheckBox>
 #include <DMenu>
 #include "DSpinBox"
+#include "archiveentry.h"
+
 
 DWIDGET_USE_NAMESPACE
 
@@ -78,6 +81,9 @@ private:
 
 signals:
     void sigCompressPressed(QMap<QString, QString> &Args);
+    void sigUncompressStateAutoCompress(QMap<QString, QString> &Args);
+    void sigUncompressStateAutoCompressEntry(QMap<QString, QString> &Args, Archive::Entry *pWorkEntry = nullptr);
+    void sigMoveFilesToArchive(QMap<QString, QString> &Args);
     void sigFileUnreadable(QStringList &pathList, int fileIndex);//compress file is unreadable or file is a link
 
 public slots:
@@ -88,12 +94,15 @@ public slots:
     void showRightMenu(QMouseEvent *e);
 
     void onThemeChanged();
+    
     bool onSplitChecked();
-
     void slotEchoModeChanged(bool echoOn);
+    void autoCompress(const QString &compresspath, const QStringList &path);
+    void autoCompressEntry(const QString &compresspath, const QStringList &path, Archive::Entry *pWorkEntry); //added by hsw 20200525
+    void autoMoveToArchive(const QStringList &files, const QString &archive);
 
 private:
-    int showWarningDialog(const QString &msg, int index = 0);
+    int showWarningDialog(const QString &msg, int index = 0, const QString &strTitle = "", DDialog *pDialogShow = nullptr);
     bool existSameFileName();
 
 private:

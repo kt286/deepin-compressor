@@ -75,6 +75,7 @@ private:
     QString m_globalWorkDir;
 };
 
+class Settings_Extract_Info;
 class  ExtractionOptions : public Options
 {
 public:
@@ -89,6 +90,9 @@ public:
     void setBatchExtract(bool status);
     bool isAutoCreatDir() const;
     void setAutoCreatDir(bool bAutoCreatDir);
+
+public:
+    Settings_Extract_Info *pSettingInfo = nullptr;
 
 private:
 

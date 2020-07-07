@@ -123,9 +123,7 @@ bool CliPlugin::readListLine(const QString &line)
         }
         emit error(tr("Listing the archive failed."));
         return false;
-    }
-
-    if (line.startsWith(QLatin1String("ERROR:")) && line.contains(QLatin1String("Can not open the file as archive"))) {
+    } else if (line.startsWith(QLatin1String("ERROR:")) && line.contains(QLatin1String("Can not open the file as archive"))) {
         //  7z l -slt -p123 1G压缩文件.7z.001
         //  Open ERROR: Can not open the file as [7z] archive means password error
         if (isPasswordList()) {

@@ -27,8 +27,12 @@
 #include <DLog>
 #include "utils.h"
 #include <DApplicationSettings>
-#include "openwithdialog/openwithdialog.h"
 #include <DDesktopServices>
+#include <QMessageBox>
+#include "monitorAdaptor.h"
+#include "monitorInterface.h"
+#include "openwithdialog/openwithdialog.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -88,6 +92,13 @@ int main(int argc, char *argv[])
         }
     }
 
+
+
+
+
+
+
+
     QIcon appIcon = QIcon::fromTheme("deepin-compressor");
 
     if (appIcon.isNull()) {
@@ -119,15 +130,50 @@ int main(int argc, char *argv[])
         newfilelist = multilist;
     }
 
-    QObject::connect(&w, &MainWindow::sigquitApp, &app, DApplication::quit);
-    // handle command line parser.
-    if (!fileList.isEmpty()) {
-        QMetaObject::invokeMethod(&w, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, newfilelist));
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    bool busRegistered = bus.registerService("com.archive.mainwindow.monitor");
+    if (busRegistered == false) {
+        com::archive::mainwindow::monitor monitor("com.archive.mainwindow.monitor", HEADBUS, QDBusConnection::sessionBus());
+        if (monitor.isValid()) {
+            QDBusPendingReply<bool> reply = monitor.createSubWindow(newfilelist);
+            reply.waitForFinished();
+            if (reply.isValid()) {
+                bool isClosed = reply.value();
+                if (isClosed) {
+//                    app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+                    app.exit();
+                    return 0;
+                }
+            }
+        }
     }
 
-    w.showNormal();
-    w.show();
+    w.bindAdapter();
 
+    if (busRegistered == true) {
 
+        // init modules.
+
+//        app.setMainWindow(&w);
+        if (app.setSingleInstance("deepin-compressor")) {
+            Dtk::Widget::moveToCenter(&w);
+        }
+
+        QString strWId = QString::number(w.winId());
+        bus.registerObject(HEADBUS, &w);
+
+        QObject::connect(&w, &MainWindow::sigquitApp, &app, &DApplication::quit);
+        // handle command line parser.
+        if (!fileList.isEmpty()) {
+            QMetaObject::invokeMethod(&w, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, newfilelist));
+        }
+
+//        LogWidget widget;
+//        w.initalizeLog(&widget);
+//        widget.show();
+        w.show();
+    }
     return app.exec();
 }
+
+//#define LOGINFO(a) MainWindow::getLogger()->info(a)

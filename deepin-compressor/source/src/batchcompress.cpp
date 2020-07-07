@@ -31,6 +31,7 @@
 
 BatchCompress::BatchCompress(QObject *parent): BatchJobs(parent)
 {
+    mType = Job::ENUM_JOBTYPE::BATCHCOMPRESSJOB;
     setCapabilities(KJob::Killable);
     if (m_Args != nullptr) {
         delete m_Args;

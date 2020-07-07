@@ -26,6 +26,32 @@
 #include <QObject>
 
 
+#define SAFE_DELETE_ELE( ptr ) \
+    if (ptr != NULL)      \
+    {                     \
+        delete ptr;       \
+        ptr = NULL;       \
+    }
+
+#define SAFE_DELETE_ARRAY( ptr ) \
+    if (ptr != NULL)            \
+    {                           \
+        delete[] ptr;           \
+        ptr = NULL;             \
+    }
+
+#define SAFE_DELETE_TABLE( ptr ) \
+    if (ptr != NULL)            \
+    {                           \
+        for (i = 0; i < row; i++)\
+        {\
+            SAFE_DELETE_ARRAY(ptr[i])\
+            delete [] ptr;\
+        }\
+        ptr = NULL; \
+    }
+
+
 class Utils : public QObject
 {
     Q_OBJECT
@@ -44,6 +70,7 @@ public:
     static QString toShortString(QString strSrc, int limitCounts = 16, int left = 8);
     static bool checkAndDeleteDir(const QString &iFilePath);
     static bool deleteDir(const QString &iFilePath);
+    static quint64 getAllFileCount(const QString &path);
     static QString readConf();
     static bool existMimeType(QString mimetype);
     static QString judgeFileMime(QString file);

@@ -55,7 +55,7 @@ private:
     DPasswordEdit *m_password = nullptr;
 
     bool m_inputflag = false;
-    bool pwdCheckDown = true;
+//    bool pwdCheckDown = true;
 };
 
 #endif // ENCRYPTIONPAGE_H

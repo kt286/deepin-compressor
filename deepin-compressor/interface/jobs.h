@@ -73,6 +73,7 @@ protected Q_SLOTS:
 Q_SIGNALS:
     void entryRemoved(const QString &entry);
     void newEntry(Archive::Entry *);
+    void addEntry(Archive::Entry *);
     void userQuery(Query *);
     void sigWrongPassword();
     void sigCancelled();
@@ -193,14 +194,10 @@ class ExtractJob : public Job
     Q_OBJECT
 
 public:
-    ExtractJob(const QVector<Archive::Entry *> &entries, const QString &destinationDir, const ExtractionOptions &options, ReadOnlyArchiveInterface *interface);
+    explicit ExtractJob(const QVector<Archive::Entry *> &entries, const QString &destinationDir, const ExtractionOptions &options, ReadOnlyArchiveInterface *interface);
 
     QString destinationDirectory() const;
     ExtractionOptions extractionOptions() const;
-    bool Killjob();
-
-
-    void resetTimeOut();
 
 public Q_SLOTS:
     void doWork() override;
@@ -209,6 +206,15 @@ public Q_SLOTS:
     void slotExtractJobPwdCheckDown();
     void onProgress(double progress)override;
     void onProgressFilename(const QString &filename)override;
+public:
+    bool Killjob();
+    /**
+     * get the work archiveEntry
+     * @brief getWorkEntry
+     * @return
+     */
+    Archive::Entry *getWorkEntry();
+    void resetTimeOut();
 signals:
     void sigExtractJobPassword();
     void sigExtractJobFinished();
@@ -217,10 +223,16 @@ signals:
 private:
     void cleanIfCanceled();
 private:
+
     QVector<Archive::Entry *> m_entries;
     QString m_destinationDir;
     ExtractionOptions m_options;
-    bool m_bTimeout = true;//if work time out,if greater than 700ms,emit the progress info.
+    /**
+     * @brief m_bTimeout
+     * @see true:默认不执行 TimerWatcher 判断延时显示进度条; false:执行 TimerWatcher 延时显示进度条（为了不出现解压太快导致的进度条闪现效果）
+     * @see if work time out,if greater than 700ms,emit the progress info.
+     */
+    bool m_bTimeout = true;
 };
 
 
@@ -229,7 +241,7 @@ class TempExtractJob : public Job
     Q_OBJECT
 
 public:
-    TempExtractJob(Archive::Entry *entry, bool passwordProtectedHint, ReadOnlyArchiveInterface *interface);
+    explicit TempExtractJob(Archive::Entry *entry, bool passwordProtectedHint, ReadOnlyArchiveInterface *interface);
     QString validatedFilePath() const;
 
     ExtractionOptions extractionOptions() const;
@@ -277,7 +289,7 @@ class AddJob : public Job
 
 public:
     AddJob(const QVector<Archive::Entry *> &files, const Archive::Entry *destination, const CompressionOptions &options, ReadWriteArchiveInterface *interface);
-
+    const QVector<Archive::Entry *> &entries();
 public Q_SLOTS:
     void doWork() override;
 
@@ -296,7 +308,7 @@ class MoveJob : public Job
     Q_OBJECT
 
 public:
-    MoveJob(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options, ReadWriteArchiveInterface *interface);
+    explicit MoveJob(const QVector<Archive::Entry *> &files, Archive::Entry *destination, const CompressionOptions &options, ReadWriteArchiveInterface *interface);
 
 public Q_SLOTS:
     void doWork() override;
@@ -337,11 +349,11 @@ class DeleteJob : public Job
     Q_OBJECT
 
 public:
-    DeleteJob(const QVector<Archive::Entry *> &files, ReadWriteArchiveInterface *interface);
+    explicit DeleteJob(const QVector<Archive::Entry *> &files, ReadWriteArchiveInterface *interface);
 
 public Q_SLOTS:
     void doWork() override;
-
+    Archive::Entry *getWorkEntry();
 private:
     QVector<Archive::Entry *> m_entries;
 };
@@ -378,5 +390,23 @@ private:
     bool m_testSuccess;
 };
 
+
+class UpdateJob : public Job
+{
+    Q_OBJECT
+
+public:
+    explicit UpdateJob(const QVector<Archive::Entry *> &files, ReadWriteArchiveInterface *interface);
+public Q_SLOTS:
+    void doWork() override;
+    Archive::Entry *getWorkEntry();
+protected:
+    bool doKill() override;
+
+private:
+    AddJob *m_addJob = nullptr;
+    QVector<Archive::Entry *> m_entries;
+
+};
 
 #endif // JOBS_H

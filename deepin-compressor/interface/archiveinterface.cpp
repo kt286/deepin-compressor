@@ -27,6 +27,8 @@
 #include <QProcess>
 #include <QTextCodec>
 #include <sys/stat.h>
+#include "structs.h"
+#include <sys/stat.h>
 
 Q_DECLARE_METATYPE(KPluginMetaData)
 ReadOnlyArchiveInterface::ReadOnlyArchiveInterface(QObject *parent, const QVariantList &args)
@@ -51,6 +53,7 @@ ReadOnlyArchiveInterface::ReadOnlyArchiveInterface(QObject *parent, const QVaria
 
 ReadOnlyArchiveInterface::~ReadOnlyArchiveInterface()
 {
+    qDebug() << "destructor";
 }
 
 void ReadOnlyArchiveInterface::onEntry(Archive::Entry *archiveEntry)
@@ -326,6 +329,11 @@ bool ReadOnlyArchiveInterface::isCheckPsw() const
 bool ReadOnlyArchiveInterface::isAnyFileExtracted() const
 {
     return bAnyFileExtracted;
+}
+
+void ReadOnlyArchiveInterface::bindProgressInfo(ProgressAssistant *pProgressIns)
+{
+    this->m_pProgressInfo = pProgressIns;
 }
 
 bool ReadWriteArchiveInterface::isReadOnly() const

@@ -31,6 +31,7 @@
 #include <DMessageManager>
 #include <DDialog>
 #include <QFontMetrics>
+#include "queries.h"
 
 DCORE_USE_NAMESPACE
 DWIDGET_USE_NAMESPACE
@@ -79,7 +80,15 @@ UnCompressPage::UnCompressPage(QWidget *parent)
     connect(m_nextbutton, &DPushButton::clicked, this, &UnCompressPage::oneCompressPress);
     connect(m_extractpath, &DPushButton::clicked, this, &UnCompressPage::onPathButoonClicked);
     connect(m_fileviewer, &fileViewer::sigextractfiles, this, &UnCompressPage::onextractfilesSlot);
-    connect(m_fileviewer, &fileViewer::sigOpenWith, this, &UnCompressPage::onextractfilesOpenSlot);
+    connect(m_fileviewer, &fileViewer::sigOpenWith,     this, &UnCompressPage::onextractfilesOpenSlot);
+//    connect(m_fileviewer, &fileViewer::sigFileRemoved, this, &UnCompressPage::onRefreshFilelist);
+    connect(m_fileviewer, &fileViewer::sigEntryRemoved, this, &UnCompressPage::onRefreshEntryList);
+    connect(m_fileviewer, &fileViewer::sigFileAutoCompress, this, &UnCompressPage::onAutoCompress);
+    connect(this, &UnCompressPage::subWindowTipsPopSig, m_fileviewer, &fileViewer::SubWindowDragMsgReceive);
+//    connect(this, &UnCompressPage::subWindowTipsUpdateEntry, m_fileviewer, &fileViewer::SubWindowDragUpdateEntry);
+
+    connect(m_fileviewer, &fileViewer::sigFileRemovedFromArchive, this, &UnCompressPage::sigDeleteArchiveFiles);
+//    connect(m_fileviewer, &fileViewer::sigFileAutoCompressToArchive, this, &UnCompressPage::sigAddArchiveFiles);
 }
 
 void UnCompressPage::oneCompressPress()
@@ -138,6 +147,11 @@ void UnCompressPage::setdefaultpath(const QString path)
     str = getAndDisplayPath(str);
 
     m_extractpath->setText(tr("Extract to:") + str);
+}
+
+void UnCompressPage::SetDefaultFile(QFileInfo info)
+{
+    m_info = info;
 }
 
 int UnCompressPage::getFileCount()
@@ -218,6 +232,61 @@ QString UnCompressPage::getAndDisplayPath(QString path)
     return pathStr;
 }
 
+void UnCompressPage::slotCompressedAddFile()
+{
+    DFileDialog dialog(this);
+    dialog.setAcceptMode(DFileDialog::AcceptOpen);
+    dialog.setFileMode(DFileDialog::ExistingFiles);
+    dialog.setAllowMixedSelection(true);
+
+    const int mode = dialog.exec();;
+
+    // if click cancel button or close button.
+    if (mode != QDialog::Accepted) {
+        return;
+    }
+    QVector<Archive::Entry *> vectorEntry;
+    m_inputlist.clear();
+    ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
+    int responseValue = 0;
+    foreach (QString strPath, dialog.selectedFiles()) {
+
+        Archive::Entry *entry = pModel->isExists(strPath);
+
+        if (entry != nullptr) {
+
+            int mode = showReplaceDialog(strPath, responseValue);
+            if (1 == mode) {
+                vectorEntry.push_back(entry);
+                m_inputlist.push_back(strPath);
+            }
+        } else {
+            m_inputlist.push_back(strPath);
+        }
+    }
+
+
+    m_model->refreshNow();
+    if (vectorEntry.count() > 0) {
+        emit onRefreshEntryList(vectorEntry, false);
+    } else {
+        if (m_inputlist.count() > 0)
+            emit sigAutoCompress(m_info.filePath(), m_inputlist);
+        //emit onAutoCompress(m_inputlist);
+
+        m_inputlist.clear();
+    }
+
+
+
+    //emit sigAutoCompress(m_info.filePath(), dialog.selectedFiles());
+}
+
+fileViewer *UnCompressPage::getFileViewer()
+{
+    return m_fileviewer;
+}
+
 QString UnCompressPage::getDecompressPath()
 {
     return m_pathstr;
@@ -231,7 +300,7 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
     // get extract type
     extractType = type;
 
-    if (EXTRACT_TO == type) {
+    if (EXTRACT_TO == type) {//菜单“提取”
         DFileDialog dialog(this);
         dialog.setAcceptMode(DFileDialog::AcceptOpen);
         dialog.setFileMode(DFileDialog::Directory);
@@ -266,7 +335,28 @@ void UnCompressPage::onextractfilesSlot(QVector<Archive::Entry *> fileList, EXTR
     } else {
         emit sigextractfiles(fileList, m_pathstr, type);
     }
+}
 
+//void UnCompressPage::onRefreshFilelist(const QStringList &filelist)
+//{
+//    m_filelist = filelist;
+////    m_fileviewer->setFileList(m_filelist);
+
+//    emit sigRefreshFileList(m_filelist);
+
+//    if (m_filelist.size() == 0) {
+//        emit sigFilelistIsEmpty();
+//    }
+//}
+
+void UnCompressPage::onRefreshEntryList(QVector<Archive::Entry *> &vectorDel, bool isManual)
+{
+    m_vectorDel = vectorDel;
+//    emit sigRefreshFileList(m_filelist);
+    emit sigRefreshEntryVector(m_vectorDel, isManual);
+    if (m_vectorDel.size() == 0) {
+        emit sigFilelistIsEmpty();
+    }
 }
 
 void UnCompressPage::onextractfilesOpenSlot(const QVector<Archive::Entry *> &fileList, const QString &programma)
@@ -274,3 +364,89 @@ void UnCompressPage::onextractfilesOpenSlot(const QVector<Archive::Entry *> &fil
     emit sigOpenExtractFile(fileList, programma);
 }
 
+void UnCompressPage::onAutoCompress(const QStringList &path, Archive::Entry *pWorkEntry)
+{
+    m_inputlist.clear();
+
+    if (!m_fileviewer->isDropAdd()) {
+        //m_inputlist = path;
+        emit sigAutoCompressEntry(m_info.filePath(), path, pWorkEntry);
+        return;
+    }
+
+    ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
+    QVector<Archive::Entry *> vectorEntry;
+    //int mode = 0;
+    int responseValue = Result_Cancel;
+    foreach (QString strPath, path) {
+
+        Archive::Entry *entry = pModel->isExists(strPath);
+
+//        if (entry != nullptr) {
+//            if (mode == 1 && responseValue == Result_OverwriteAll) {
+//                vectorEntry.push_back(entry);
+//                m_inputlist.push_back(strPath);
+//            } else {
+//                mode = showReplaceDialog(strPath, responseValue);
+//            }
+//            qDebug() << responseValue;
+////            int ret = showReplaceDialog(strPath);
+////            if (1 == mode) {
+////                vectorEntry.push_back(entry);
+////                m_inputlist.push_back(strPath);
+////            }
+//        } else {
+//            m_inputlist.push_back(strPath);
+//        }
+        if (entry != nullptr) {
+
+            int mode = showReplaceDialog(strPath, responseValue);
+            if (1 == mode) {
+                vectorEntry.push_back(entry);
+                m_inputlist.push_back(strPath);
+            }
+        } else {
+            m_inputlist.push_back(strPath);
+        }
+
+    }
+
+
+    m_model->refreshNow();
+    if (vectorEntry.count() > 0) {
+        emit onRefreshEntryList(vectorEntry, false);
+    } else {
+        if (m_inputlist.count() > 0)
+            emit sigAutoCompress(m_info.filePath(), m_inputlist);
+        //emit onAutoCompress(m_inputlist);
+
+        m_inputlist.clear();
+    }
+}
+
+void UnCompressPage::slotSubWindowTipsPopSig(int mode, const QStringList &args)
+{
+    emit subWindowTipsPopSig(mode, args);
+}
+
+void UnCompressPage::slotDeleteJobFinished(Archive::Entry *pWorkEntry)
+{
+    if (m_inputlist.count() > 0) {
+//        emit sigAutoCompressEntry(m_info.filePath(), m_inputlist, pWorkEntry);
+        emit sigAutoCompress(m_info.filePath(), m_inputlist);
+    }
+//    emit sigAutoCompress(m_info.filePath(), m_inputlist);
+
+
+    m_inputlist.clear();
+
+    emit sigDeleteJobFinished(pWorkEntry);
+}
+
+int UnCompressPage::showReplaceDialog(QString name, int &responseValue)
+{
+    OverwriteQuery query(name);
+    query.execute();
+    responseValue = query.response().toInt();
+    return query.getExecuteReturn();
+}
