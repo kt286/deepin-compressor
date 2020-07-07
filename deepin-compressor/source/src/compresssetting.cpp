@@ -339,9 +339,7 @@ void CompressSetting::onNextButoonClicked()
     QString fixedMimeType;
 
     for (const QString &type : qAsConst(m_supportedMimeTypes)) {
-        if (0
-                == QMimeDatabase().mimeTypeForName(type).preferredSuffix().compare(m_compresstype->text(),
-                                                                                   Qt::CaseInsensitive)) {
+        if (0 == QMimeDatabase().mimeTypeForName(type).preferredSuffix().compare(m_compresstype->text(), Qt::CaseInsensitive)) {
             fixedMimeType = type;
             break;
         }

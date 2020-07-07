@@ -251,14 +251,13 @@ void UnCompressPage::slotCompressedAddFile()
         }
     }
 
-
     m_model->refreshNow();
     if (vectorEntry.count() > 0) {
         emit onRefreshEntryList(vectorEntry, false);
     } else {
         if (m_inputlist.count() > 0)
-            //emit onAutoCompress(m_inputlist);
             emit sigAutoCompress(m_info.filePath(), m_inputlist);
+        //emit onAutoCompress(m_inputlist);
         m_inputlist.clear();
     }
 
@@ -361,38 +360,48 @@ void UnCompressPage::onAutoCompress(const QStringList &path, Archive::Entry *pWo
 
     ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
     QVector<Archive::Entry *> vectorEntry;
-    int mode = 0;
+//    int mode = 0;
     int responseValue = Result_Cancel;
+
     foreach (QString strPath, path) {
 
         Archive::Entry *entry = pModel->isExists(strPath);
 
-        if (entry != nullptr) {
-            if (mode == 1 && responseValue == Result_OverwriteAll) {
-                vectorEntry.push_back(entry);
-                m_inputlist.push_back(strPath);
-            } else {
-                mode = showReplaceDialog(strPath, responseValue);
-            }
-            qDebug() << responseValue;
-//            int ret = showReplaceDialog(strPath);
-//            if (1 == mode) {
+//        if (entry != nullptr) {
+//            if (mode == 1 && responseValue == Result_OverwriteAll) {
 //                vectorEntry.push_back(entry);
 //                m_inputlist.push_back(strPath);
+//            } else {
+//                mode = showReplaceDialog(strPath, responseValue);
 //            }
+//            qDebug() << responseValue;
+//  //            int ret = showReplaceDialog(strPath);
+//  //            if (1 == mode) {
+//  //                vectorEntry.push_back(entry);
+//  //                m_inputlist.push_back(strPath);
+//  //            }
+//        } else {
+//            m_inputlist.push_back(strPath);
+//        }
+        if (entry != nullptr) {
+
+            int mode = showReplaceDialog(strPath, responseValue);
+            if (1 == mode) {
+                vectorEntry.push_back(entry);
+                m_inputlist.push_back(strPath);
+            }
         } else {
             m_inputlist.push_back(strPath);
         }
     }
-
 
     m_model->refreshNow();
     if (vectorEntry.count() > 0) {
         emit onRefreshEntryList(vectorEntry, false);
     } else {
         if (m_inputlist.count() > 0)
-            //emit onAutoCompress(m_inputlist);
             emit sigAutoCompress(m_info.filePath(), m_inputlist);
+        //emit onAutoCompress(m_inputlist);
         m_inputlist.clear();
     }
 }
