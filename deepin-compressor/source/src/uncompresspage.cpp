@@ -390,11 +390,11 @@ void UnCompressPage::onAutoCompress(const QStringList &path, Archive::Entry *pWo
 //                mode = showReplaceDialog(strPath, responseValue);
 //            }
 //            qDebug() << responseValue;
-////            int ret = showReplaceDialog(strPath);
-////            if (1 == mode) {
-////                vectorEntry.push_back(entry);
-////                m_inputlist.push_back(strPath);
-////            }
+//  //            int ret = showReplaceDialog(strPath);
+//  //            if (1 == mode) {
+//  //                vectorEntry.push_back(entry);
+//  //                m_inputlist.push_back(strPath);
+//  //            }
 //        } else {
 //            m_inputlist.push_back(strPath);
 //        }

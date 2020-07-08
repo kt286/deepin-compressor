@@ -92,13 +92,6 @@ int main(int argc, char *argv[])
         }
     }
 
-
-
-
-
-
-
-
     QIcon appIcon = QIcon::fromTheme("deepin-compressor");
 
     if (appIcon.isNull()) {
@@ -171,6 +164,7 @@ int main(int argc, char *argv[])
 //        LogWidget widget;
 //        w.initalizeLog(&widget);
 //        widget.show();
+        w.showNormal();
         w.show();
     }
     return app.exec();

@@ -1075,7 +1075,7 @@
     <message>
         <location filename="../deepin-compressor/source/src/uncompresspage.cpp" line="101"/>
         <source>The default extraction path does not exist, please retry</source>
-        <translation type="unfinished">The default extraction path does not exist, please retry</translation>
+        <translation>The default extraction path does not exist, please retry</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/uncompresspage.cpp" line="103"/>
@@ -1168,17 +1168,12 @@
     <message>
         <location filename="../deepin-compressor/source/src/fileViewer.cpp" line="826"/>
         <source>Your current operation will permanently delete this file, please backup it in advance!Are you sure to delete?</source>
-        <translation type="unfinished"></translation>
+        <translation>Your current operation will permanently delete this file, please backup it in advance!Are you sure to delete?</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/fileViewer.cpp" line="1044"/>
         <source>Confirm</source>
         <translation>Confirm</translation>
-    </message>
-    <message>
-        <location filename="../deepin-compressor/source/src/fileViewer.cpp" line="1229"/>
-        <source>update file &apos;%1&apos; from package &apos;%2&apos;?</source>
-        <translation>update file %1 from package %2?</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/fileViewer.cpp" line="1230"/>
@@ -1192,6 +1187,11 @@
         <location filename="../deepin-compressor/source/src/fileViewer.cpp" line="1240"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
+    </message>
+    <message>
+        <location filename="../deepin-compressor/source/src/fileViewer.cpp" line="1229"/>
+        <source>update file &apos;%1&apos; from package &apos;%2&apos;?</source>
+        <translation>update file %1 from package %2?</translation>
     </message>
     <message>
         <location filename="../deepin-compressor/source/src/fileViewer.cpp" line="1241"/>
