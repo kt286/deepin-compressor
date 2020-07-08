@@ -43,6 +43,44 @@ int main(int argc, char *argv[])
     // init Dtk application's attrubites.
     CompressorApplication app(argc, argv);
 
+    // add command line parser to app.
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Deepin Compressor.");
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("filename", "File path.", "file [file..]");
+    parser.process(app);
+
+    const QStringList fileList = parser.positionalArguments();
+//    fileList.append("/home/hushiwei/Desktop/parent.zip");
+//    fileList.append("extract_here");//m_UnCompressPage->getExtractType() != EXTRACT_HEAR
+    QStringList newfilelist;
+    foreach (QString file, fileList) {
+        if (file.contains("file://")) {
+            file.remove("file://");
+        }
+        newfilelist.append(file);
+    }
+
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    bool busRegistered = bus.registerService("com.archive.mainwindow.monitor");
+    if (busRegistered == false) {
+        com::archive::mainwindow::monitor monitor("com.archive.mainwindow.monitor", HEADBUS, QDBusConnection::sessionBus());
+        if (monitor.isValid()) {
+            QDBusPendingReply<bool> reply = monitor.createSubWindow(newfilelist);
+            reply.waitForFinished();
+            if (reply.isValid()) {
+                bool isClosed = reply.value();
+                if (isClosed) {
+//                    app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+                    app.exit();
+                    return 0;
+                }
+            }
+        }
+    }
+
+
     app.loadTranslator();
     app.setOrganizationName("deepin");
     app.setApplicationName("deepin-compressor");
@@ -56,18 +94,29 @@ int main(int argc, char *argv[])
     DLogManager::registerConsoleAppender();
     DLogManager::registerFileAppender();
 
-    // add command line parser to app.
-    QCommandLineParser parser;
-    parser.setApplicationDescription("Deepin Compressor.");
-    parser.addHelpOption();
-    parser.addVersionOption();
-    parser.addPositionalArgument("filename", "File path.", "file [file..]");
-    parser.process(app);
 
-    // init modules.
+
+    QIcon appIcon = QIcon::fromTheme("deepin-compressor");
+
+    if (appIcon.isNull()) {
+        appIcon = QIcon(":assets/icons/deepin/builtin/icons/deepin-compressor.svg");
+    }
+
+    app.setProductIcon(appIcon);
+    app.setWindowIcon(appIcon);
+    //w.titlebar()->setIcon(appIcon);
+
+    QStringList multilist;
+    if (newfilelist.count() > 0 && ((newfilelist.last() == QStringLiteral("extract_here_split_multi") || newfilelist.last() == QStringLiteral("extract_split_multi")))) {
+        multilist.append(newfilelist.at(0));
+        multilist.append(newfilelist.last().remove("_multi"));
+        newfilelist = multilist;
+    }
     MainWindow w;
-    app.setMainWindow(&w);
-
+    qDebug() << argv;
+//    if (fileList.length() >= 2 && (!w.checkSettings(argv[1]))) {//判断目标文件是否合法
+//        return  0;
+//    }
     QString lastStr = argv[argc - 1];
 
     if (argc >= 2) {
@@ -91,56 +140,6 @@ int main(int argc, char *argv[])
             return 0;
         }
     }
-
-    QIcon appIcon = QIcon::fromTheme("deepin-compressor");
-
-    if (appIcon.isNull()) {
-        appIcon = QIcon(":assets/icons/deepin/builtin/icons/deepin-compressor.svg");
-    }
-
-    app.setProductIcon(appIcon);
-    app.setWindowIcon(appIcon);
-    //w.titlebar()->setIcon(appIcon);
-
-    if (app.setSingleInstance("deepin-compressor")) {
-        Dtk::Widget::moveToCenter(&w);
-    }
-
-    const QStringList fileList = parser.positionalArguments();
-
-    QStringList newfilelist;
-    foreach (QString file, fileList) {
-        if (file.contains("file://")) {
-            file.remove("file://");
-        }
-        newfilelist.append(file);
-    }
-
-    QStringList multilist;
-    if (newfilelist.count() > 0 && ((newfilelist.last() == QStringLiteral("extract_here_split_multi") || newfilelist.last() == QStringLiteral("extract_split_multi")))) {
-        multilist.append(newfilelist.at(0));
-        multilist.append(newfilelist.last().remove("_multi"));
-        newfilelist = multilist;
-    }
-
-    QDBusConnection bus = QDBusConnection::sessionBus();
-    bool busRegistered = bus.registerService("com.archive.mainwindow.monitor");
-    if (busRegistered == false) {
-        com::archive::mainwindow::monitor monitor("com.archive.mainwindow.monitor", HEADBUS, QDBusConnection::sessionBus());
-        if (monitor.isValid()) {
-            QDBusPendingReply<bool> reply = monitor.createSubWindow(newfilelist);
-            reply.waitForFinished();
-            if (reply.isValid()) {
-                bool isClosed = reply.value();
-                if (isClosed) {
-//                    app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
-                    app.exit();
-                    return 0;
-                }
-            }
-        }
-    }
-
     w.bindAdapter();
 
     if (busRegistered == true) {
@@ -157,14 +156,13 @@ int main(int argc, char *argv[])
 
         QObject::connect(&w, &MainWindow::sigquitApp, &app, &DApplication::quit);
         // handle command line parser.
-        if (!fileList.isEmpty()) {
+        if (!newfilelist.isEmpty()) {
             QMetaObject::invokeMethod(&w, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, newfilelist));
         }
 
 //        LogWidget widget;
 //        w.initalizeLog(&widget);
 //        widget.show();
-        w.showNormal();
         w.show();
     }
     return app.exec();
