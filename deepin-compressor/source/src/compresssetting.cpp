@@ -345,7 +345,7 @@ void CompressSetting::onNextButoonClicked()
     QString fixedMimeType;
     QString tmpCompresstype = m_compresstype->text();
     QString strTar7z;
-    if (0 == QString("tar.7z").compare(m_compresstype->text(), Qt::CaseInsensitive)) {
+    if (0 == QString("tar.7z").compare(tmpCompresstype, Qt::CaseInsensitive)) {
         tmpCompresstype = "7z";
         strTar7z = ".tar";
         m_openArgs[QStringLiteral("createtar7z")] = QString("true");
@@ -354,7 +354,7 @@ void CompressSetting::onNextButoonClicked()
 //    QString tmpCompresstype = (0 == QString("tar.7z").compare(m_compresstype->text(), Qt::CaseInsensitive)) ? QString("7z") : m_compresstype->text();
 
     for (const QString &type : qAsConst(m_supportedMimeTypes)) {
-        if (0 == QMimeDatabase().mimeTypeForName(type).preferredSuffix().compare(m_compresstype->text(), Qt::CaseInsensitive)) {
+        if (0 == QMimeDatabase().mimeTypeForName(type).preferredSuffix().compare(tmpCompresstype, Qt::CaseInsensitive)) {
             fixedMimeType = type;
             break;
         }
@@ -646,7 +646,7 @@ void CompressSetting::ontypeChanged(QAction *action)
     m_compresstype->setText(action->text());
 
     //tar.7z暂不支持加密
-    if (action->text().contains("7z") && !action->text().contains("tar.7z")) {
+    if (action->text().contains("7z")) {
         if (m_splitcompress->isChecked()) {
             m_splitnumedit->setEnabled(true);
         }

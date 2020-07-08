@@ -33,24 +33,21 @@ CliProperties::CliProperties(QObject *parent, const KPluginMetaData &metaData, c
 
 QStringList CliProperties::addArgs(const QString &archive, const QStringList &files, const QString &password, bool headerEncryption, int compressionLevel, const QString &compressionMethod, const QString &encryptionMethod, ulong volumeSize, bool isTar7z, const QString &globalWorkDir)
 {
-    //const QString oneSpace = " "; //一个空格
+    Q_UNUSED(globalWorkDir);
 
     if (!encryptionMethod.isEmpty()) {
         Q_ASSERT(!password.isEmpty());
     }
+
     if (isTar7z) {
-        //        tar.7z压缩命令: tar cf - -C /home/username/Desktop/ 1.txt -C /home/username/Desktop/2/3/ 4K | 7z a - si new.tar.7z
+//        tar.7z压缩命令: tar cf - -C /home/username/Desktop/ 1.txt -C /home/username/Desktop/2/3/ 4K | 7z a - si new.tar.7z
         const QString oneSpace = " "; //一个空格
         QVector<QString> strold = {  " ",   "!",   "$",   "&",   "*",   "(",   ")",   "<",   ">",   "+",   "-",   ";"};
         QVector<QString> strnew = {"\\ ", "\\!", "\\$", "\\&", "\\*", "\\(", "\\)", "\\<", "\\>", "\\+", "\\-", "\\;"};
-        //        注意字符转意，待优化
+//        注意字符转意，待优化
 
         QStringList args;
         args << "-c";
-        QString newGlobalWorkDir = globalWorkDir + '/';
-        for (int n = 0; n < strold.length(); ++n) {
-            newGlobalWorkDir.replace(strold[n], strnew[n]);
-        }
 
         QString tmp = "tar cf - ";
         for (QString file : files) {
@@ -62,12 +59,10 @@ QStringList CliProperties::addArgs(const QString &archive, const QStringList &fi
             }
             int pos = file.lastIndexOf('/');
             if (pos > 0) {
-                tmp += "-C " + newGlobalWorkDir + file.mid(0, pos + 1) + oneSpace + file.mid(pos + 1) + oneSpace;
-            } else {
-                tmp += "-C " + newGlobalWorkDir + oneSpace + file + oneSpace;
+                //此处传进来的files是绝对路径，处理和dev分支有点区别，
+                tmp += "-C " + file.mid(0, pos + 1) + oneSpace + file.mid(pos + 1) + oneSpace;
             }
         }
-
         tmp += "| 7z a -si ";
         if (!password.isEmpty()) {
             for (QString &val : substitutePasswordSwitch(password, headerEncryption)) {
@@ -95,6 +90,7 @@ QStringList CliProperties::addArgs(const QString &archive, const QStringList &fi
         }
         tmp += tmparchive;
         args << tmp;
+//        qDebug() << tmp;
         return args;
     } else {
         QStringList args;
