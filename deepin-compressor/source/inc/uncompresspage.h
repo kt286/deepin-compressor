@@ -114,7 +114,7 @@ private:
     QFileInfo m_info;
 
     ArchiveSortFilterModel *m_model;
-    EXTRACT_TYPE extractType;
+    EXTRACT_TYPE extractType = EXTRACT_TO;
     int m_width;
     QStringList m_inputlist;
 };
