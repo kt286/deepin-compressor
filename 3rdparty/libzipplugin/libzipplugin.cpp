@@ -288,8 +288,6 @@ QString  LibzipPlugin::trans2uft8(const char *str)
     }
 }
 
-
-
 const char *LibzipPlugin::passwordUnicode(const QString &strPassword, int iIndex)
 {
     if (filename().endsWith(".zip")) {

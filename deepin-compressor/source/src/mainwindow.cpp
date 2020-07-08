@@ -1553,6 +1553,7 @@ void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
 //    refreshPage();
 //    m_progressdialog->setProcess(0);
 //    m_Progess->setprogress(0);
+    m_progressdialog->setProcess(0);
 
     m_workstatus = WorkProcess;
     m_encryptiontype = Encryption_Extract;
@@ -3632,6 +3633,9 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
     }
     refreshPage();
     // emit sigquitApp();
+    slotResetPercentAndTime();
+    m_Progess->setprogress(0);
+
 }
 
 void MainWindow::slotClearTempfile()
