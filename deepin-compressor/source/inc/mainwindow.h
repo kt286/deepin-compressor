@@ -253,6 +253,7 @@ public:
     //static Log4Qt::Logger *getLogger();
     OpenInfo::ENUM_OPTION option = OpenInfo::OPEN;
     QString *strChildMndExtractPath = nullptr;//保存的有次级面板解压路径（用户解压路径，非临时路径），该变量其他地方用不到
+    QString *strParentArchivePath = nullptr;//保存第一级压缩包路径
 private:
     void saveWindowState();
     void loadWindowState();

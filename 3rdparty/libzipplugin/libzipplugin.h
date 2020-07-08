@@ -68,7 +68,7 @@ public:
      * @param archive:归档对象
      * @return 如果返回false，结束当前解压
      */
-    bool checkArchivePsd(zip_t *archive);
+    bool checkArchivePsd(zip_t *archive, int &iCodecIndex);
 
     /**
      * @brief checkEntriesPsd:首次提取Entry树需要判断一次密码

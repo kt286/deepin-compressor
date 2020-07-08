@@ -843,6 +843,7 @@ bool MainWindow::createSubWindow(const QStringList &urls)
     }
     subWindow->pMapGlobalWnd = this->pMapGlobalWnd;//获取deepin-compressor进程中的全局窗口map
     subWindow->strChildMndExtractPath = this->strChildMndExtractPath;//子面板的解压路径必须和父面板的解压路径统一
+    subWindow->strParentArchivePath = this->strParentArchivePath;//子面板的解压?当前路径必须和父面板的解压路径统一
     if (this->pMapGlobalWnd == nullptr) {
         this->pMapGlobalWnd = new GlobalMainWindowMap();
     }
@@ -1171,7 +1172,13 @@ void MainWindow::onSelected(const QStringList &files)
             m_UnCompressPage->SetDefaultFile(fileinfo);
             if (strChildMndExtractPath == nullptr) {
                 strChildMndExtractPath = new QString(fileinfo.path());
+
             }
+
+            if (strParentArchivePath == nullptr) {
+                strParentArchivePath = new QString(fileinfo.path());
+            }
+
             if ("" != m_settingsDialog->getCurExtractPath() && m_UnCompressPage->getExtractType() != EXTRACT_HEAR) {
                 m_UnCompressPage->setdefaultpath(m_settingsDialog->getCurExtractPath());
             } else {
@@ -1222,6 +1229,10 @@ void MainWindow::onRightMenuSelected(const QStringList &files)
         InitUI();
         InitConnection();
         m_initflag = true;
+    }
+
+    if (strParentArchivePath == nullptr && files.count() > 0) {
+        strParentArchivePath = new QString(QFileInfo(files[0]).path());
     }
 
     m_UnCompressPage->getMainWindowWidth(this->width());
@@ -3285,7 +3296,8 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         programName = "deepin-compressor";
         m_pageid = PAGE_UNZIPPROGRESS;
         m_encryptiontype = Encryption_SingleExtract;
-        m_pathstore = QFileInfo(m_model->archive()->fileName()).absolutePath();
+        //m_pathstore = QFileInfo(m_model->archive()->fileName()).absolutePath();
+        m_pathstore = *strParentArchivePath;
         destinationDirectory = m_pathstore;
     } else if (type == EXTRACT_TO) {
         programName = "deepin-compressor";
