@@ -124,6 +124,7 @@ void Compressor_Success::showfiledirSlot(bool iIsUrl)
         }
     }
 
+
     //emit sigQuitApp();
 }
 

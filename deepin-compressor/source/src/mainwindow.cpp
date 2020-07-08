@@ -1020,16 +1020,25 @@ void MainWindow::refreshPage()
         m_openAction->setEnabled(false);
         setAcceptDrops(false);
         m_titlebutton->setVisible(false);
+//        if (m_isrightmenu) {
+//            if ("" != m_settingsDialog->getCurExtractPath() && m_UnCompressPage->getExtractType() != EXTRACT_HEAR) {
+//                m_CompressSuccess->showfiledirSlot(false);
+//            }
+//        } else {
+//            if (m_settingsDialog->isAutoOpen() && m_encryptiontype != Encryption_NULL) {
+//                m_CompressSuccess->showfiledirSlot();
+//            }
+//        }
+
         if (m_isrightmenu) {
-            if ("" != m_settingsDialog->getCurExtractPath() && m_UnCompressPage->getExtractType() != EXTRACT_HEAR) {
+            if (m_settingsDialog->isAutoOpen()) {
                 m_CompressSuccess->showfiledirSlot(false);
             }
-            //如果是解压到本地，则不弹出文管窗口
-//            m_CompressSuccess->showfiledirSlot(false);
-//            DDesktopServices::showFolder(m_decompressfilepath);
+            slotquitApp();
+            return;
         } else {
             if (m_settingsDialog->isAutoOpen() && m_encryptiontype != Encryption_NULL) {
-                m_CompressSuccess->showfiledirSlot();
+                m_CompressSuccess->showfiledirSlot(false);
             }
         }
 
@@ -1897,7 +1906,7 @@ void MainWindow::slotExtractionDone(KJob *job)
             QString fullpath = m_decompressfilepath + "/" + m_extractSimpleFiles.at(0)->property("name").toString();
             QFileInfo fileinfo(fullpath);
             if (fileinfo.exists()) {
-                DDesktopServices::showFolder(fullpath);
+//                DDesktopServices::showFolder(fullpath);
             }
         }
     } else if (Encryption_TempExtract_Open_Choose == m_encryptiontype) {
