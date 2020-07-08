@@ -1768,7 +1768,6 @@ void MainWindow::slotExtractionDone(KJob *job)
             return;
         }
 
-
         if (errcode == 0 && m_encryptiontype != Encryption_SingleExtract && m_encryptiontype != Encryption_DRAG) {
             if (this->pCurAuxInfo == nullptr || this->pCurAuxInfo->information.size() == 0) {
                 m_pageid = PAGE_UNZIP_SUCCESS;
@@ -1797,7 +1796,6 @@ void MainWindow::slotExtractionDone(KJob *job)
                 m_progressdialog->setFinished(m_decompressfilepath);
             }
         }
-
 
         return;
     } else if ((PAGE_ENCRYPTION == m_pageid) && (errorCode && (errorCode != KJob::KilledJobError && errorCode != KJob::UserSkiped)))   {
