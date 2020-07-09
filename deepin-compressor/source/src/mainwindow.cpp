@@ -1780,7 +1780,7 @@ void MainWindow::slotExtractionDone(KJob *job)
         }
 
         if (errcode == 0 && m_encryptiontype != Encryption_SingleExtract && m_encryptiontype != Encryption_DRAG
-                && m_encryptiontype != Encryption_TempExtract_Open_Choose) {
+                /*&& m_encryptiontype != Encryption_TempExtract_Open_Choose*/) {
             if (this->pCurAuxInfo == nullptr || this->pCurAuxInfo->information.size() == 0) {
                 m_pageid = PAGE_UNZIP_SUCCESS;
                 m_CompressSuccess->setstringinfo(tr("Extraction successful"));
@@ -1795,7 +1795,7 @@ void MainWindow::slotExtractionDone(KJob *job)
     if (m_pageid == PAGE_LOADING) {
         m_pOpenLoadingPage->stop();
     }
-    if (m_pageid == PAGE_UNZIP  && m_encryptiontype != Encryption_TempExtract_Open_Choose) { // 如果是解压界面，则返回
+    if (m_pageid == PAGE_UNZIP/*  && m_encryptiontype != Encryption_TempExtract_Open_Choose*/) { // 如果是解压界面，则返回
         if (m_progressdialog->isshown()) {
             m_progressdialog->hide();
             // m_progressdialog->reject();
