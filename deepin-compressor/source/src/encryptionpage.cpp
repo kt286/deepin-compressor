@@ -101,6 +101,11 @@ void EncryptionPage::resetPage()
     m_password->setAlert(false);
 }
 
+void EncryptionPage::setInputflag(bool bFlag)
+{
+    m_inputflag = bFlag;
+}
+
 void EncryptionPage::nextbuttonClicked()
 {
     m_inputflag = true;

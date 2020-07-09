@@ -39,6 +39,7 @@ public:
 
     void setPassowrdFocus();
     void resetPage();
+    void setInputflag(bool bFlag);
 private:
 signals:
     void sigExtractPassword(QString password);

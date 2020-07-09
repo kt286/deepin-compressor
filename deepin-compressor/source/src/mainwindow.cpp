@@ -2065,7 +2065,7 @@ void MainWindow::LoadPassword(QString password)
     m_encryptiontype = Encryption_Load;
     m_pJob = m_model->loadArchive(m_loadfile, "", m_model);
     LoadJob *pLoadJob = dynamic_cast<LoadJob *>(m_pJob);
-    connect(pLoadJob, &LoadJob::sigWrongPassword, m_encryptionpage, &EncryptionPage::wrongPassWordSlot);
+    connect(pLoadJob, &LoadJob::sigWrongPassword, this, &MainWindow::slotLoadWrongPassWord);
     pLoadJob->archiveInterface()->setPassword(password);
     if (m_pJob) {
         m_pJob->start();
@@ -3529,6 +3529,18 @@ void MainWindow::closeExtractJobSafe()
     }
 
     //deleteDecompressFile();
+}
+
+void MainWindow::slotLoadWrongPassWord()
+{
+    if (Encryption_Load == m_encryptiontype) {
+        m_pOpenLoadingPage->stop();
+        m_pageid = PAGE_ENCRYPTION;
+        m_mainLayout->setCurrentIndex(7);
+    }
+
+    m_encryptionpage->setInputflag(true);
+    m_encryptionpage->wrongPassWordSlot();
 }
 
 //void MainWindow::addToArchive(const QStringList &files, const QString &archive)

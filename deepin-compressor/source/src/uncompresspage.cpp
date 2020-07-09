@@ -377,30 +377,30 @@ void UnCompressPage::onAutoCompress(const QStringList &path, Archive::Entry *pWo
     ArchiveModel *pModel = dynamic_cast<ArchiveModel *>(m_model->sourceModel());
     QVector<Archive::Entry *> vectorEntry;
     //int mode = 0;
+    int mode = 0;
+    bool bAll = false;
     int responseValue = Result_Cancel;
     foreach (QString strPath, path) {
 
         Archive::Entry *entry = pModel->isExists(strPath);
 
-//        if (entry != nullptr) {
-//            if (mode == 1 && responseValue == Result_OverwriteAll) {
-//                vectorEntry.push_back(entry);
-//                m_inputlist.push_back(strPath);
-//            } else {
-//                mode = showReplaceDialog(strPath, responseValue);
-//            }
-//            qDebug() << responseValue;
-//  //            int ret = showReplaceDialog(strPath);
-//  //            if (1 == mode) {
-//  //                vectorEntry.push_back(entry);
-//  //                m_inputlist.push_back(strPath);
-//  //            }
-//        } else {
-//            m_inputlist.push_back(strPath);
-//        }
         if (entry != nullptr) {
 
-            int mode = showReplaceDialog(strPath, responseValue);
+            //int mode = showReplaceDialog(strPath, responseValue);
+
+            if (!bAll) {
+                OverwriteQuery query(strPath);
+                query.execute();
+                mode = query.getExecuteReturn();
+
+                bAll = query.applyAll();
+            }
+//            if (-1 == mode || 0 == mode) {        // skip or cancel
+//                inputlist.removeOne(path);
+//            } else {                // overwrite
+//                m_filelist.removeOne(m_path);
+//            }
+
             if (1 == mode) {
                 vectorEntry.push_back(entry);
                 m_inputlist.push_back(strPath);

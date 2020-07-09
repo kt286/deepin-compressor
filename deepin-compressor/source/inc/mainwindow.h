@@ -329,6 +329,7 @@ private slots:
     void closeExtractJobSafe();
 //    void addToArchive(const QStringList &files, const QString &archive);//废弃，added by hsw 20200528
 
+    void slotLoadWrongPassWord();
 signals:
     void sigquitApp();
     void sigZipAddFile();
