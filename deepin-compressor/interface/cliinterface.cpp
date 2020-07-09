@@ -583,6 +583,7 @@ void CliInterface::extractProcessFinished(int exitCode, QProcess::ExitStatus exi
         //emit error(tr("wrong password"));
         emit error("wrong password");
         setPassword(QString());
+        // emit finished(false);
         return;
     }
 
@@ -1172,9 +1173,6 @@ bool CliInterface::handleLine(const QString &line)
                             }
                         }
                     }
-
-
-
                 }
             }
         }

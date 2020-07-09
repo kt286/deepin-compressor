@@ -3544,7 +3544,7 @@ void MainWindow::closeExtractJobSafe()
             connect(pExtractJob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
             m_pJob->kill();
             m_pJob = nullptr;
-            pEventloop->exec(QEventLoop::ExcludeUserInputEvents);
+//            pEventloop->exec(QEventLoop::ExcludeUserInputEvents);
         } else {
             m_pJob->kill();
             m_pJob = nullptr;

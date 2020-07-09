@@ -848,9 +848,9 @@ void AddJob::doWork()
 
     if (m_writeInterface->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_READWRITE_LIBARCHIVE) {
         const QString &firstFilePath = fileListWathed->at(0);
-        totalCount = (uint)getAllFileCount(firstFilePath);
+        totalCount = static_cast<uint>(getAllFileCount(firstFilePath));
     } else {
-        totalCount = (uint)m_entries.length();
+        totalCount = static_cast<uint>(m_entries.length());
     }
     const QString desc = QString("Compressing %1 files").arg(totalCount);
     //emit description(this, desc, qMakePair(tr("Archive"), archiveInterface()->filename()));

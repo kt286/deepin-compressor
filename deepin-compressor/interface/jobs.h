@@ -206,6 +206,7 @@ public Q_SLOTS:
     void slotExtractJobPwdCheckDown();
     void onProgress(double progress)override;
     void onProgressFilename(const QString &filename)override;
+
 public:
     bool Killjob();
     /**
