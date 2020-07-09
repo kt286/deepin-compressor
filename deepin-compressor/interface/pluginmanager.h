@@ -27,7 +27,6 @@
 #include <QMimeType>
 #include <QVector>
 
-
 class PluginManager : public QObject
 {
     Q_OBJECT

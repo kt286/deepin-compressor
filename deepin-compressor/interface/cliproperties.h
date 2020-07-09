@@ -23,6 +23,7 @@
 #define CLIPROPERTIES_H
 
 #include "archiveinterface.h"
+
 #include <QVariant>
 
 typedef QHash<QString, QVariant> Hash;

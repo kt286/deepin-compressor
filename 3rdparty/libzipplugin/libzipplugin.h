@@ -2,12 +2,12 @@
 #define LIBZIPPLUGIN_H
 
 #include "archiveinterface.h"
+#include "kpluginfactory.h"
 
+#include <QFileDevice>
 
 #include <zip.h>
 #include <minizip/unzip.h>
-#include "kpluginfactory.h"
-#include <QFileDevice>
 
 
 struct FileProgressInfo {

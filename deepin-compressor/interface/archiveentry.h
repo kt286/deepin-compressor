@@ -26,8 +26,6 @@
 
 #include <QDateTime>
 
-
-
 enum PathFormat {
     NoTrailingSlash,
     WithTrailingSlash
@@ -36,7 +34,7 @@ enum PathFormat {
 //#include <iostream>
 //#include <vector>
 
-//// Factory
+// Factory
 //template<typename T>
 //class EntryFactory
 //{

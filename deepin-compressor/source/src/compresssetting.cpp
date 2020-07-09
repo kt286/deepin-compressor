@@ -20,13 +20,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "compresssetting.h"
-
 #include "DApplicationHelper"
 #include "DFontSizeManager"
 #include "utils.h"
+
 #include <DDialog>
 #include <DFileDialog>
 #include <DStyle>
+
 #include <QDebug>
 #include <QFileIconProvider>
 #include <QFileInfo>
@@ -36,8 +37,7 @@
 #include <QScrollArea>
 #include <QStandardPaths>
 #include <QTemporaryFile>
-#include <qevent.h>
-
+#include <QKeyEvent>
 #include <QRegExp>
 
 TypeLabel::TypeLabel(QWidget *parent) : DLabel(parent)

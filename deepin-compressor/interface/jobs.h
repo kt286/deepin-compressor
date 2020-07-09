@@ -27,11 +27,11 @@
 #include "archive_manager.h"
 #include "archiveentry.h"
 #include "queries.h"
-
 #include "archivejob.h"
 
 #include <QElapsedTimer>
 #include <QTemporaryDir>
+
 
 class  Job : public KJob
 {

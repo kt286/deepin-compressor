@@ -21,13 +21,15 @@
  */
 #include "compressor_success.h"
 
+#include <DFontSizeManager>
+#include <DApplicationHelper>
 #include <DFileDialog>
-#include <QBoxLayout>
-#include <utils.h>
 #include <DDesktopServices>
+
+#include <QBoxLayout>
 #include <QDebug>
-#include "DFontSizeManager"
-#include "DApplicationHelper"
+
+#include <utils.h>
 
 Compressor_Success::Compressor_Success(QWidget *parent)
     : DWidget(parent)

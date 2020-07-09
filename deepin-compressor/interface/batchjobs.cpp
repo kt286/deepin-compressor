@@ -1,4 +1,5 @@
 #include "batchjobs.h"
+
 #include <QDebug>
 
 //BatchJobsPrivate::BatchJobsPrivate()

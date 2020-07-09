@@ -20,14 +20,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include "myfilesystemmodelprivate.h"
+
 #include "myfilesystemmodel.h"
+#include "mimetypes.h"
+#include "utils.h"
+
+#include <DFontSizeManager>
+
 #include <QDateTime>
 #include <QDebug>
-#include <utils.h>
-#include "DFontSizeManager"
-#include "mimetypes.h"
-
 #include <QMimeDatabase>
 
 MyFileSystemModel::MyFileSystemModel(QObject *parent)

@@ -21,8 +21,9 @@
  */
 #include "cliinterface.h"
 #include "queries.h"
-
 #include "kprocess.h"
+#include "analysepsdtool.h"
+#include "filewatcher.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -35,9 +36,8 @@
 #include <QTemporaryDir>
 #include <QTemporaryFile>
 #include <QUrl>
+
 #include <linux/limits.h>
-#include "analysepsdtool.h"
-#include "filewatcher.h"
 
 CliInterface::CliInterface(QObject *parent, const QVariantList &args) : ReadWriteArchiveInterface(parent, args)
 {

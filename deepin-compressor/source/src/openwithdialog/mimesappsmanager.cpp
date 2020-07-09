@@ -24,9 +24,6 @@
 
 #include "openwithdialog/mimesappsmanager.h"
 #include "openwithdialog/dmimedatabase.h"
-
-//#include "app/define.h"
-
 #include "openwithdialog/singleton.h"
 #include "openwithdialog/desktopfile.h"
 #include "openwithdialog/dfmstandardpaths.h"
@@ -40,12 +37,10 @@
 #include <QThread>
 #include <QStandardPaths>
 #include <QDebug>
-
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QApplication>
-
 
 
 #undef signals
@@ -55,8 +50,6 @@ extern "C" {
 #include <gio/gappinfo.h>
 }
 #define signals public
-
-
 
 
 

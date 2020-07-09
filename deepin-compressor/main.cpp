@@ -22,16 +22,15 @@
 
 #include "mainwindow.h"
 #include "compressorapplication.h"
-#include <DWidgetUtil>
-#include <QCommandLineParser>
-#include <DLog>
 #include "utils.h"
-#include <DApplicationSettings>
-#include <DDesktopServices>
-#include <QMessageBox>
-#include "monitorAdaptor.h"
 #include "monitorInterface.h"
-#include "openwithdialog/openwithdialog.h"
+
+#include <DWidgetUtil>
+#include <DLog>
+#include <DApplicationSettings>
+
+#include <QCommandLineParser>
+
 
 
 int main(int argc, char *argv[])

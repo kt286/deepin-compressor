@@ -22,16 +22,22 @@
 
 #include "uncompresspage.h"
 #include "utils.h"
+#include "archivemodel.h"
+#include "lib_edit_button.h"
+#include "archivesortfiltermodel.h"
+#include "queries.h"
+
+#include <DStandardPaths>
+#include <DMessageManager>
+#include <DDialog>
+#include <DFontSizeManager>
 
 #include <QVBoxLayout>
 #include <QDebug>
 #include <QFile>
 #include <QUrl>
-#include <DStandardPaths>
-#include <DMessageManager>
-#include <DDialog>
 #include <QFontMetrics>
-#include "queries.h"
+
 
 DCORE_USE_NAMESPACE
 DWIDGET_USE_NAMESPACE

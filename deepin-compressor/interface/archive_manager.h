@@ -23,13 +23,12 @@
 #define ARCHIVE_H
 
 #include "options.h"
-
-#include "archivejob.h"
+//#include "archivejob.h"
 
 #include <QHash>
 #include <QMimeType>
 
-
+class KJob;
 class LoadJob;
 class BatchExtractJob;
 class CreateJob;

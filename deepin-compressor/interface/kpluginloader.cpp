@@ -20,7 +20,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "kpluginloader.h"
-
 #include "kpluginfactory.h"
 #include "kpluginmetadata.h"
 
@@ -28,7 +27,6 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
-
 #include <QCoreApplication>
 #include <QMutex>
 #include <QDebug>

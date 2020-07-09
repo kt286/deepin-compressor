@@ -26,7 +26,6 @@
 //#include "shutil/fileutils.h"
 
 #include <QFileInfo>
-
 #include <QUrl>
 
 DMimeDatabase::DMimeDatabase()

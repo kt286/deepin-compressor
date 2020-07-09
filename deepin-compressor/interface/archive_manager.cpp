@@ -24,11 +24,11 @@
 #include "jobs.h"
 #include "mimetypes.h"
 #include "pluginmanager.h"
+#include "kpluginloader.h"
+#include "kpluginfactory.h"
 
 #include <QMimeDatabase>
 #include <QRegularExpression>
-#include "kpluginloader.h"
-#include "kpluginfactory.h"
 
 Q_DECLARE_METATYPE(KPluginMetaData)
 

@@ -20,21 +20,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "settingdialog.h"
+#include "kprocess.h"
+
+#include <DPushButton>
+#include <DApplicationHelper>
+#include <DStandardPaths>
+#include <DSuggestButton>
+#include <DFileDialog>
+#include <DComboBox>
+#include <DLabel>
+#include <DPalette>
+#include <DSettingsWidgetFactory>
+
 #include <QStandardItemModel>
 #include <qsettingbackend.h>
 #include <QDebug>
-#include <DFileDialog>
 #include <QBoxLayout>
-#include <DComboBox>
-#include <DLabel>
 #include <QMessageBox>
-#include <DPalette>
-#include <DSettingsWidgetFactory>
-#include "DPushButton"
-#include "DApplicationHelper"
-#include "kprocess.h"
-#include <DStandardPaths>
-#include <DSuggestButton>
 
 DGUI_USE_NAMESPACE
 

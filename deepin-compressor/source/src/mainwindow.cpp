@@ -22,10 +22,42 @@
  */
 
 #include "mainwindow.h"
+#include "homepage.h"
+#include "uncompresspage.h"
+#include "compresspage.h"
+#include "compresssetting.h"
+#include "compressor_success.h"
+#include "compressor_fail.h"
+#include "archive_manager.h"
+#include "archivemodel.h"
+#include "encryptionpage.h"
+#include "progressdialog.h"
+#include "extractpausedialog.h"
+#include "settingdialog.h"
+#include "encodingpage.h"
+#include "archivesortfiltermodel.h"
+#include "batchextract.h"
+#include "batchcompress.h"
+#include "openloadingpage.h"
 #include "pluginmanager.h"
 #include "utils.h"
+#include "compressorapplication.h"
+#include "structs.h"
+#include "openwithdialog/openwithdialog.h"
+#include "jobs.h"
+#include "kprocess.h"
+#include "monitorInterface.h"
+#include "filewatcher.h"
+#include "monitorAdaptor.h"
+
+#include <DApplication>
+#include <DFileWatcher>
 #include <DDesktopServices>
 #include <DMessageManager>
+#include <DStandardPaths>
+#include <DFontSizeManager>
+#include <DWidgetUtil>
+
 #include <QDebug>
 #include <QDir>
 #include <QDragEnterEvent>
@@ -40,23 +72,14 @@
 #include <QStorageInfo>
 #include <QSvgWidget>
 #include <QTimer>
-#include <DStandardPaths>
 #include <QStackedLayout>
-#include "monitorInterface.h"
-#include <DApplication>
-#include <monitorAdaptor.h>
-#include <DWidgetUtil>
-#include "jobs.h"
-#include "kprocess.h"
-#include <DStandardPaths>
 #include <QStackedLayout>
 #include <QScreen>
-#include "filewatcher.h"
 #include <QUuid>
-#include "unistd.h"
-#include "compressorapplication.h"
-#include "structs.h"
 #include <QMessageBox>
+#include <QElapsedTimer>
+
+#include "unistd.h"
 
 DWIDGET_USE_NAMESPACE
 

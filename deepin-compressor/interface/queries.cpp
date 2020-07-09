@@ -20,19 +20,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "queries.h"
+
+#include <DDialog>
+#include <DPasswordEdit>
+#include <DFontSizeManager>
+#include <DApplicationHelper>
+#include <DLabel>
+
 #include <QApplication>
 #include <QDir>
 #include <QMessageBox>
 #include <QPointer>
 #include <QUrl>
-#include <DDialog>
-#include <DFontSizeManager>
-#include <DApplicationHelper>
-#include <DLabel>
 #include <QBoxLayout>
 #include <QImageReader>
 #include <QDebug>
-#include <DPasswordEdit>
 #include <QMainWindow>
 
 

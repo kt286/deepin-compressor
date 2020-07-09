@@ -1,8 +1,9 @@
 #include "cliplugin.h"
+#include "kprocess.h"
+
 #include <QDateTime>
 #include <QDir>
 #include <QRegularExpression>
-#include "kprocess.h"
 
 //K_PLUGIN_CLASS_WITH_JSON(CliPlugin, "kerfuffle_cli7z.json")
 

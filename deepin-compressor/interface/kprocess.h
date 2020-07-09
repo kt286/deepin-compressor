@@ -28,7 +28,6 @@
 
 class KProcessPrivate;
 
-
 class KCOREADDONS_EXPORT KProcess : public QProcess
 {
     Q_OBJECT

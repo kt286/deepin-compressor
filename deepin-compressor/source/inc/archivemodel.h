@@ -22,13 +22,12 @@
 #ifndef ARCHIVEMODEL_H
 #define ARCHIVEMODEL_H
 
-
 #include "archiveentry.h"
+#include "mimetypedisplaymanager.h"
 
 #include <QAbstractItemModel>
 #include <QScopedPointer>
 #include <QTableView>
-#include "mimetypedisplaymanager.h"
 
 class Query;
 
@@ -136,7 +135,7 @@ public:
     //store the map what key is path,value is entryChild. 如果双击查看一个entryChild,需要这个map去建立映射.
     QMap<QString, Archive::Entry *> mapFilesUpdate;
 //    QList<Archive::Entry *> *getLeavesList();
-	ReadOnlyArchiveInterface *getPlugin();
+    ReadOnlyArchiveInterface *getPlugin();
 Q_SIGNALS:
     void loadingStarted();
     void loadingFinished(KJob *);
@@ -207,6 +206,6 @@ private:
 //    Used to speed up the loading of large archives.
     Archive::Entry *s_previousMatch = nullptr;
     QStringList *s_previousPieces = new QStringList();
-	ReadOnlyArchiveInterface *m_plugin;
+    ReadOnlyArchiveInterface *m_plugin;
 };
 #endif // ARCHIVEMODEL_H

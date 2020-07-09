@@ -22,9 +22,7 @@
 #ifndef ARCHIVESORTFILTERMODEL_H
 #define ARCHIVESORTFILTERMODEL_H
 
-
 #include <QSortFilterProxyModel>
-
 
 class MimeTypeDisplayManager;
 

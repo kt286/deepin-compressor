@@ -21,10 +21,12 @@
  */
 #include "progressdialog.h"
 #include "kprocess.h"
+
+#include <DFontSizeManager>
+
 #include <QBoxLayout>
 #include <QDebug>
 #include <QFileInfo>
-#include "DFontSizeManager"
 
 ProgressDialog::ProgressDialog(QWidget *parent):
     DAbstractDialog(parent)

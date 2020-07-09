@@ -12,9 +12,11 @@
 #ifndef MONITORADAPTOR_H
 #define MONITORADAPTOR_H
 
+#include "mainwindow.h"
+
 #include <QtCore/QObject>
 #include <QtDBus/QtDBus>
-#include "mainwindow.h"
+
 QT_BEGIN_NAMESPACE
 class QByteArray;
 template<class T> class QList;

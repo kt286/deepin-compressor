@@ -22,6 +22,7 @@
 #include "cliproperties.h"
 #include "archiveformat.h"
 #include "pluginmanager.h"
+
 #include <QRegularExpression>
 
 CliProperties::CliProperties(QObject *parent, const KPluginMetaData &metaData, const QMimeType &archiveType)

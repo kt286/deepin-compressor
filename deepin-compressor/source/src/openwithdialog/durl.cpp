@@ -25,13 +25,13 @@
 #include "openwithdialog/durl.h"
 #include "openwithdialog/dfmstandardpaths.h"
 
-#include <utility>
-
 #include <QFileInfo>
 #include <QSet>
 #include <QDir>
 #include <QDebug>
 #include <QUrlQuery>
+
+#include <utility>
 
 
 QRegularExpression DUrl::burn_rxp = QRegularExpression("^(.*?)/(" BURN_SEG_ONDISC "|" BURN_SEG_STAGING ")(.*)$");

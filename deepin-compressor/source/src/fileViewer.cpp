@@ -20,23 +20,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QLayout>
-#include <QDir>
-#include <QDesktopServices>
-#include <QDebug>
-#include <QStandardItemModel>
-#include <QHeaderView>
-#include <DPalette>
-#include <QFileIconProvider>
-#include <QDragEnterEvent>
-#include <QMimeData>
-#include <QDrag>
-#include <QApplication>
-#include <QIcon>
-#include <DStandardPaths>
-
-#include <unistd.h>
-
+#include "myfilesystemmodel.h"
+#include "mimetypedisplaymanager.h"
+#include "archivesortfiltermodel.h"
 #include "uncompresspage.h"
 #include "fileViewer.h"
 #include "utils.h"
@@ -48,6 +34,28 @@
 #include "openwithdialog/openwithdialog.h"
 #include "monitorInterface.h"
 #include "archiveinterface.h"
+#include "archivemodel.h"
+
+
+#include <DFileDrag>
+#include <DFontSizeManager>
+#include <DStandardPaths>
+#include <DPalette>
+
+#include <QLayout>
+#include <QDir>
+#include <QDesktopServices>
+#include <QDebug>
+#include <QStandardItemModel>
+#include <QHeaderView>
+#include <QFileIconProvider>
+#include <QDragEnterEvent>
+#include <QMimeData>
+#include <QDrag>
+#include <QApplication>
+#include <QIcon>
+
+#include <unistd.h>
 
 
 const QString rootPathUnique = "_&_&_&_";

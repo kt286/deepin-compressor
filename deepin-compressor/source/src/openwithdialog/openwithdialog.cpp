@@ -23,13 +23,18 @@
  */
 
 #include "openwithdialog/openwithdialog.h"
+#include "openwithdialog/properties.h"
+
+#include <DHorizontalLine>
+#include <DStyle>
+#include <DIconButton>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QPushButton>
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QWindow>
+#include <DPushButton>
+//#include <QApplication>
+//#include <QDesktopWidget>
+//#include <QWindow>
 #include <QDebug>
 #include <QLabel>
 #include <QScrollArea>
@@ -41,14 +46,10 @@
 #include <QCommandLinkButton>
 #include <QColor>
 #include <QIcon>
-#include <DHorizontalLine>
-#include <DStyle>
-#include <DIconButton>
 #include <QFileDialog>
 #include <QResizeEvent>
 #include <QMimeDatabase>
 
-#include "openwithdialog/properties.h"
 
 class OpenWithDialogListItem : public QWidget
 {

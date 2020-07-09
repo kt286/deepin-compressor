@@ -25,13 +25,11 @@
 #include "archiveinterface.h"
 #include "archiveentry.h"
 #include "cliproperties.h"
-//#include "filewatcher.h"
+
 #include <QProcess>
 #include <QRegularExpression>
 
-
 class KProcess;
-
 class QDir;
 class QTemporaryDir;
 class QTemporaryFile;

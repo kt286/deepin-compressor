@@ -21,13 +21,14 @@
  */
 #include "archiveinterface.h"
 #include "mimetypes.h"
+#include "structs.h"
 
 #include <QDir>
 #include <QFileInfo>
 #include <QProcess>
 #include <QTextCodec>
+
 #include <sys/stat.h>
-#include "structs.h"
 #include <sys/stat.h>
 
 Q_DECLARE_METATYPE(KPluginMetaData)

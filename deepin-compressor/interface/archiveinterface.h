@@ -29,8 +29,8 @@
 #define ARCHIVEINTERFACE_H
 
 #include "archive_manager.h"
-
 #include "archiveentry.h"
+#include "kpluginmetadata.h"
 
 #include <QObject>
 #include <QStringList>
@@ -38,7 +38,6 @@
 #include <QVariantList>
 #include <QFileDevice>
 #include <QElapsedTimer>
-#include "kpluginmetadata.h"
 
 #define TIMER_TIMEOUT 1000
 
@@ -216,10 +215,10 @@ public:
      */
     virtual void watchFileList(QStringList *strList) = 0;
 
-/**
-     * show the package first level entry
-     * @brief the input param is entry full path
-     */
+    /**
+         * show the package first level entry
+         * @brief the input param is entry full path
+         */
     virtual void showEntryListFirstLevel(const QString &/*directory*/) {}
 
     /**
@@ -239,7 +238,7 @@ public:
      *
      */
     virtual qint64 extractSize(const QVector<Archive::Entry *> &/*files*/) {return 0;}
-	
+
     /**
      * @brief bindProgressInfo
      * @param pProgressIns

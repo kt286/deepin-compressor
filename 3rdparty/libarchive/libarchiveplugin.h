@@ -3,15 +3,15 @@
 
 #include "archiveinterface.h"
 
-#include <archive.h>
-
 #include <QScopedPointer>
 #include <QProcess>
+
+#include <archive.h>
 
 struct FileProgressInfo {
     float fileProgressProportion = 0.0; //内部百分值范围
     float fileProgressStart;            //上次的百分值
-	float totalFileSize;
+    float totalFileSize;
 };
 
 class LibarchivePlugin : public ReadWriteArchiveInterface

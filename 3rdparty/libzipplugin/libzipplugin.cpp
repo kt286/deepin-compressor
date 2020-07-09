@@ -1,6 +1,7 @@
 #include "libzipplugin.h"
 //#include "kpluginfactory.h"
 #include "../common/detectencoding.h"
+#include "queries.h"
 
 //#include <KIO/Global>
 //#include <KLocalizedString>
@@ -14,14 +15,16 @@
 #include <qplatformdefs.h>
 #include <QThread>
 #include <QTextCodec>
-#include <KEncodingProber>
-#include <utime.h>
-#include <zlib.h>
-#include <memory>
 #include <QMimeDatabase>
 #include <QRegularExpression>
-#include "queries.h"
+
+#include <zlib.h>
 #include <chardet.h>
+
+#include <KEncodingProber>
+#include <utime.h>
+#include <memory>
+
 //K_PLUGIN_CLASS_WITH_JSON(LibzipPlugin, "kerfuffle_libzip.json")
 
 #define MAX_FILENAME 512

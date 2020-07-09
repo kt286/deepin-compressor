@@ -27,9 +27,6 @@
 
 #include <QMimeDatabase>
 
-
-
-
 class DMimeDatabase : public QMimeDatabase
 {
     Q_DISABLE_COPY(DMimeDatabase)

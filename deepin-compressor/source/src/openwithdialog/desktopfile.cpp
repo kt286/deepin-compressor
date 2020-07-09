@@ -24,6 +24,7 @@
 
 #include "openwithdialog/desktopfile.h"
 #include "openwithdialog/properties.h"
+
 #include <QFile>
 #include <QSettings>
 #include <QDebug>

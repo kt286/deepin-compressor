@@ -23,19 +23,21 @@
 #ifndef SINGLEFILEPAGE_H
 #define SINGLEFILEPAGE_H
 
-#include "DWidget"
+#include "fileViewer.h"
+
+#include <DWidget>
 #include <DFileDialog>
 #include <DPushButton>
 #include <DLineEdit>
-#include "DLabel"
-#include "lib_edit_button.h"
+#include <DLabel>
 #include <DCommandLinkButton>
 #include <DPalette>
-#include "archivesortfiltermodel.h"
 #include <DApplicationHelper>
-#include "fileViewer.h"
 
 DWIDGET_USE_NAMESPACE
+
+class Lib_Edit_Button;
+class ArchiveSortFilterModel;
 
 class UnCompressPage : public DWidget
 {

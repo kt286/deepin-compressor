@@ -20,11 +20,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "pluginmanager.h"
-//#include "settings.h"
+#include "kpluginloader.h"
 
 #include <QPluginLoader>
-//#include <KSharedConfig>
-
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QMimeDatabase>
@@ -32,10 +30,9 @@
 #include <QRegularExpression>
 #include <QSet>
 #include <QStandardPaths>
+#include <QDebug>
 
 #include <algorithm>
-#include "kpluginloader.h"
-#include <QDebug>
 
 
 PluginManager::PluginManager(QObject *parent) : QObject(parent)

@@ -20,7 +20,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "jobs.h"
-#include "archiveentry.h"
+//#include "archiveentry.h"
+#include "structs.h"
 
 #include <QDir>
 #include <QDirIterator>
@@ -28,7 +29,6 @@
 #include <QRegularExpression>
 #include <QThread>
 #include <QTimer>
-#include "structs.h"
 
 class Job::Private : public QThread
 {

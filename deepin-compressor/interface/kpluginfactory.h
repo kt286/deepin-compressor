@@ -30,8 +30,8 @@
 //#include "kexportplugin.h" // for source compat
 
 class QWidget;
-
 class KPluginFactoryPrivate;
+
 namespace KParts {
 class Part;
 }

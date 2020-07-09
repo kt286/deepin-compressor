@@ -22,11 +22,13 @@
 
 #include "compresspage.h"
 #include "utils.h"
-
-#include "DFileDialog"
+#include "queries.h"
 #include "fileViewer.h"
+
+#include <DFileDialog>
 #include <DDialog>
 #include <DRecentManager>
+
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
@@ -34,7 +36,9 @@
 #include <QShortcut>
 #include <QTimer>
 #include <QVBoxLayout>
-#include "queries.h"
+#include <QSettings>
+#include <DFontSizeManager>
+
 
 DWIDGET_USE_NAMESPACE
 

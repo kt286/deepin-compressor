@@ -28,7 +28,6 @@
 #include <QFileInfo>
 #include <QPointer>
 #include <QTimer>
-#include <QUrl>
 
 BatchExtract::BatchExtract(QObject *parent)
     : BatchJobs(parent),

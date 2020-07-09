@@ -21,18 +21,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "progress.h"
-
-#include <QFileIconProvider>
-#include <QVBoxLayout>
-#include <QDebug>
-#include <DDialog>
-#include <QGraphicsDropShadowEffect>
-#include "DFontSizeManager"
-#include "utils.h"
-#include <QTimerEvent>
 #include "mainwindow.h"
+#include "utils.h"
 #include "archiveinterface.h"
 #include "structs.h"
+
+#include <DFontSizeManager>
+#include <DApplicationHelper>
+#include <DDialog>
+
+#include <QFileIconProvider>
+#include <QGraphicsDropShadowEffect>
+#include <QTimerEvent>
+#include <QVBoxLayout>
+#include <QDebug>
 
 Progress::Progress(DWidget *parent)
     : DWidget(parent)

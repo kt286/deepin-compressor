@@ -2,11 +2,11 @@
 #define READWRITELIBARCHIVEPLUGIN_H
 
 #include "../libarchiveplugin.h"
+#include "kpluginfactory.h"
 
 #include <QStringList>
 #include <QSaveFile>
 #include <QTemporaryDir>
-#include "kpluginfactory.h"
 
 
 class ReadWriteLibarchivePluginFactory : public KPluginFactory

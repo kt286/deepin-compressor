@@ -22,12 +22,11 @@
 #include "archivejob.h"
 #include "archivejob_p.h"
 
-//#include "kjobuidelegate.h"
-
 #include <QEventLoop>
 #include <QMap>
 #include <QMetaType>
 #include <QTimer>
+
 #include <climits>
 
 KJobPrivate::KJobPrivate()

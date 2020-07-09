@@ -25,6 +25,7 @@
 #include <QByteArray>
 #include <QLoggingCategory>
 #include <QVector>
+
 class QJsonObject;
 class QJsonValue;
 

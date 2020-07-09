@@ -20,12 +20,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "encodingpage.h"
+
+#include <DFontSizeManager>
+
 #include <QVBoxLayout>
 #include <QFileIconProvider>
 #include <QDir>
 #include <QTemporaryFile>
 #include <QTextCodec>
-#include "DFontSizeManager"
 
 EncodingPage::EncodingPage(QWidget *parent)
     : DWidget(parent)

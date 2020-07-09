@@ -23,41 +23,21 @@
 
 #pragma once
 
-#include <DMainWindow>
-#include <QSettings>
-#include <DTitlebar>
-#include <DFileWatcher>
-#include <QElapsedTimer>
-#include <DIconButton>
-
-#include "homepage.h"
-#include "uncompresspage.h"
-#include "compresspage.h"
-#include "compresssetting.h"
+#include "fileViewer.h"
 #include "progress.h"
-#include "compressor_success.h"
-#include "compressor_fail.h"
-#include "archive_manager.h"
-#include "archivemodel.h"
-#include "encryptionpage.h"
-#include "progressdialog.h"
-#include "extractpausedialog.h"
-#include "settingdialog.h"
-#include "encodingpage.h"
-#include <DIconButton>
-#include "archivesortfiltermodel.h"
-#include "batchextract.h"
-#include "batchcompress.h"
-#include "openloadingpage.h"
-#include <DFileWatcher>
-#include <QElapsedTimer>
-#include <QQueue>
 
+#include <DMainWindow>
+#include <DFileWatcher>
+#include <DSpinner>
+#include <DIconButton>
+
+#include <QEvent>
 
 #define TITLE_FIXED_HEIGHT 50
 #define HEADBUS "/QtDusServer/registry"
 
 DWIDGET_USE_NAMESPACE
+DCORE_USE_NAMESPACE
 
 enum Page_ID {
     PAGE_HOME,
@@ -193,6 +173,24 @@ static QVector<qint64> m_tempProcessId;
 class QStackedLayout;
 
 class MonitorAdaptor;
+class QSettings;
+class HomePage;
+class UnCompressPage;
+class CompressPage;
+class CompressSetting;
+//class Progress;
+class Compressor_Success;
+class Compressor_Fail;
+class Archive;
+class ArchiveModel;
+class EncryptionPage;
+class ProgressDialog;
+class ExtractPauseDialog;
+class SettingDialog;
+class EncodingPage;
+class ArchiveSortFilterModel;
+class OpenLoadingPage;
+class QEventLoop;
 
 class MainWindow : public DMainWindow
 {

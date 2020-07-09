@@ -22,9 +22,9 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
-#include <QObject>
-
 #include "kpluginmetadata.h"
+
+#include <QObject>
 #include <QJsonObject>
 
 

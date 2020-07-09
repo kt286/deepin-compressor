@@ -20,10 +20,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "kprocess_p.h"
-#include <QStandardPaths>
-#include <qplatformdefs.h>
 
-#include <qfile.h>
+#include <QStandardPaths>
+#include <QFile>
+#include <qplatformdefs.h>
 
 /////////////////////////////
 // public member functions //

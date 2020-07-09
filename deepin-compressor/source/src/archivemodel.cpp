@@ -20,20 +20,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "archivemodel.h"
-
 #include "jobs.h"
+#include "DPalette"
+#include "DFontSizeManager"
+#include "mimetypes.h"
+
 #include <QDBusConnection>
 #include <QFileIconProvider>
 #include <QMimeData>
 #include <QMimeDatabase>
 #include <QRegularExpression>
-
 #include <QTextCodec>
 #include <QUrl>
+
 #include <utils.h>
-#include "DPalette"
-#include "DFontSizeManager"
-#include "mimetypes.h"
 
 DWIDGET_USE_NAMESPACE
 

@@ -1,4 +1,5 @@
 #include "filewatcher.h"
+
 #include <QDebug>
 #include <QTimerEvent>
 #include <QFileInfo>

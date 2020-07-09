@@ -2,11 +2,12 @@
 #define DETECTENCODING_H
 
 
+#include <QLatin1String>
+#include <QDebug>
+
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
-#include <QLatin1String>
-#include <QDebug>
 
 /* Type for Unicode characters */
 typedef unsigned long unichar;

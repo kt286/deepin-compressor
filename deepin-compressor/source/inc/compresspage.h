@@ -25,11 +25,12 @@
 
 #include <DWidget>
 #include <DPushButton>
-#include <QSettings>
+
 
 DWIDGET_USE_NAMESPACE
 
 class fileViewer;
+class QSettings;
 
 class CompressPage : public DWidget
 {

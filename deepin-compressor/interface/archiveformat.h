@@ -23,9 +23,7 @@
 #define ARCHIVEFORMAT_H
 
 #include "archive_manager.h"
-
 #include "kpluginmetadata.h"
-
 
 
 class  ArchiveFormat

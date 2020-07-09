@@ -1,9 +1,10 @@
 #include "analysepsdtool.h"
-#include <stdio.h>
 
 #include <DStandardPaths>
 #include <QDir>
 #include <QProcess>
+
+#include <stdio.h>
 
 DCORE_USE_NAMESPACE
 

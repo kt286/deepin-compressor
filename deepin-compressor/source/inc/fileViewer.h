@@ -22,26 +22,30 @@
 #ifndef FILEVIWER_H
 #define FILEVIWER_H
 
-#include <QFileInfo>
-#include <QLineEdit>
+#include "archiveentry.h"
+
+//#include <QFileInfo>
+//#include <QLineEdit>
 #include <DTableView>
 #include <DLabel>
-#include <QItemDelegate>
-#include <QPainter>
-#include "myfilesystemmodel.h"
-#include <DScrollBar>
-#include <QStandardItemModel>
-#include <dfiledragserver.h>
-#include <dfiledrag.h>
-#include "archivemodel.h"
+#include <DFileDragServer>
 #include <DMenu>
-#include "mimetypedisplaymanager.h"
-#include "archivesortfiltermodel.h"
-#include <DApplicationHelper>
-#include <DFontSizeManager>
+
+#include <QItemDelegate>
 #include <QUrl>
 #include <QReadWriteLock>
-#include "openwithdialog/openwithdialog.h"
+#include <QFileInfoList>
+//#include <QPainter>
+//#include "myfilesystemmodel.h"
+//#include <DScrollBar>
+//#include <QStandardItemModel>
+//#include <dfiledragserver.h>
+//#include <dfiledrag.h>
+//#include "archivemodel.h"
+//#include <DApplicationHelper>
+//#include <DFontSizeManager>
+//#include <QReadWriteLock>
+//#include "openwithdialog/openwithdialog.h"
 
 DWIDGET_USE_NAMESPACE
 DGUI_USE_NAMESPACE
@@ -81,6 +85,12 @@ struct SubActionInfo {
 };
 
 class LogViewHeaderView;
+class QLineEdit;
+class MyFileSystemModel;
+class QStandardItemModel;
+class ArchiveModel;
+class MimeTypeDisplayManager;
+class ArchiveSortFilterModel;
 
 class FirstRowDelegate : public QItemDelegate
 {

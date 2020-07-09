@@ -21,6 +21,10 @@
  */
 
 #include "utils.h"
+#include "mimetypes.h"
+
+#include <DStandardPaths>
+
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -34,10 +38,9 @@
 #include <QImageReader>
 #include <QPixmap>
 #include <QTextCodec>
-#include <KEncodingProber>
 #include <QRegularExpression>
-#include "mimetypes.h"
-#include <DStandardPaths>
+
+#include <KEncodingProber>
 
 DCORE_USE_NAMESPACE
 

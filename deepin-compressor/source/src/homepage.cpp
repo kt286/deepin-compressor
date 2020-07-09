@@ -21,15 +21,17 @@
  */
 
 #include "homepage.h"
-#include "utils.h"
-#include <QApplication>
-#include <QDir>
-#include <DFileDialog>
-#include <DPalette>
-#include <QShortcut>
 #include "DFontSizeManager"
 #include "DGuiApplicationHelper"
 #include "mainwindow.h"
+#include "utils.h"
+
+#include <DPalette>
+#include <DFileDialog>
+
+#include <QApplication>
+#include <QDir>
+#include <QShortcut>
 
 DGUI_USE_NAMESPACE
 

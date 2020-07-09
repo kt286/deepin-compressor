@@ -20,14 +20,17 @@
  */
 
 #include "logviewheaderview.h"
+
+#include <DFontSizeManager>
 #include <DApplication>
 #include <DApplicationHelper>
 #include <DPalette>
 #include <DStyleHelper>
+
 #include <QDebug>
 #include <QPaintEvent>
 #include <QPainter>
-#include "DFontSizeManager"
+
 static const int kSpacingMargin = 4;
 
 DWIDGET_USE_NAMESPACE

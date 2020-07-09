@@ -1,5 +1,7 @@
-#include <QMutex>
+
 #include "TSMutex.h"
+
+#include <QMutex>
 
 
 struct TSMutexPrivate {

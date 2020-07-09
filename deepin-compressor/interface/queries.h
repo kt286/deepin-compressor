@@ -22,14 +22,14 @@
 #ifndef QUERIES_H
 #define QUERIES_H
 
-
+#include <DApplicationHelper>
 #include <DCheckBox>
+
 #include <QString>
 #include <QHash>
 #include <QWaitCondition>
 #include <QMutex>
 #include <QVariant>
-#include <DApplicationHelper>
 
 DWIDGET_USE_NAMESPACE
 

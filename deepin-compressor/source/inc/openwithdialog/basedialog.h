@@ -25,13 +25,14 @@
 #ifndef BASEDIALOG_H
 #define BASEDIALOG_H
 
-#include <ddialog.h>
+#include <DDialog>
+#include <DTitlebar>
 
 DWIDGET_USE_NAMESPACE
 
-DWIDGET_BEGIN_NAMESPACE
-class DTitlebar;
-DWIDGET_END_NAMESPACE
+//DWIDGET_BEGIN_NAMESPACE
+//class DTitlebar;
+//DWIDGET_END_NAMESPACE
 
 class QShowEvent;
 class QWidget;

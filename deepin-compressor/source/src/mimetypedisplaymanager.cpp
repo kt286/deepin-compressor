@@ -21,6 +21,7 @@
  */
 
 #include "mimetypedisplaymanager.h"
+
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>

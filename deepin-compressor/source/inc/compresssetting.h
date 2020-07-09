@@ -22,27 +22,30 @@
 #ifndef COMPRESSSETTING_H
 #define COMPRESSSETTING_H
 
+#include "archiveentry.h"
+#include "lib_edit_button.h"
+#include "pluginmanager.h"
+
 #include <DWidget>
 #include <DDialog>
 #include <DPushButton>
 #include <DLabel>
 #include <DLineEdit>
 #include <DSwitchButton>
-#include <dpasswordedit.h>
-#include <QVBoxLayout>
-#include "lib_edit_button.h"
-#include "pluginmanager.h"
-#include "dfilechooseredit.h"
+#include <DPasswordEdit>
+#include <dfilechooseredit.h>
 #include <DCheckBox>
+#include <DSpinBox>
 #include <DMenu>
-#include "DSpinBox"
-#include "archiveentry.h"
+
+#include <QVBoxLayout>
 
 
 DWIDGET_USE_NAMESPACE
 
 #define D_COMPRESS_SPLIT_MIX    5000
 #define D_COMPRESS_SPLIT_MIN   0
+
 
 class TypeLabel: public DLabel
 {
@@ -94,7 +97,7 @@ public slots:
     void showRightMenu(QMouseEvent *e);
 
     void onThemeChanged();
-    
+
     bool onSplitChecked();
     void slotEchoModeChanged(bool echoOn);
     void autoCompress(const QString &compresspath, const QStringList &path);

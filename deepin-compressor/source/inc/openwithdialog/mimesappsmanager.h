@@ -25,6 +25,9 @@
 #ifndef MIMESAPPSMANAGER_H
 #define MIMESAPPSMANAGER_H
 
+#include "desktopfile.h"
+
+#include <DMenu>
 
 #include <QObject>
 #include <QSet>
@@ -34,9 +37,7 @@
 #include <QFileSystemWatcher>
 #include <QTimer>
 #include <QIcon>
-#include <DMenu>
 
-#include "desktopfile.h"
 
 DWIDGET_USE_NAMESPACE
 
@@ -46,7 +47,7 @@ class DUrl;
 
 class MimeAppsWorker: public QObject
 {
-   Q_OBJECT
+    Q_OBJECT
 
 public:
     MimeAppsWorker(QObject *parent = 0);
@@ -56,16 +57,16 @@ public:
 
 public slots:
     void startWatch();
-    void handleDirectoryChanged(const QString& filePath);
-    void handleFileChanged(const QString& filePath);
+    void handleDirectoryChanged(const QString &filePath);
+    void handleFileChanged(const QString &filePath);
     void updateCache();
-    void writeData(const QString& path, const QByteArray& content);
-    QByteArray readData(const QString& path);
+    void writeData(const QString &path, const QByteArray &content);
+    QByteArray readData(const QString &path);
 
 
 private:
-    QFileSystemWatcher* m_fileSystemWatcher = NULL;
-    QTimer* m_updateCacheTimer;
+    QFileSystemWatcher *m_fileSystemWatcher = NULL;
+    QTimer *m_updateCacheTimer;
 };
 
 
@@ -87,22 +88,22 @@ public:
     static QMap<QString, DesktopFile> AudioMimeApps;
     static QMap<QString, DesktopFile> DesktopObjs;
 
-    static QMimeType getMimeType(const QString& fileName);
-    static QString getMimeTypeByFileName(const QString& fileName);
-    static QString getDefaultAppByFileName(const QString& fileName);
-    static QString getDefaultAppByMimeType(const QMimeType& mimeType);
+    static QMimeType getMimeType(const QString &fileName);
+    static QString getMimeTypeByFileName(const QString &fileName);
+    static QString getDefaultAppByFileName(const QString &fileName);
+    static QString getDefaultAppByMimeType(const QMimeType &mimeType);
 
 
-    static QString getDefaultAppByMimeType(const QString& mimeType);
-    static QString getDefaultAppDisplayNameByMimeType(const QMimeType& mimeType);
-    static QString getDefaultAppDisplayNameByGio(const QString& mimeType);
-    static QString getDefaultAppDesktopFileByMimeType(const QString& mimeType);
+    static QString getDefaultAppByMimeType(const QString &mimeType);
+    static QString getDefaultAppDisplayNameByMimeType(const QMimeType &mimeType);
+    static QString getDefaultAppDisplayNameByGio(const QString &mimeType);
+    static QString getDefaultAppDesktopFileByMimeType(const QString &mimeType);
 
-    static bool setDefautlAppForTypeByGio(const QString& mimeType,
-                                     const QString& targetAppName);
+    static bool setDefautlAppForTypeByGio(const QString &mimeType,
+                                          const QString &targetAppName);
 
-    static QStringList getRecommendedAppsByQio(const QMimeType& mimeType);
-    static QStringList getRecommendedAppsByGio(const QString& mimeType);
+    static QStringList getRecommendedAppsByQio(const QMimeType &mimeType);
+    static QStringList getRecommendedAppsByGio(const QString &mimeType);
 
 
     static QStringList getApplicationsFolders();
@@ -116,15 +117,15 @@ public:
     static QMap<QString, DesktopFile> getDesktopObjs();
     static void initMimeTypeApps();
     static void loadDDEMimeTypes();
-    static bool lessByDateTime(const QFileInfo& f1,  const QFileInfo& f2);
-    static bool removeOneDupFromList(QStringList& list, const QString desktopFilePath);
+    static bool lessByDateTime(const QFileInfo &f1,  const QFileInfo &f2);
+    static bool removeOneDupFromList(QStringList &list, const QString desktopFilePath);
 
 
 signals:
     void requestUpdateCache();
 
 private:
-    MimeAppsWorker* m_mimeAppsWorker=NULL;
+    MimeAppsWorker *m_mimeAppsWorker = NULL;
 
 };
 
