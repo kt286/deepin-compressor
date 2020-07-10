@@ -102,7 +102,6 @@ HEADERS += \
     ../../deepin-compressor/interface/kpluginfactory_p.h \
     ../../deepin-compressor/interface/analysepsdtool.h \
     ../../deepin-compressor/interface/filewatcher.h \
-    detectencoding.h \
     ../ChardetDetector/chardet.h \
     ../ChardetDetector/CharDistribution.h \
     ../ChardetDetector/JpCntx.h \
