@@ -176,6 +176,7 @@ void CompressPage::onAddfileSlot()
 
 void CompressPage::onSelectedFilesSlot(const QStringList &files)
 {
+    // 判断是否在根目录下添加文件，若不是，给出提示
     if (0 != m_fileviewer->getPathIndex()) {
         showDialog();
         return;
@@ -215,9 +216,8 @@ void CompressPage::onSelectedFilesSlot(const QStringList &files)
 
     m_filelist.append(inputlist);
 
-    m_fileviewer->setFileList(m_filelist);
-
-    m_fileviewer->setSelectFiles(inputlist);
+    m_fileviewer->setFileList(m_filelist);      // 设置添加文件
+    m_fileviewer->setSelectFiles(inputlist);    // 设置选中的文件
 }
 
 void CompressPage::onRefreshFilelist(const QStringList &filelist)

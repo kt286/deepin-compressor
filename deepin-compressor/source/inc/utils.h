@@ -72,6 +72,12 @@ public:
     static bool deleteDir(const QString &iFilePath);
     static quint64 getAllFileCount(const QString &path);
     static QString readConf();
+
+    /**
+     * @brief existMimeType 判断此文件关联类型是否存在
+     * @param mimetype      文件类型
+     * @return
+     */
     static bool existMimeType(QString mimetype);
     static QString judgeFileMime(QString file);
 

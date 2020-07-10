@@ -31,11 +31,10 @@
 
 #include <QCommandLineParser>
 
-
-
 int main(int argc, char *argv[])
 {
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
     // load dtk xcb plugin.
     DApplication::loadDXcbPlugin();
 
@@ -51,8 +50,6 @@ int main(int argc, char *argv[])
     parser.process(app);
 
     const QStringList fileList = parser.positionalArguments();
-//    fileList.append("/home/hushiwei/Desktop/parent.zip");
-//    fileList.append("extract_here");//m_UnCompressPage->getExtractType() != EXTRACT_HEAR
     QStringList newfilelist;
     foreach (QString file, fileList) {
         if (file.contains("file://")) {
@@ -79,7 +76,6 @@ int main(int argc, char *argv[])
         }
     }
 
-
     app.loadTranslator();
     app.setOrganizationName("deepin");
     app.setApplicationName("deepin-compressor");
@@ -93,8 +89,6 @@ int main(int argc, char *argv[])
     DLogManager::registerConsoleAppender();
     DLogManager::registerFileAppender();
 
-
-
     QIcon appIcon = QIcon::fromTheme("deepin-compressor");
 
     if (appIcon.isNull()) {
@@ -103,7 +97,6 @@ int main(int argc, char *argv[])
 
     app.setProductIcon(appIcon);
     app.setWindowIcon(appIcon);
-    //w.titlebar()->setIcon(appIcon);
 
     QStringList multilist;
     if (newfilelist.count() > 0 && ((newfilelist.last() == QStringLiteral("extract_here_split_multi") || newfilelist.last() == QStringLiteral("extract_split_multi")))) {
@@ -112,10 +105,7 @@ int main(int argc, char *argv[])
         newfilelist = multilist;
     }
     MainWindow w;
-    qDebug() << argv;
-//    if (fileList.length() >= 2 && (!w.checkSettings(argv[1]))) {//判断目标文件是否合法
-//        return  0;
-//    }
+
     QString lastStr = argv[argc - 1];
 
     if (argc >= 2) {
@@ -135,6 +125,7 @@ int main(int argc, char *argv[])
             }
         }
 
+        //判断目标文件是否合法
         if (!w.checkSettings(argv[1])) {
             return 0;
         }
@@ -144,8 +135,6 @@ int main(int argc, char *argv[])
     if (busRegistered == true) {
 
         // init modules.
-
-//        app.setMainWindow(&w);
         if (app.setSingleInstance("deepin-compressor")) {
             Dtk::Widget::moveToCenter(&w);
         }
@@ -159,9 +148,6 @@ int main(int argc, char *argv[])
             QMetaObject::invokeMethod(&w, "onRightMenuSelected", Qt::DirectConnection, Q_ARG(QStringList, newfilelist));
         }
 
-//        LogWidget widget;
-//        w.initalizeLog(&widget);
-//        widget.show();
         w.show();
     }
     return app.exec();

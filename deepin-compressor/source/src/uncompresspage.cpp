@@ -214,14 +214,14 @@ void UnCompressPage::setRootPathIndex()
     m_fileviewer->setRootPathIndex();
 }
 
-void UnCompressPage::getMainWindowWidth(int windowWidth)
+void UnCompressPage::setWidth(int windowWidth)
 {
-    m_width = windowWidth;
+    m_iWidth = windowWidth;
 }
 
 void UnCompressPage::resizeEvent(QResizeEvent *event)
 {
-    getMainWindowWidth(width());
+    setWidth(width());
     setdefaultpath(m_pathstr);
     QWidget::resizeEvent(event);
 }
@@ -232,8 +232,8 @@ QString UnCompressPage::getAndDisplayPath(QString path)
     QFontMetrics fontMetrics(this->font());
     int fontSize = fontMetrics.width(curpath);//获取之前设置的字符串的像素大小
     QString pathStr = curpath;
-    if (fontSize > m_width) {
-        pathStr = fontMetrics.elidedText(path, Qt::ElideMiddle, m_width);//返回一个带有省略号的字符串
+    if (fontSize > m_iWidth) {
+        pathStr = fontMetrics.elidedText(path, Qt::ElideMiddle, m_iWidth);//返回一个带有省略号的字符串
     }
     return pathStr;
 }

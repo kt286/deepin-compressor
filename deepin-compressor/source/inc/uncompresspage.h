@@ -55,7 +55,12 @@ public:
     int showWarningDialog(const QString &msg);
     EXTRACT_TYPE getExtractType();
     void setRootPathIndex();
-    void getMainWindowWidth(int windowWidth);
+
+    /**
+     * @brief setWidth      设置界面宽度
+     * @param windowWidth   宽度
+     */
+    void setWidth(int windowWidth);
     void slotCompressedAddFile();
     fileViewer *getFileViewer();
     int showReplaceDialog(QString name, int &responseValue);
@@ -117,7 +122,7 @@ private:
 
     ArchiveSortFilterModel *m_model;
     EXTRACT_TYPE extractType = EXTRACT_TO;
-    int m_width;
+    int m_iWidth;                           // 界面宽度
     QStringList m_inputlist;
 };
 #endif

@@ -25,6 +25,7 @@
 
 #include "fileViewer.h"
 #include "progress.h"
+#include "customdatainfo.h"
 
 #include <DMainWindow>
 #include <DFileWatcher>
@@ -33,152 +34,18 @@
 
 #include <QEvent>
 
-#define TITLE_FIXED_HEIGHT 50
-#define HEADBUS "/QtDusServer/registry"
-
-DWIDGET_USE_NAMESPACE
-DCORE_USE_NAMESPACE
-
-enum Page_ID {
-    PAGE_HOME,
-    PAGE_UNZIP,
-    PAGE_ZIP,
-    PAGE_ZIPSET,
-    PAGE_ZIPPROGRESS,
-    PAGE_UNZIPPROGRESS,
-    PAGE_ZIP_SUCCESS,
-    PAGE_ZIP_FAIL,
-    PAGE_UNZIP_SUCCESS,
-    PAGE_UNZIP_FAIL,
-    PAGE_ENCRYPTION,
-    PAGE_DELETEPROGRESS,
-    PAGE_MAX,
-    PAGE_LOADING
-};
-
-enum EncryptionType {
-    Encryption_NULL,
-    Encryption_Load,
-    Encryption_Extract,
-    Encryption_SingleExtract,// “提取”
-    Encryption_ExtractHere,
-    Encryption_TempExtract,
-    Encryption_TempExtract_Open,
-    Encryption_TempExtract_Open_Choose,
-    Encryption_DRAG
-};
-
-enum WorkState {
-    WorkNone,
-    WorkProcess,
-};
-
-class QStackedLayout;
-class TimerWatcher;
-enum JobState {
-    JOB_NULL,
-    JOB_ADD,
-    JOB_DELETE,
-    JOB_DELETE_MANUAL,//手动delete，而非消息通知的delete
-    JOB_CREATE,
-    JOB_LOAD,
-    JOB_COPY,
-    JOB_BATCHEXTRACT,
-    JOB_EXTRACT,
-    JOB_TEMPEXTRACT,
-    JOB_MOVE,
-    JOB_COMMENT,
-    JOB_BATCHCOMPRESS,
-};
+static QVector<qint64> m_gTempProcessId;                 // 临时进程ID
 
 class MainWindow;
 class Settings_Extract_Info;
-/**
- * this can help us to get the map of all mainwindow created.
- * @brief The GlobalMainWindowMap struct
- */
-struct GlobalMainWindowMap {
-public:
-    void insert(const QString &strWinId, MainWindow *wnd)
-    {
-        if (this->mMapGlobal.contains(strWinId) == false) {
-            this->mMapGlobal.insert(strWinId, wnd);
-        }
-    }
-
-    MainWindow *getOne(const QString &strWinId)
-    {
-        if (this->mMapGlobal.contains(strWinId) == false) {
-            return nullptr;
-        } else {
-            return this->mMapGlobal[strWinId];
-        }
-    }
-
-    void remove(const QString &strWinId)
-    {
-        if (this->mMapGlobal.contains(strWinId) == true) {
-            this->mMapGlobal.remove(strWinId);
-        }
-    }
-
-    void clear()
-    {
-        this->mMapGlobal.clear();
-    }
-
-    /**
-     * @brief mMapGlobal
-     * @ key: winId
-     * @ value: pointer of mainWindow
-     */
-    QMap<QString, MainWindow *> mMapGlobal = {};
-};
-
-struct OpenInfo {
-    enum ENUM_OPTION {
-        CLOSE = 0,//正常关闭
-        OPEN = 1,//打开
-        QUERY_CLOSE_CANCEL = 2//询问后，关闭取消
-    };
-
-    // 逻辑子窗口的WinId
-    QString strWinId = "";
-    // 逻辑子窗口的状态
-    ENUM_OPTION option = OPEN;
-    // 逻辑子窗口的job
-    KJob *pJob = nullptr;
-};
-
-/**
- * @brief The MainWindow_AuxInfo struct
- * @see 存放MainWindow的重要辅助信息
- */
-struct MainWindow_AuxInfo {
-    /**
-     * @brief infomation
-     * @see节点详情
-     * @ key :strModexIndex,see as modelIndexToStr()
-     * @ value :the pointer of open info
-     */
-    QMap<QString, OpenInfo *> information;
-    /**
-     * @brief parentAuxInfo
-     * @see 逻辑父面板辅助信息节点
-     */
-    MainWindow_AuxInfo *parentAuxInfo = nullptr;
-};
-
-static QVector<qint64> m_tempProcessId;
 class QStackedLayout;
-
+class TimerWatcher;
 class MonitorAdaptor;
 class QSettings;
 class HomePage;
 class UnCompressPage;
 class CompressPage;
 class CompressSetting;
-//class Progress;
 class Compressor_Success;
 class Compressor_Fail;
 class Archive;
@@ -192,32 +59,76 @@ class ArchiveSortFilterModel;
 class OpenLoadingPage;
 class QEventLoop;
 
+/**
+ * @brief The MainWindow class  整个归档管理器窗口，不用类型的操作通过切换其中的界面实现
+ */
 class MainWindow : public DMainWindow
 {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "com.archive.mainwindow.monitor")
 
 public:
-    static int m_windowcount;
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
+
     /**
      * @brief closeClean
      * @param event
      * @see 每次关闭窗口尽量手动释放更多的内存，因为我们的窗口close()实际上执行的是hide();
      */
     void closeClean(QCloseEvent *event);
-    void closeEvent(QCloseEvent *event) override;
-    void timerEvent(QTimerEvent *event) override;
 
+    /**
+     * @brief InitUI   初始化界面
+     */
     void InitUI();
+
+    /**
+     * @brief InitConnection    初始化信号槽连接
+     */
     void InitConnection();
+
+    /**
+     * @brief initTitleBar  初始化标题栏
+     */
     void initTitleBar();
+
+    /**
+     * @brief createSettingsMenu    创建设置菜单Action
+     * @return  设置菜单
+     */
     QMenu *createSettingsMenu();
+
+    /**
+     * @brief loadArchive   加载压缩包
+     * @param files 压缩包文件名（含路径）
+     */
     void loadArchive(const QString &files);
+
+    /**
+     * @brief creatArchive  创建压缩包（单路径）
+     * @param Args  相关设置参数
+     */
     void creatArchive(QMap<QString, QString> &Args);
+
+    /**
+     * @brief creatBatchArchive  创建压缩包（多路径）
+     * @param Args  相关设置参数
+     * @param filetoadd 需要添加的文件（路径 - 文件名）
+     */
     void creatBatchArchive(QMap<QString, QString> &Args, QMap<QString, QStringList> &filetoadd);
+
+    /**
+     * @brief addArchive    拖拽追加压缩
+     * @param Args  需要追加的文件相关 参数
+     */
     void addArchive(QMap<QString, QString> &Args);
+
+    /**
+     * @brief addArchiveEntry   删除之后自动追加
+     * @param args  参数
+     * @param pWorkEntry    删除的Entry
+     */
     void addArchiveEntry(QMap<QString, QString> &args, Archive::Entry *pWorkEntry);
 
     /**
@@ -227,86 +138,483 @@ public:
      * @see true:手动删除；false:子面板消息通知删除。
      */
     void removeEntryVector(QVector<Archive::Entry *> &vectorDel, bool isManual);
+
+    /**
+     * @brief moveToArchive
+     * @param Args
+     */
     void moveToArchive(QMap<QString, QString> &Args);
 
+    /**
+     * @brief transSplitFileName    处理7z分卷压缩包名称
+     * @param fileName  原始名称
+     */
     void transSplitFileName(QString &fileName); // *.7z.003 -> *.7z.001
 
+    /**
+     * @brief ExtractPassword   加密解压
+     * @param password  输入的密码
+     */
     void ExtractPassword(QString password);
+
+    /**
+     * @brief ExtractSinglePassword 加密提取/打开等
+     * @param password  输入的密码
+     */
     void ExtractSinglePassword(QString password);
+
+    /**
+     * @brief LoadPassword  加密加载
+     * @param password  输入的密码
+     */
     void LoadPassword(QString password);
+
+    /**
+     * @brief WatcherFile   监听本地压缩包
+     * @param files 压缩包名称（全路径）
+     */
     void WatcherFile(const QString &files);
+
+    /**
+     * @brief renameCompress    重命名压缩包名称
+     * @param filename  压缩包名称
+     * @param fixedMimeType 类型
+     */
     void renameCompress(QString &filename, QString fixedMimeType);
-    QString getLoadFile();
+
+    /**
+     * @brief getLoadFile
+     * @return
+     */
+
+    /**
+     * @brief getDiskFreeSpace  获取磁盘控件
+     * @return 磁盘空间大小
+     */
     qint64 getDiskFreeSpace();
+
+    /**
+     * @brief getMediaFreeSpace 获取挂载设备控件
+     * @return 挂载设备空间大小
+     */
     qint64 getMediaFreeSpace();
 
+    /**
+     * @brief applicationQuit   应用程序退出处理
+     * @return 是否正常退出
+     */
     bool applicationQuit();
-    QString getAddFile();
+
+    /**
+     * @brief isWorkProcess 判断当前工作状态
+     * @return 当前工作状态
+     */
     bool isWorkProcess();
+
+    /**
+     * @brief checkSettings 检测目标文件合法性
+     * @param file  文件名
+     * @return
+     */
     bool checkSettings(QString file);
-    //log
-    //void initalizeLog(QWidget *widget);
-    //void logShutDown();
+
+    /**
+     * @brief bindAdapter   初始化监视器
+     */
     void bindAdapter();
-    //static Log4Qt::Logger *getLogger();
-    OpenInfo::ENUM_OPTION option = OpenInfo::OPEN;
-    QString *strChildMndExtractPath = nullptr;//保存的有次级面板解压路径（用户解压路径，非临时路径），该变量其他地方用不到
-    QString *strParentArchivePath = nullptr;//保存第一级压缩包路径
+
 private:
+    /**
+     * @brief saveWindowState   退出时保存位置
+     */
     void saveWindowState();
+
+    /**
+     * @brief loadWindowState   初始化时获取上次打开的位置
+     */
     void loadWindowState();
+
+    /**
+     * @brief modelIndexToStr
+     * @param modelIndex
+     * @return
+     */
     QString modelIndexToStr(const QModelIndex &modelIndex);//added by hsw 20200525
+
+    /**
+     * @brief queryDialogForClose   关闭询问窗口
+     * @return  点击操作，确认/取消
+     */
     int queryDialogForClose();
+
+    /**
+     * @brief setCompressDefaultPath    设置压缩路径
+     */
+    void setCompressDefaultPath();
+
+    /**
+     * @brief setQLabelText
+     * @param label
+     * @param text
+     */
+    //void setQLabelText(QLabel *label, const QString &text);
+
+    /**
+     * @brief creatShorcutJson  创建快捷键配置
+     * @return
+     */
+    QJsonObject creatShorcutJson();
+
+    //QStringList CheckAllFiles(QString path);
+
+    /**
+     * @brief deleteCompressFile    关闭/取消/退出时删除临时压缩文件
+     */
+    void deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/);
+
+    /**
+     * @brief deleteDecompressFile    关闭/取消/退出时删除临时解压文件
+     * @param destDirName
+     */
+    void deleteDecompressFile(QString destDirName = "");
+
+    /**
+     * @brief startCmd  启动命令
+     * @param executeName   可执行程序名称
+     * @param arguments 命令参数
+     * @return 是否启动成功
+     */
+    bool startCmd(const QString &executeName, QStringList arguments);
+
+    /**
+     * @brief removeFromParentInfo  从父窗口中移除某窗口
+     * @param CurMainWnd    需要移除的当前窗口
+     */
+    void removeFromParentInfo(MainWindow *CurMainWnd);
+
+    /**
+     * @brief calSelectedTotalFileSize  计算本地选择的文件大小
+     * @param files
+     */
+    void calSelectedTotalFileSize(const QStringList &files);
+
+    /**
+     * @brief calSelectedTotalEntrySize 计算选择的所有Entry大小
+     * @param vectorDel 选择的Entry
+     */
+    void calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel);
+
+    /**
+     * @brief calFileSize   计算文件或文件夹内所有文件大小
+     * @param path  文件或文件夹路径
+     * @return
+     */
+    qint64 calFileSize(const QString &path);
+
+    /**
+     * @brief calSpeedAndTime   计算速度和剩余时间
+     * @param compressPercent   当前进度百分比
+     */
+    void calSpeedAndTime(unsigned long compressPercent);
+
+    /**
+     * @brief getDefaultApp 根据文件类型获取默认打开的应用的程序
+     * @param mimetype  文件类型
+     * @return 应用程序
+     */
+    QString getDefaultApp(QString mimetype);
+
+    /**
+     * @brief setDefaultApp 设置默认应用程序
+     * @param mimetype  文件类型
+     * @param desktop   应用程序
+     */
+    void setDefaultApp(QString mimetype, QString desktop);
+
+    /**
+     * @brief promptDialog  关联类型提示对话框
+     * @return  点击类型
+     */
+    int promptDialog();
+
 protected:
     void dragEnterEvent(QDragEnterEvent *) override;
     void dragLeaveEvent(QDragLeaveEvent *) override;
     void dropEvent(QDropEvent *) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
+    void timerEvent(QTimerEvent *event) override;
+
+signals:
+    /**
+     * @brief sigquitApp
+     */
+    void sigquitApp();
+
+    /**
+     * @brief sigZipAddFile
+     */
+    void sigZipAddFile();
+
+    /**
+     * @brief sigCompressedAddFile
+     */
+    void sigCompressedAddFile();
+
+    /**
+     * @brief sigZipReturn
+     */
+    void sigZipReturn();
+
+    /**
+     * @brief sigZipSelectedFiles
+     * @param files
+     */
+    void sigZipSelectedFiles(const QStringList &files);
+
+    /**
+     * @brief loadingStarted
+     */
+    void loadingStarted();
+
+    /**
+     * @brief sigUpdateTableView
+     */
+    void sigUpdateTableView(const QFileInfo &);
+
+    /**
+     * @brief sigTipsWindowPopUp
+     */
+    void sigTipsWindowPopUp(int, const QStringList &);
+
+    /**
+     * @brief sigTipsUpdateEntry
+     * @param vectorDel
+     */
+    void sigTipsUpdateEntry(int, QVector<Archive::Entry *> &vectorDel);
+
+    /**
+     * @brief deleteJobComplete
+     * @param pEntry
+     */
+    void deleteJobComplete(Archive::Entry *pEntry);
 
 public slots:
     //accept subwindows drag files and return tips string
+    /**
+     * @brief onSubWindowActionFinished
+     * @param mode
+     * @param pid
+     * @param urls
+     * @return
+     */
     bool onSubWindowActionFinished(int mode, const qint64 &pid, const QStringList &urls);
 
+    /**
+     * @brief popUpChangedDialog
+     * @param pid
+     * @return
+     */
     bool popUpChangedDialog(const qint64 &pid);
 
+    /**
+     * @brief createSubWindow
+     * @param urls
+     * @return
+     */
     bool createSubWindow(const QStringList &urls);
 
 private slots:
+    /**
+     * @brief setEnable
+     */
     void setEnable();
+
+    /**
+     * @brief setDisable
+     */
     void setDisable();
+
+    /**
+     * @brief refreshPage
+     */
     void refreshPage();
-    void onSelected(const QStringList &);
+
+    /**
+     * @brief onSelected    选择本地文件（通过拖拽、打开、选择打开）
+     * @param listSelFiles  选择的文件
+     */
+    void onSelected(const QStringList &listSelFiles);
+
+    /**
+     * @brief onRightMenuSelected
+     */
     void onRightMenuSelected(const QStringList &);
+
+    /**
+     * @brief onCompressNext
+     */
     void onCompressNext();
+
+    /**
+     * @brief onCompressPressed
+     * @param Args
+     */
     void onCompressPressed(QMap<QString, QString> &Args);
+
+    /**
+     * @brief onUncompressStateAutoCompress
+     * @param Args
+     */
     void onUncompressStateAutoCompress(QMap<QString, QString> &Args);
+
     // added by hsw 20200525
+    /**
+     * @brief onUncompressStateAutoCompressEntry
+     * @param Args
+     * @param pWorkEntry
+     */
     void onUncompressStateAutoCompressEntry(QMap<QString, QString> &Args, Archive::Entry *pWorkEntry = nullptr);
+
+    /**
+     * @brief onCancelCompressPressed
+     * @param compressType
+     */
     void onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressType);
+
+    /**
+     * @brief onTitleButtonPressed
+     */
     void onTitleButtonPressed();
+
+    /**
+     * @brief onCompressAddfileSlot
+     * @param status
+     */
     void onCompressAddfileSlot(bool status);
 
+    /**
+     * @brief slotLoadingFinished
+     * @param job
+     */
     void slotLoadingFinished(KJob *job);
+
+    /**
+     * @brief slotExtractionDone
+     * @param job
+     */
     void slotExtractionDone(KJob *job);
+
+    /**
+     * @brief slotShowPageUnzipProgress
+     */
     void slotShowPageUnzipProgress();
+
+    /**
+     * @brief slotextractSelectedFilesTo
+     * @param localPath
+     */
     void slotextractSelectedFilesTo(const QString &localPath);
+
+    /**
+     * @brief SlotProgress
+     * @param job
+     * @param percent
+     */
     void SlotProgress(KJob *job, unsigned long percent);
+
+    /**
+     * @brief SlotProgressFile
+     * @param job
+     * @param filename
+     */
     void SlotProgressFile(KJob *job, const QString &filename);
+
+    /**
+     * @brief SlotNeedPassword
+     */
     void SlotNeedPassword();
+
+    /**
+     * @brief SlotExtractPassword
+     * @param password
+     */
     void SlotExtractPassword(QString password);
+
+    /**
+     * @brief slotCompressFinished
+     * @param job
+     */
     void slotCompressFinished(KJob *job);
+
+    /**
+     * @brief slotJobFinished
+     * @param job
+     */
     void slotJobFinished(KJob *job);
+
+    /**
+     * @brief slotExtractSimpleFiles
+     * @param fileList
+     * @param path
+     * @param type
+     */
     void slotExtractSimpleFiles(QVector<Archive::Entry *> fileList, QString path, EXTRACT_TYPE type);
+
+    /**
+     * @brief slotExtractSimpleFilesOpen
+     * @param fileList
+     * @param programma
+     */
     void slotExtractSimpleFilesOpen(const QVector<Archive::Entry *> &fileList, const QString &programma);
+
+    /**
+     * @brief slotKillExtractJob
+     */
     void slotKillExtractJob();
+
+    /**
+     * @brief slotFailRetry
+     */
     void slotFailRetry();
+
+    /**
+     * @brief slotBatchExtractFileChanged
+     * @param name
+     */
     void slotBatchExtractFileChanged(const QString &name);
+
+    /**
+     * @brief slotBatchExtractError
+     * @param name
+     */
     void slotBatchExtractError(const QString &name);
+
+    /**
+     * @brief slotClearTempfile
+     */
     void slotClearTempfile();
+
+    /**
+     * @brief slotquitApp
+     */
     void slotquitApp();
+
+    /**
+     * @brief onUpdateDestFile
+     * @param destFile
+     */
     void onUpdateDestFile(QString destFile);
+
+    /**
+     * @brief onCompressPageFilelistIsEmpty
+     */
     void onCompressPageFilelistIsEmpty();
 
+    /**
+     * @brief slotCalDeleteRefreshTotalFileSize
+     * @param files
+     */
     void slotCalDeleteRefreshTotalFileSize(const QStringList &files);
 
     /**
@@ -316,130 +624,129 @@ private slots:
      */
     void slotUncompressCalDeleteRefreshTotoalSize(QVector<Archive::Entry *> &vectorDel, bool isManual);
 
+    /**
+     * @brief resetMainwindow
+     */
     void resetMainwindow();
+
+    /**
+     * @brief slotBackButtonClicked
+     */
     void slotBackButtonClicked();
+
+    /**
+     * @brief slotResetPercentAndTime
+     */
     void slotResetPercentAndTime();
+
+    /**
+     * @brief slotFileUnreadable
+     * @param pathList
+     * @param fileIndex
+     */
     void slotFileUnreadable(QStringList &pathList, int fileIndex);//compress file is unreadable or file is a link
+
+    /**
+     * @brief slotStopSpinner
+     */
     void slotStopSpinner();
+
+    /**
+     * @brief slotWorkTimeOut
+     */
     void slotWorkTimeOut();
 
+    /**
+     * @brief deleteFromArchive
+     * @param files
+     * @param archive
+     */
     void deleteFromArchive(const QStringList &files, const QString &archive);
+
+    /**
+     * @brief closeExtractJobSafe
+     */
     void closeExtractJobSafe();
-//    void addToArchive(const QStringList &files, const QString &archive);//废弃，added by hsw 20200528
 
+    /**
+     * @brief slotLoadWrongPassWord
+     */
     void slotLoadWrongPassWord();
-signals:
-    void sigquitApp();
-    void sigZipAddFile();
-    void sigCompressedAddFile();
-    void sigZipReturn();
-    void sigZipSelectedFiles(const QStringList &files);
-    void loadingStarted();
-    void sigUpdateTableView(const QFileInfo &);
-    void sigTipsWindowPopUp(int, const QStringList &);
-    void sigTipsUpdateEntry(int, QVector<Archive::Entry *> &vectorDel);
-    void deleteJobComplete(Archive::Entry *pEntry);
+
+public:
+    static int m_windowcount;                               // 窗口数目
+    OpenInfo::ENUM_OPTION m_eOption = OpenInfo::OPEN;       // 窗口打开标志
+    QString *m_pChildMndExtractPath = nullptr;              // 保存的有次级面板解压路径（用户解压路径，非临时路径），该变量其他地方用不到
 
 private:
-    MonitorAdaptor *m_adaptor = nullptr;
-    Archive *m_archive_manager = nullptr;
-    ArchiveModel *m_model = nullptr;
-    ArchiveSortFilterModel *m_filterModel = nullptr;
-    QString m_decompressfilename;
-    QString m_decompressfilepath;
-    QString m_loadfile;
-    QString m_addFile;
+    DWidget *m_pMmainWidget = nullptr;                      // 中心面板
+    QStackedLayout *m_pMainLayout = nullptr;                // 切页
 
-    void setCompressDefaultPath();
-    void setQLabelText(QLabel *label, const QString &text);
-    QJsonObject creatShorcutJson();
+    // 界面页
+    HomePage *m_pHomePage = nullptr;                        // 首页
+    UnCompressPage *m_pUnCompressPage = nullptr;            // 解压界面
+    CompressPage *m_pCompressPage = nullptr;                // 压缩界面
+    CompressSetting *m_pCompressSetting = nullptr;          // 压缩设置界面
+    Progress *m_pProgess = nullptr;                         // 进度界面
+    Compressor_Success *m_pCompressSuccess = nullptr;       // 压缩成功界面
+    Compressor_Fail *m_pCompressFail = nullptr;             // 压缩失败界面
+    EncryptionPage *m_pEncryptionpage = nullptr;            // 解压输入密码界面
+    OpenLoadingPage *m_pOpenLoadingPage = nullptr;          // 加载界面
 
-    QStringList CheckAllFiles(QString path);
-    void deleteCompressFile(/*QStringList oldfiles, QStringList newfiles*/);
-    void deleteDecompressFile(QString destDirName = "");
-    /**
-     * @brief startCmd
-     * @param executeName
-     * @param arguments
-     * @see 启动一个命令，完成后自动销毁
-     */
-    bool startCmd(const QString &executeName, QStringList arguments);
-    void removeFromParentInfo(MainWindow *);
-private:
-//    DLabel *m_logo;
-    QPixmap m_logoicon;
-//    QFrame *m_titleFrame;
-//    DLabel *m_titlelabel;
-    DWidget *m_mainWidget;
-    QStackedLayout *m_mainLayout;
-    HomePage *m_homePage;
-    UnCompressPage *m_UnCompressPage;
-    CompressPage *m_CompressPage;
-    CompressSetting *m_CompressSetting;
-    Progress *m_Progess;
-    Compressor_Success *m_CompressSuccess;
-    Compressor_Fail *m_CompressFail;
-    EncryptionPage *m_encryptionpage;
-    ProgressDialog *m_progressdialog;
-    SettingDialog *m_settingsDialog = nullptr;
-    OpenLoadingPage *m_pOpenLoadingPage;
-    EncodingPage *m_encodingpage;
-    QSettings *m_settings;
-    Page_ID m_pageid;
+    DIconButton *m_pTitleButton = nullptr;                  // 标题栏按钮（添加文件）
+    QAction *m_pOpenAction;                                 // 菜单 - 打开
+    DSpinner *m_pSpinner = nullptr;                         // 转圈加载
 
-    QVector<Archive::Entry *> m_extractSimpleFiles;
+    // 弹窗
+    ProgressDialog *m_pProgressdialog = nullptr;            // 进度对话框
+    SettingDialog *m_pSettingsDialog = nullptr;             // 设置对话框
 
-    DIconButton *m_titlebutton = nullptr;
+    QString m_strPathStore;                                 // 解压/压缩目标路径
 
-    KJob *m_pJob = nullptr;// 指向所有Job派生类对象
-    EncryptionType m_encryptiontype = Encryption_NULL;
-    bool m_isrightmenu = false;
-    WorkState m_workstatus = WorkNone;
-    JobState m_jobState = JOB_NULL;
+    // 压缩参数
+    QString m_strCreateCompressFile;                        // 创建的压缩文件名（带路径）
 
-    int m_timerId = 0;
+    // 解压参数
+    ArchiveModel *m_pArchiveModel = nullptr;                // 数据模型
+    ArchiveSortFilterModel *m_pArchiveFilterModel = nullptr;// 数据排序模型
+    QString m_strDecompressFileName;                        // 压缩包文件名（不含路径）
+    QString m_strDecompressFilePath;                        // 压缩包路径
+    QString m_strLoadfile;                                  // 加载文件名（含路径）
+    QVector<Archive::Entry *> m_vecExtractSimpleFiles;      // 解压文件
+    QString m_strProgram;                                   // 打开方式（应用程序名称）
 
-    QAction *m_openAction;
+    // 追加压缩参数
+    QString m_strAppendFileName;                            // 追加文件名（含路径）
 
-    QString createCompressFile_;
-
-    QString m_pathstore;
-    bool m_initflag = false;
-    int m_startTimer = 0;
-    int m_watchTimer = 0;
-
-    DFileWatcher *m_fileManager = nullptr;
-    int openTempFileLink = 0;
-    QEventLoop *pEventloop = nullptr;
-    DSpinner *m_spinner = nullptr;
-
-    TimerWatcher *m_pWatcher = nullptr;
-    // bool m_openType = false; //false解压 true打开
-    bool IsAddArchive = false;
-
-    GlobalMainWindowMap *pMapGlobalWnd = nullptr;//added by hsw 20200521
-    MonitorAdaptor *pAdapter = nullptr;//added by hsw 20200521
-    /**
-     * @brief pCurAuxInfo
-     * @see 当前面板辅助信息
-     */
-    MainWindow_AuxInfo *pCurAuxInfo = nullptr;//added by hsw 20200525
-    Settings_Extract_Info *pSettingInfo = nullptr;//added by hsw 20200619
-
-private:
-    void calSelectedTotalFileSize(const QStringList &files);
-    void calSelectedTotalEntrySize(QVector<Archive::Entry *> &vectorDel);
-    qint64 calFileSize(const QString &path);
-    void calSpeedAndTime(unsigned long compressPercent);
-
-    QString getDefaultApp(QString mimetype);
-    void setDefaultApp(QString mimetype, QString desktop);
-    int promptDialog();
+    // DBus相关
+    MonitorAdaptor *m_pAdaptor = nullptr;                   // 监视器
+    GlobalMainWindowMap *m_pMapGlobalWnd = nullptr;         // winID - 面板 added by hsw 20200521
+    MainWindow_AuxInfo *m_pCurAuxInfo = nullptr;            // 当前面板辅助信息 added by hsw 20200525
     QReadWriteLock m_lock;
-    QString program;
-    QMap<qint64, QStringList> m_subWinDragFiles;
-    int m_mode = 0;
-    qint64 m_curOperChildPid = 0;
+    QMap<qint64, QStringList> m_mapSubWinDragFiles;         // 子面板拖拽文件
+    int m_iMode = 0;                                        // 子面板弹出模式
+    qint64 m_lCurOperChildPid = 0;                          // 当前打开的子面板winID
+
+    // 配置相关
+    QSettings *m_pSettings = nullptr;                       // 设置选项
+    Settings_Extract_Info *pSettingInfo = nullptr;          // 设置信息 added by hsw 20200619
+    Page_ID m_ePageID = PAGE_HOME;                          // 界面页类型
+    bool m_bIsRightMenu = false;                            // 是否右键菜单引起的操作
+    bool m_bIsAddArchive = false;                           // 是否追加压缩
+
+    // 界面<->插件
+    KJob *m_pJob = nullptr;                                 // 指向所有Job派生类对象
+    Archive_OperationType m_operationtype = Operation_NULL; // 操作类型
+    WorkState m_eWorkStatus = WorkNone;                     // Job的工作状态
+    JobType m_eJobType = JOB_NULL;                          // Job的类型
+
+    // 其它
+    int m_iWatchTimerID = 0;                                // 定时器ID
+    TimerWatcher *m_pWatcher = nullptr;                     // 定时器监视类
+    DFileWatcher *m_pFileWatcher = nullptr;                 // 文件监控
+    int m_iOpenTempFileLink = 0;                            // 打开临时文件索引
+    QEventLoop *pEventloop = nullptr;                       // 事件循环
+
 
 #ifdef __aarch64__
     qint64 maxFileSize_ = 0;

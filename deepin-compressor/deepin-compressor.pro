@@ -63,6 +63,7 @@ HEADERS +=  \
     interface/kcoreaddons_export.h \
     interface/kprocess.h \
     interface/kprocess_p.h \
+    interface/customdatainfo.h \
     source/inc/encryptionpage.h \
     source/inc/progressdialog.h \
     source/inc/extractpausedialog.h \

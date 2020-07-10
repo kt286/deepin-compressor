@@ -118,19 +118,21 @@ QPixmap Utils::renderSVG(const QString &filePath, const QSize &size)
 
 bool Utils::isCompressed_file(const QString &filePath)
 {
-    QString mime = judgeFileMime(filePath);
+    QString mime = judgeFileMime(filePath);         // 根据文件名（后缀）判断文件类型
+
     bool ret = false;
+
     if (mime.size() > 0) {
         ret = existMimeType(mime);
     } else {
         ret = false;
     }
 
-    if (filePath.endsWith(".deb")) {
+    if (filePath.endsWith(".deb")) {    // 对deb文件识别为普通文件
         ret = false;
     }
 
-    if (filePath.endsWith(".crx")) {
+    if (filePath.endsWith(".crx")) {    // 对crx文件识别为压缩包
         ret = true;
     }
 
