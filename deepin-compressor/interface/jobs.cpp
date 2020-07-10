@@ -625,13 +625,13 @@ void ExtractJob::cleanIfCanceled()
     this->archiveInterface()->waitForFinishedSignal();
     Settings_Extract_Info *pSettingInfo = this->m_options.pSettingInfo;
     if (pSettingInfo != nullptr) {
-        if (pSettingInfo->str_CreateFolder == "") {
+        if (pSettingInfo->str_CreateFolder.isEmpty()) {
             return;
         }
 
         QString fullPath = pSettingInfo->str_defaultPath;
-        if (fullPath.right(1) != QDir::separator()) {
-            fullPath += QDir::separator() ;
+        if (!fullPath.endsWith(QDir::separator())) {
+            fullPath += QDir::separator();
         }
         fullPath += pSettingInfo->str_CreateFolder;
         qDebug() << "取消删除：" << fullPath;

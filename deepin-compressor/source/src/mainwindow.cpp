@@ -1623,7 +1623,6 @@ void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
 
     QString detectedSubfolder = "";
     if (m_settingsDialog->isAutoCreatDir()) {                   //自动创建文件夹
-        qDebug() << "Detected subfolder" << detectedSubfolder;
         if (m_model->archive()->hasMultipleTopLevelEntries()) { //如果是顶级多个目录，则创建文件夹
             detectedSubfolder = m_model->archive()->subfolderName();
 
@@ -2059,6 +2058,11 @@ void MainWindow::ExtractPassword(QString password)
     } else {
         // second or more  time to extract
         ExtractionOptions options;
+        options.setAutoCreatDir(m_settingsDialog->isAutoCreatDir());
+        if (pSettingInfo == nullptr) {
+            pSettingInfo = new Settings_Extract_Info();
+        }
+        options.pSettingInfo = pSettingInfo;
 
         QVector< Archive::Entry * > files;
 
@@ -2899,31 +2903,46 @@ void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles
 }
 
 //解压取消时删除临时文件,这个函数好像不太安全，尽量不要使用
-void MainWindow::deleteDecompressFile(QString /*destDirName*/)
+void MainWindow::deleteDecompressFile(QString destDirName)
 {
-//    qDebug() << "deleteDecompressFile" << m_decompressfilepath << m_decompressfilename << m_UnCompressPage->getDeFileCount() << m_model->archive()->isSingleFile() << m_model->archive()->isSingleFolder();
-//    bool bAutoCreatDir = m_settingsDialog->isAutoCreatDir();
-
-//    if (!m_decompressfilepath.isEmpty()) {
-//        if (m_UnCompressPage->getDeFileCount() > 1) {
-//            QDir fi(m_decompressfilepath);  //若m_decompressfilepath为空字符串，则使用（"."）构造目录
-//            if (fi.exists() && bAutoCreatDir) {
-//                fi.removeRecursively();
-//            }
-//        } else if (m_UnCompressPage->getDeFileCount() == 1) {
-//            if (!m_model->archive()->isSingleFile()) { //单个文件还是多个
-//                QDir fi(m_decompressfilepath + QDir::separator() + m_model->archive()->subfolderName());
-//                if (fi.exists()) {
-//                    fi.removeRecursively();
-//                }
-//            } else {
-//                QFile fi(m_decompressfilepath + QDir::separator() + destDirName);
-//                if (fi.exists()) {
-//                    fi.remove();
-//                }
-//            }
-//        }
-//    }
+    qDebug() << "deleteDecompressFile" << m_decompressfilepath << m_decompressfilename << m_UnCompressPage->getDeFileCount() << m_model->archive()->isSingleFile() << m_model->archive()->isSingleFolder();
+    bool bAutoCreatDir = m_settingsDialog->isAutoCreatDir();
+    QString tmpDecompressfilepath = m_decompressfilepath;
+    if (!tmpDecompressfilepath.isEmpty()) {
+        if (!tmpDecompressfilepath.endsWith(QDir::separator())) {
+            tmpDecompressfilepath += QDir::separator();
+        }
+        if (m_UnCompressPage->getDeFileCount() > 1) {
+            if (bAutoCreatDir) {
+                QDir fi(tmpDecompressfilepath);  //注意：若tmpDecompressfilepath为空字符串，则使用（"."）构造目录，后面会删除整个当前目录!!!
+                if (fi.exists()) {
+                    fi.removeRecursively();
+                }
+            } /*else {      //不自动创建文件夹，顶级多文件(夹)，未做删除临时文件处理
+                auto rootEntry = this->m_model->getRootEntry();
+                int rootEntriesNum = rootEntry->entries().length();
+                for (int i = 0; i < rootEntriesNum; i++) {
+                    qDebug() << rootEntry->entries().at(i)->name();
+                    QDir fi(tmpDecompressfilepath + rootEntry->entries().at(i)->name());
+                    if (fi.exists()) {
+                        fi.removeRecursively();
+                    }
+                }
+            }*/
+        } else if (m_UnCompressPage->getDeFileCount() == 1) {
+            if (!m_model->archive()->isSingleFile()) { //单个文件还是文件夹？
+                QDir fi(tmpDecompressfilepath + m_model->archive()->subfolderName());
+                if (fi.exists()) {
+                    fi.removeRecursively();
+                }
+            } else {
+                QFile fi(tmpDecompressfilepath + destDirName);
+                if (fi.exists()) {
+                    fi.remove();
+                }
+            }
+        }
+    }
 }
 
 bool MainWindow::startCmd(const QString &executeName, QStringList arguments)
@@ -3588,56 +3607,58 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
     slotResetPercentAndTime();
     m_isrightmenu = false;
     m_pageid = PAGE_UNZIP;
+    QString destDirName;
     if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::EXTRACTJOB) { // 解压取消
         ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
-        if (pExtractJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE) {
-            //append the spiner animation to the eventloop, so can play the spinner animation
-            if (pEventloop == nullptr) {
-                pEventloop = new QEventLoop(this->m_Progess);
-            }
+        destDirName = pExtractJob->archiveInterface()->destDirName;
+//        if (pExtractJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE) {
+//            //append the spiner animation to the eventloop, so can play the spinner animation
+//            if (pEventloop == nullptr) {
+//                pEventloop = new QEventLoop(this->m_Progess);
+//            }
 
-            pExtractJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
-            if (pEventloop->isRunning() == false) {
-                connect(pExtractJob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
-                if (m_spinner == nullptr) {
-                    m_spinner = new DSpinner(this->m_Progess);
-                    m_spinner->setFixedSize(40, 40);
-                }
-                m_spinner->move(this->m_Progess->width() / 2 - 20, this->m_Progess->height() / 2 - 20);
-                m_spinner->hide();
-                m_spinner->start();
-                m_spinner->show();
-                m_pJob->kill();
-                m_pJob = nullptr;
-                pEventloop->exec(QEventLoop::ExcludeUserInputEvents);
-            } else {
-                m_pJob->kill();
-                m_pJob = nullptr;
-            }
-        } else {
-            if (pEventloop == nullptr) {
-                pEventloop = new QEventLoop(this->m_Progess);
-            }
-            pExtractJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
-            if (pEventloop->isRunning() == false) {
-                connect(pExtractJob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
-                if (m_spinner == nullptr) {
-                    m_spinner = new DSpinner(this->m_Progess);
-                    m_spinner->setFixedSize(40, 40);
-                }
-                m_spinner->move(this->m_Progess->width() / 2 - 20, this->m_Progess->height() / 2 - 20);
-                m_spinner->hide();
-                m_spinner->start();
-                m_spinner->show();
-                m_pJob->kill();
-                m_pJob = nullptr;
-                pEventloop->exec(QEventLoop::ExcludeUserInputEvents);
-            } else {
-                m_pJob->kill();
-                m_pJob = nullptr;
-            }
+
+//            pExtractJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
+//            if (pEventloop->isRunning() == false) {
+//                connect(pExtractJob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
+//                if (m_spinner == nullptr) {
+//                    m_spinner = new DSpinner(this->m_Progess);
+//                    m_spinner->setFixedSize(40, 40);
+//                }
+//                m_spinner->move(this->m_Progess->width() / 2 - 20, this->m_Progess->height() / 2 - 20);
+//                m_spinner->hide();
+//                m_spinner->start();
+//                m_spinner->show();
+//                m_pJob->kill();
+//                m_pJob = nullptr;
+//                pEventloop->exec(QEventLoop::ExcludeUserInputEvents);
+//            } else {
+//                m_pJob->kill();
+//                m_pJob = nullptr;
+//            }
+//        } else {
+        if (pEventloop == nullptr) {
+            pEventloop = new QEventLoop(this->m_Progess);
         }
-
+        pExtractJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
+        if (pEventloop->isRunning() == false) {
+            connect(pExtractJob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
+            if (m_spinner == nullptr) {
+                m_spinner = new DSpinner(this->m_Progess);
+                m_spinner->setFixedSize(40, 40);
+            }
+            m_spinner->move(this->m_Progess->width() / 2 - 20, this->m_Progess->height() / 2 - 20);
+            m_spinner->hide();
+            m_spinner->start();
+            m_spinner->show();
+            m_pJob->kill();
+            m_pJob = nullptr;
+            pEventloop->exec(QEventLoop::ExcludeUserInputEvents);
+        } else {
+            m_pJob->kill();
+            m_pJob = nullptr;
+        }
+//        }
     } else if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::DELETEJOB) {
         DeleteJob *pDeleteJob = dynamic_cast<DeleteJob *>(m_pJob);
         if (pDeleteJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE) {
@@ -3645,7 +3666,6 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
             m_pJob = nullptr;
             m_pageid = PAGE_UNZIP;
         }
-
     } else {
         if (m_pJob) {
             m_pJob->kill();
@@ -3655,7 +3675,7 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
     }
 
     deleteCompressFile(/*m_compressDirFiles, CheckAllFiles(m_pathstore)*/);
-    deleteDecompressFile();
+    deleteDecompressFile(destDirName);
 
     if (compressType == Progress::ENUM_PROGRESS_TYPE::OP_COMPRESSING) {
         if (m_pJob) {
