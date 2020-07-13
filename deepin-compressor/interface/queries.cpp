@@ -350,7 +350,8 @@ void PasswordNeededQuery::execute()
 
     widget->setLayout(mainlayout);
     dialog->addContent(widget);
-
+    QRect mainWindowGeometr = getMainWindow()->geometry();
+    dialog->move(mainWindowGeometr.topLeft().x() + (mainWindowGeometr.width() - dialog->width()) / 2, mainWindowGeometr.topLeft().y() - TITLE_FIXED_HEIGHT + (mainWindowGeometr.height() - dialog->height()) / 2); //居中显示
     const int mode = dialog->exec();
 
     const QString password = "";

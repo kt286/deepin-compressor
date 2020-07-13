@@ -31,6 +31,7 @@
 #include <QMutex>
 #include <QVariant>
 
+#define TITLE_FIXED_HEIGHT 50               // 标题栏高度
 DWIDGET_USE_NAMESPACE
 
 enum RenameDialog_Result {
