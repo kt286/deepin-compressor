@@ -1624,11 +1624,12 @@ void MainWindow::slotextractSelectedFilesTo(const QString &localPath)
     m_strPathStore = userDestination;
     //m_compressDirFiles = CheckAllFiles(m_strPathStore);
 
-    pSettingInfo->b_isAutoCreateDir = m_pSettingsDialog->isAutoCreatDir();
-    options.setAutoCreatDir(pSettingInfo->b_isAutoCreateDir);
     if (pSettingInfo == nullptr) {
         pSettingInfo = new Settings_Extract_Info();
     }
+    pSettingInfo->b_isAutoCreateDir = m_pSettingsDialog->isAutoCreatDir();
+    options.setAutoCreatDir(pSettingInfo->b_isAutoCreateDir);
+
     options.pSettingInfo = pSettingInfo;
     pSettingInfo->str_defaultPath = userDestination;
 
