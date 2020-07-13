@@ -36,7 +36,6 @@
 #include "archiveinterface.h"
 #include "archivemodel.h"
 
-
 #include <DFileDrag>
 #include <DFontSizeManager>
 #include <DStandardPaths>
@@ -56,7 +55,6 @@
 #include <QIcon>
 
 #include <unistd.h>
-
 
 const QString rootPathUnique = "_&_&_&_";
 const QString zipPathUnique = "_&_&_";

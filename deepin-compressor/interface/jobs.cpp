@@ -578,13 +578,10 @@ void ExtractJob::resetTimeOut()
 void ExtractJob::doWork()
 {
     //percent( this, 0);
-
     QString desc;
     if (m_entries.count() == 0) {
-        //desc = tr("Extracting all files");
         desc = ("Extracting all files");
     } else {
-        //desc = tr("Extracting one file", "Extracting %1 files", m_entries.count());
         desc = QString("Extracting %1 files").arg(m_entries.count());
     }
 
@@ -608,6 +605,7 @@ void ExtractJob::doWork()
     if (pTool == nullptr) {
         return;
     }
+
     bool ret = pTool->extractFiles(m_entries, m_destinationDir, m_options);
 
     if (!pTool->waitForFinishedSignal()/*&& archiveInterface()->isUserCancel() == false*/) {
@@ -640,6 +638,7 @@ void ExtractJob::cleanIfCanceled()
             ReadWriteArchiveInterface::clearPath(fullPath);
         }
     }
+
     qDebug() << "do nothing";
 }
 
@@ -670,11 +669,11 @@ bool ExtractJob::Killjob()
 
 void ExtractJob::onProgress(double value)
 {
-    if (this->m_bTimeout) {
-        setPercent(static_cast<unsigned long>(100.0 * value));
-    } else {
+    if (!this->m_bTimeout) {
         this->archiveInterface()->m_pProgressInfo->restartTimer();
     }
+
+    setPercent(static_cast<unsigned long>(100.0 * value));
 }
 
 void ExtractJob::onProgressFilename(const QString &filename)

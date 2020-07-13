@@ -3353,23 +3353,28 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         m_operationtype =  Operation_DRAG;
     } else if (type == EXTRACT_HEAR) {
         programName = "deepin-compressor";
-        m_ePageID = PAGE_UNZIPPROGRESS;
+//        m_ePageID = PAGE_UNZIPPROGRESS;
         m_operationtype = Operation_SingleExtract;
         //m_strPathStore = QFileInfo(m_pArchiveModel->archive()->fileName()).absolutePath();
         m_strPathStore = *m_pChildMndExtractPath;
         destinationDirectory = m_strPathStore;
     } else if (type == EXTRACT_TO) {
         programName = "deepin-compressor";
-        m_ePageID = PAGE_UNZIPPROGRESS;
+//        m_ePageID = PAGE_UNZIPPROGRESS;
         m_operationtype = Operation_SingleExtract;
     } else {
         programName = "deepin-compressor";
         m_operationtype = Operation_SingleExtract;
     }
 
+    if (fileList.size() == 1 && !(fileList.at(0)->fullPath().endsWith("/"))) {
+        m_pProgressdialog->setCurrentFile(fileList.at(0)->fullPath());
+    }
+
     if (!destinationDirectory.endsWith(QDir::separator())/*destinationDirectory.right(1) != QDir::separator()*/) {
         destinationDirectory = destinationDirectory + QDir::separator();
     }
+
     QString destEntryPath = destinationDirectory + pDestEntry->name();
     QFileInfo fileInfo(destEntryPath);
 
@@ -3380,7 +3385,6 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
             QString programName = "xdg-open";
             QString firstFileName = m_vecExtractSimpleFiles.at(0)->name();
             bool isCompressedFile = Utils::isCompressed_file(pDestEntry->fullPath());
-
 
             QStringList arguments;
             arguments << destEntryPath;//the first arg
@@ -3403,14 +3407,15 @@ void MainWindow::slotExtractSimpleFiles(QVector< Archive::Entry * > fileList, QS
         } else {
             clearTempFiles(destEntryPath);//if file exists but diff in size,so delete it and extract again.
         }
-
     }
+
     refreshPage();
     m_pJob = m_pArchiveModel->extractFiles(fileList, destinationDirectory, options);
     if (m_pJob == nullptr || m_pJob->mType != Job::ENUM_JOBTYPE::EXTRACTJOB) {
         qDebug() << "ExtractJob new failed.";
         return;
     }
+
     ExtractJob *pExtractJob = dynamic_cast<ExtractJob *>(m_pJob);
     pExtractJob->archiveInterface()->bindProgressInfo(this->m_pProgess->pInfo());
     if (this->m_pWatcher == nullptr) {
@@ -3561,6 +3566,7 @@ void MainWindow::deleteFromArchive(const QStringList &files, const QString &/*ar
     m_pJob->start();
     m_eWorkStatus = WorkProcess;
 }
+
 /**
  * @brief MainWindow::closeExtractJobSafe
  * @see 安全地退出解压过程并关闭
@@ -3657,6 +3663,7 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
         if (pEventloop == nullptr) {
             pEventloop = new QEventLoop(this->m_pProgess);
         }
+
         pExtractJob->archiveInterface()->extractPsdStatus = ReadOnlyArchiveInterface::ExtractPsdStatus::Canceled;
         if (pEventloop->isRunning() == false) {
             connect(pExtractJob, &ExtractJob::sigExtractSpinnerFinished, this, &MainWindow::slotStopSpinner);
@@ -3664,6 +3671,7 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
                 m_pSpinner = new DSpinner(this->m_pProgess);
                 m_pSpinner->setFixedSize(40, 40);
             }
+
             m_pSpinner->move(this->m_pProgess->width() / 2 - 20, this->m_pProgess->height() / 2 - 20);
             m_pSpinner->hide();
             m_pSpinner->start();
@@ -3675,7 +3683,6 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
             m_pJob->kill();
             m_pJob = nullptr;
         }
-
     } else if (m_pJob && m_pJob->mType == Job::ENUM_JOBTYPE::DELETEJOB) {
         DeleteJob *pDeleteJob = dynamic_cast<DeleteJob *>(m_pJob);
         if (pDeleteJob->archiveInterface()->mType == ReadOnlyArchiveInterface::ENUM_PLUGINTYPE::PLUGIN_CLIINTERFACE) {
@@ -3714,13 +3721,14 @@ void MainWindow::onCancelCompressPressed(Progress::ENUM_PROGRESS_TYPE compressTy
             m_pJob->kill();
             m_pJob = nullptr;
         }
+
         m_ePageID = PAGE_UNZIP;
     }
+
     refreshPage();
     // emit sigquitApp();
     slotResetPercentAndTime();
     m_pProgess->setprogress(0);
-
 }
 
 void MainWindow::slotClearTempfile()
@@ -3750,7 +3758,6 @@ void MainWindow::slotquitApp()
 
         emit sigquitApp();
     }
-
 }
 
 void MainWindow::onUpdateDestFile(QString destFile)
