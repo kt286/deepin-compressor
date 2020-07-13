@@ -2922,7 +2922,7 @@ void MainWindow::deleteCompressFile(/*QStringList oldfiles, QStringList newfiles
 //解压取消时删除临时文件,这个函数好像不太安全，尽量不要使用
 void MainWindow::deleteDecompressFile(QString destDirName)
 {
-    qDebug() << "deleteDecompressFile" << m_strDecompressFilePath << m_strDecompressFileName << m_pUnCompressPage->getDeFileCount() << m_pArchiveModel->archive()->isSingleFile() << m_pArchiveModel->archive()->isSingleFolder();
+//    qDebug() << "deleteDecompressFile" << m_strDecompressFilePath << m_strDecompressFileName << m_pUnCompressPage->getDeFileCount() << m_pArchiveModel->archive()->isSingleFile() << m_pArchiveModel->archive()->isSingleFolder();
     bool bAutoCreatDir = m_pSettingsDialog->isAutoCreatDir();
     QString tmpDecompressfilepath = m_strDecompressFilePath;
     if (!tmpDecompressfilepath.isEmpty()) {
