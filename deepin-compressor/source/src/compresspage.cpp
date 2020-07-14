@@ -183,22 +183,24 @@ void CompressPage::onSelectedFilesSlot(const QStringList &files)
     int mode = 0;
     bool bAll = false;
 
+    // 对重复文件进行判断处理
     foreach (QString m_path, m_filelist) {
         QFileInfo mfile(m_path);
         foreach (QString path, files) {
             QFileInfo file(path);
             if (file.fileName() == mfile.fileName()) {
 
-                if (!bAll) {
+                if (!bAll) {    // 判断是否全部应用，若不是，则继续弹出对话框
                     OverwriteQuery query(path);
                     query.execute();
                     mode = query.getExecuteReturn();
 
                     bAll = query.applyAll();
                 }
-                if (-1 == mode || 0 == mode) {        // skip or cancel
+
+                if (-1 == mode || 0 == mode) {      // -1：取消  0：跳过
                     inputlist.removeOne(path);
-                } else {                // overwrite
+                } else {                            // 覆盖
                     m_filelist.removeOne(m_path);
                 }
                 /*int mode = showReplaceDialog(path);
@@ -213,7 +215,7 @@ void CompressPage::onSelectedFilesSlot(const QStringList &files)
 
     m_filelist.append(inputlist);
 
-    m_fileviewer->setFileList(m_filelist);      // 设置添加文件
+    m_fileviewer->setFileList(m_filelist);      // 设置所有压缩文件
     m_fileviewer->setSelectFiles(inputlist);    // 设置选中的文件
 }
 

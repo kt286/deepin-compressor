@@ -575,7 +575,7 @@ bool CompressSetting::checkFilePermission(const QString &path)
     return filePermissionFlag;
 }
 
-void CompressSetting::getSelectedFileSize(qint64 size)
+void CompressSetting::setSelectedFileSize(qint64 size)
 {
     m_getFileSize = size;
 }

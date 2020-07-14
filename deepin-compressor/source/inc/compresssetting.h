@@ -75,7 +75,7 @@ public:
     quint64 dirFileSize(const QString &path);
     bool checkfilename(QString str);
     bool checkFilePermission(const QString &path);
-    void getSelectedFileSize(qint64 size);
+    void setSelectedFileSize(qint64 size);
     void clickTitleBtnResetAdvancedOptions();
 
 private:

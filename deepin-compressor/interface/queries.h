@@ -22,6 +22,8 @@
 #ifndef QUERIES_H
 #define QUERIES_H
 
+#include "customdatainfo.h"
+
 #include <DApplicationHelper>
 #include <DCheckBox>
 
@@ -31,7 +33,7 @@
 #include <QMutex>
 #include <QVariant>
 
-#define TITLE_FIXED_HEIGHT 50               // 标题栏高度
+//#define TITLE_FIXED_HEIGHT 50               // 标题栏高度
 DWIDGET_USE_NAMESPACE
 
 enum RenameDialog_Result {

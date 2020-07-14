@@ -294,7 +294,7 @@ private:
 
     /**
      * @brief calSelectedTotalFileSize  计算本地选择的文件大小
-     * @param files
+     * @param files 选择文件
      */
     void calSelectedTotalFileSize(const QStringList &files);
 
@@ -311,11 +311,11 @@ private:
      */
     qint64 calFileSize(const QString &path);
 
-    /**
-     * @brief calSpeedAndTime   计算速度和剩余时间
-     * @param compressPercent   当前进度百分比
-     */
-    void calSpeedAndTime(unsigned long compressPercent);
+//    /**
+//     * @brief calSpeedAndTime   计算速度和剩余时间
+//     * @param compressPercent   当前进度百分比
+//     */
+//    void calSpeedAndTime(unsigned long compressPercent);
 
     /**
      * @brief getDefaultApp 根据文件类型获取默认打开的应用的程序
@@ -337,13 +337,64 @@ private:
      */
     int promptDialog();
 
+    /**
+     * @brief refreshPage
+     */
+    void refreshPage();
+
+
+    /**
+     * @brief setTitleButtonStyle   设置标题栏按钮样式以及显隐状态
+     * @param bVisible  显示/隐藏
+     * @param pixmap    图片样式
+     */
+    void setTitleButtonStyle(bool bVisible, DStyle::StandardPixmap pixmap = DStyle::StandardPixmap::SP_IncreaseElement);
+
+    /**
+     * @brief unzipSuccessOpenFileDir    解压成功打开文管
+     */
+    void unzipSuccessOpenFileDir();
+
+    /**
+     * @brief killJob   关闭Job
+     */
+    void killJob();
+
+    /**
+     * @brief deleteLaterJob    删除Job
+     */
+    void deleteLaterJob();
+
 protected:
+    /**
+     * @brief dragEnterEvent    拖拽进入
+     */
     void dragEnterEvent(QDragEnterEvent *) override;
+
+    /**
+     * @brief dragLeaveEvent    拖拽离开
+     */
     void dragLeaveEvent(QDragLeaveEvent *) override;
+
+    /**
+     * @brief dropEvent 拖拽放下
+     */
     void dropEvent(QDropEvent *) override;
-    void dragMoveEvent(QDragMoveEvent *event) override;
-    void closeEvent(QCloseEvent *event) override;
-    void timerEvent(QTimerEvent *event) override;
+
+    /**
+     * @brief dragMoveEvent     拖拽移动
+     */
+    void dragMoveEvent(QDragMoveEvent *) override;
+
+    /**
+     * @brief closeEvent    关闭
+     */
+    void closeEvent(QCloseEvent *) override;
+
+    /**
+     * @brief timerEvent    定时
+     */
+    void timerEvent(QTimerEvent *) override;
 
 signals:
     /**
@@ -411,7 +462,7 @@ public slots:
     bool onSubWindowActionFinished(int mode, const qint64 &pid, const QStringList &urls);
 
     /**
-     * @brief popUpChangedDialog
+     * @brief popUpChangedDialog    主界面接收到要弹出对话框消息
      * @param pid
      * @return
      */
@@ -425,20 +476,15 @@ public slots:
     bool createSubWindow(const QStringList &urls);
 
 private slots:
-    /**
-     * @brief setEnable
-     */
-    void setEnable();
+//    /**
+//     * @brief setEnable
+//     */
+//    void setEnable();
 
-    /**
-     * @brief setDisable
-     */
-    void setDisable();
-
-    /**
-     * @brief refreshPage
-     */
-    void refreshPage();
+//    /**
+//     * @brief setDisable
+//     */
+//    void setDisable();
 
     /**
      * @brief onSelected    选择本地文件（通过拖拽、打开、选择打开）

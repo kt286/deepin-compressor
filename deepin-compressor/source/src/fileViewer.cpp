@@ -36,6 +36,7 @@
 #include "archiveinterface.h"
 #include "archivemodel.h"
 
+
 #include <DFileDrag>
 #include <DFontSizeManager>
 #include <DStandardPaths>
@@ -55,6 +56,7 @@
 #include <QIcon>
 
 #include <unistd.h>
+
 
 const QString rootPathUnique = "_&_&_&_";
 const QString zipPathUnique = "_&_&_";
@@ -441,6 +443,7 @@ void fileViewer::InitUI()
 
 void fileViewer::refreshTableview()
 {
+    // 如果不是外部修改（即新拖拽文件刷新）
     if (false == curFileListModified) {
         pTableViewFile->setModel(firstmodel);
         pTableViewFile->setSelectionModel(firstSelectionModel);
@@ -454,38 +457,47 @@ void fileViewer::refreshTableview()
     MyFileItem *item = nullptr;
     firstmodel->clear();
 
+    // 刷新表头数据
     item = new MyFileItem(QObject::tr("Name"));
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     firstmodel->setHorizontalHeaderItem(0, item);
+
     item = new MyFileItem(QObject::tr("Time modified"));
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     firstmodel->setHorizontalHeaderItem(1, item);
+
     item = new MyFileItem(QObject::tr("Type"));
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     firstmodel->setHorizontalHeaderItem(2, item);
+
     item = new MyFileItem(QObject::tr("Size"));
     item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     firstmodel->setHorizontalHeaderItem(3, item);
 
     int rowindex = 0;
+    // 刷新列表数据
     foreach (QFileInfo fileinfo, m_curfilelist) {
         QMimeDatabase db;
         QIcon icon;
+        // 根据类型获取文件类型图标
         fileinfo.isDir() ? icon = QIcon::fromTheme(db.mimeTypeForName(QStringLiteral("inode/directory")).iconName()).pixmap(24, 24)
                                   : icon = QIcon::fromTheme(db.mimeTypeForFile(fileinfo.fileName()).iconName()).pixmap(24, 24);
-        //qDebug() << db.mimeTypeForFile(fileinfo.fileName()).iconName();
+
+        // 如果获取到的图标为空，则默认给一个名称为 "empty" 的图标
         if (icon.isNull()) {
             icon = QIcon::fromTheme("empty").pixmap(24, 24);
         }
-        item = new MyFileItem(icon, fileinfo.fileName());
-        item->setData(QVariant::fromValue(fileinfo), Qt::UserRole);
 
+        // 名称
+        item = new MyFileItem(icon, fileinfo.fileName());
+        item->setData(QVariant::fromValue(fileinfo), Qt::UserRole);     // 绑定fileInfo，方便删除的时候准确定位
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         QFont font = DFontSizeManager::instance()->get(DFontSizeManager::T6);
         font.setWeight(QFont::Medium);
         item->setFont(font);
-
         firstmodel->setItem(rowindex, 0, item);
+
+        // 大小（对于文件夹，显示为下一层级的项数，对于文件，显示文件大小）
         if (fileinfo.isDir()) {
 //            item = new MyFileItem("-");
             QDir dir(fileinfo.filePath());
@@ -500,6 +512,8 @@ void fileViewer::refreshTableview()
         item->setFont(font);
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         firstmodel->setItem(rowindex, 3, item);
+
+        //类型
         QMimeType mimetype = determineMimeType(fileinfo.fileName());
         item = new MyFileItem(m_mimetype->displayName(mimetype.name()));
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -507,6 +521,8 @@ void fileViewer::refreshTableview()
         font.setWeight(QFont::Normal);
         item->setFont(font);
         firstmodel->setItem(rowindex, 2, item);
+
+        // 时间
         item = new MyFileItem(QLocale().toString(fileinfo.lastModified(), tr("yyyy/MM/dd hh:mm:ss")));
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
         font = DFontSizeManager::instance()->get(DFontSizeManager::T7);
@@ -518,11 +534,12 @@ void fileViewer::refreshTableview()
 
     pTableViewFile->setModel(firstmodel);
 
+    // 清除选中
     firstSelectionModel->clear();
     pTableViewFile->setSelectionModel(firstSelectionModel);
 
-    restoreHeaderSort(rootPathUnique);
-    resizecolumn();
+    restoreHeaderSort(rootPathUnique);      // 重置列表排行
+    resizecolumn();     // 重置列宽
 
 //    foreach (int row, m_fileaddindex) {
 //        pTableViewFile->selectRow(row);
@@ -927,20 +944,21 @@ void fileViewer::setFileList(const QStringList &files)
 {
     curFileListModified = true;
 
-    if (files.count() > m_curfilelist.count()) {
-        m_fileaddindex.clear();
-        for (int i = 0; i < files.count() - m_curfilelist.count(); i++) {
-            m_fileaddindex.append(files.count() - 1 + i);
-        }
-    }
+//    if (files.count() > m_curfilelist.count()) {
+//        m_fileaddindex.clear();
+//        for (int i = 0; i < files.count() - m_curfilelist.count(); i++) {
+//            m_fileaddindex.append(files.count() - 1 + i);
+//        }
+//    }
 
-
+    // 重置所有压缩文件
     m_curfilelist.clear();
     foreach (QString filepath, files) {
         QFile file(filepath);
         m_curfilelist.append(file);
     }
 
+    // 刷新列表
     refreshTableview();
 }
 
@@ -948,22 +966,26 @@ void fileViewer::setSelectFiles(const QStringList &files)
 {
     QItemSelection selection;
     int rowCount = firstmodel->rowCount();
+
     foreach (auto file, files) {
         for (int i = 0; i < rowCount; ++i) {
             QStandardItem *item = firstmodel->item(i);
+
             if (item == nullptr) {
                 return;
             }
 
-            QString itemStr = item->text();
+            QString itemStr = item->text();     // 获取第一列（名称）文件名
 
-            if (itemStr != QFileInfo(file).fileName()) {
+            if (itemStr != QFileInfo(file).fileName()) {    // 判断是否相等
                 continue;
             }
 
             QModelIndex index = firstmodel->index(i, 0);
 
+            // 从第一次寻找到的文件开始，一直选中到最后的位置
             QItemSelectionRange selectionRange(index, firstmodel->index(i, firstmodel->columnCount() - 1));
+
             if (false == selection.contains(index)) {
                 selection.push_back(selectionRange);
                 break;

@@ -169,7 +169,17 @@ public:
 
     int getPathIndex();
     void setRootPathIndex();
+
+    /**
+     * @brief setFileList   设置压缩文件（根目录显示）
+     * @param files 文件名（含路径）
+     */
     void setFileList(const QStringList &files);
+
+    /**
+     * @brief setSelectFiles    设置列表选中文件
+     * @param files 待选中的文件名
+     */
     void setSelectFiles(const QStringList &files);
     int getFileCount();
     int getDeFileCount();
@@ -278,7 +288,7 @@ private:
 //    QDir m_parentDir;
 
     bool curFileListModified = true;
-    QList<int> m_fileaddindex;
+    //QList<int> m_fileaddindex;
     DMenu *m_pRightMenu = nullptr;
     DMenu *openWithDialogMenu  = nullptr;
 
