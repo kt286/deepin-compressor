@@ -128,6 +128,5 @@ int main(int argc, char *argv[])
     w.showNormal();
     w.show();
 
-
     return app.exec();
 }
