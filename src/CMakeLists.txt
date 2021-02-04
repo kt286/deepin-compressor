@@ -99,23 +99,11 @@ install(FILES ${INSTALL_QM_FILES}
 
 
 # for i in `ls *.desktop`; do echo "install(FILES ${i} DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)";done
-
-install(FILES desktop/deepin-compress.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-compress-multi.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-compress-multisplite7z.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-#install(FILES desktop/deepin-compressor.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-#install(FILES desktop/deepin-compress-to_7z.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-#install(FILES desktop/deepin-compress-to_zip.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-decompress.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-decompresshere.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-decompresshere-multi.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-decompresshere-split.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-decompresshere-split_multi.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-#install(FILES desktop/deepin-decompressmkdir.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-#install(FILES desktop/deepin-decompressmkdir-split.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-decompress-multi.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-decompress-split.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
-install(FILES desktop/deepin-decompress-split_multi.desktop DESTINATION share/deepin/dde-file-manager/oem-menuextensions/)
+install(FILES conf/compressor-singlecompress.conf DESTINATION /usr/share/applications/context-menus/)
+install(FILES conf/compressor-multicompress.conf DESTINATION /usr/share/applications/context-menus/)
+install(FILES conf/compressor-7zsplitemulticompress.conf DESTINATION /usr/share/applications/context-menus/)
+install(FILES conf/compressor-singleextract.conf DESTINATION /usr/share/applications/context-menus/)
+install(FILES conf/compressor-multiextract.conf DESTINATION /usr/share/applications/context-menus/)
 
 install(FILES assets/icons/deepin/builtin/icons/deepin-compressor.svg DESTINATION share/icons/hicolor/scalable/apps/)
 install(FILES assets/mimetype/deepin-compressor.xml DESTINATION share/mime/packages/)
